@@ -8,9 +8,8 @@ namespace StudyVera.Domain.Enums
 {
     public enum ProgressStatus
     {
-        NotStarted = 0,
-        InProgress = 1,
-        Completed = 2
+        InProgress = 0,
+        Completed = 1
     }
 
 }
