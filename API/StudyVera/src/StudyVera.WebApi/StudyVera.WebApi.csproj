@@ -18,11 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Middleware\" />
     <Folder Include="Requests\" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StudyVera.Application\StudyVera.Application.csproj" />
+    <ProjectReference Include="..\StudyVera.Domain\StudyVera.Domain.csproj" />
     <ProjectReference Include="..\StudyVera.Infrastructure\StudyVera.Infrastructure.csproj" />
   </ItemGroup>
 
