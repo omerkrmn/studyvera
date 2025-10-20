@@ -11,15 +11,32 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
     <Folder Include="DTOs\" />
-    <Folder Include="Handlers\" />
+    <Folder Include="Features\Exams\Commands\" />
+    <Folder Include="Features\Exams\Queries\" />
+    <Folder Include="Features\Lessons\Queries\" />
+    <Folder Include="Features\Topics\Commands\" />
+    <Folder Include="Features\Topics\Queries\" />
+    <Folder Include="Features\UserActivities\Commands\" />
+    <Folder Include="Features\UserActivities\Queries\" />
+    <Folder Include="Features\UserLessonProgresses\Commands\" />
+    <Folder Include="Features\UserLessonProgresses\Queries\" />
+    <Folder Include="Features\UserQuestionStats\Commands\" />
+    <Folder Include="Features\UserQuestionStats\Queries\" />
+    <Folder Include="Handlers\Exams\" />
+    <Folder Include="Handlers\UserQuestionStats\" />
+    <Folder Include="Handlers\UserLessonProgresses\" />
+    <Folder Include="Handlers\UserActivities\" />
+    <Folder Include="Handlers\Topics\" />
     <Folder Include="Interfaces\" />
-    <Folder Include="Mappings\" />
-    <Folder Include="Features\" />
-    <Folder Include="Queries\" />
     <Folder Include="Services\" />
     <Folder Include="Validators\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="MediatR" Version="13.0.0" />
   </ItemGroup>
 
 </Project>
