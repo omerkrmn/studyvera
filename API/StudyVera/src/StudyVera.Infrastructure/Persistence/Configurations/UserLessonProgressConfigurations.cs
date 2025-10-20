@@ -14,10 +14,7 @@ namespace StudyVera.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<UserLessonProgress> builder)
         {
-            builder.HasOne<AppUser>()
-                   .WithMany()
-                   .HasForeignKey(ulp => ulp.UserId)
-                   .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 

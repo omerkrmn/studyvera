@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace StudyVera.Domain.Interfaces;
 
-public interface IUserActivityHistoryRepository
-{
+public interface IUserActivityHistoryRepository : IRepository<UserActivityHistory>
+{ 
     public Task AddAsync(Guid userId, string activityType, string description, CancellationToken ct);
     public Task<List<UserActivityHistory>> GetAllByUser(Guid guid, CancellationToken ct);
     public Task<List<UserActivityHistory>> GetAllByUserAndType(Guid guid, ActivityType activityType, CancellationToken ct);

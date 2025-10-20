@@ -1,10 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using StudyVera.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using StudyVera.Infrastructure.Identity;
 
 namespace StudyVera.Infrastructure.Persistence
 {

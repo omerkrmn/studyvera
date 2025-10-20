@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace StudyVera.Domain.Interfaces;
 
-public interface ILessonRepository
+public interface ILessonRepository : IRepository<Lesson>
 {
-    public Task<List<Lesson>> GetByTargetExam(Guid userId, CancellationToken ct);
-    public void AddLesson(Lesson lesson, CancellationToken ct);
+    public Task<List<Lesson>> GetByTargetExamAsync(Guid userId, CancellationToken ct);
+    public Task AddLessonAsync(Lesson lesson, CancellationToken ct);
+    public Task<Lesson?> GetLessonByNameAndExamIdAsync(string name,int id,bool trackChanges, CancellationToken ct);
 }

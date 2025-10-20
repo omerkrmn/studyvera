@@ -14,10 +14,7 @@ namespace StudyVera.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<UserQuestionStat> builder)
         {
-            builder.HasOne<AppUser>()
-                   .WithMany()
-                   .HasForeignKey(uqs => uqs.UserId)
-                   .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 
