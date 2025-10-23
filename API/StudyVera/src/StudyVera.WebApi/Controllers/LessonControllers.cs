@@ -22,6 +22,12 @@ namespace StudyVera.WebApi.Controllers
             var lessonId = await _mediator.Send(command, ct);
             return CreatedAtAction(nameof(AddLesson), new { id = lessonId }, null);
         }
+        [HttpPost("add-range")]
+        public async Task<IActionResult> AddRangeLesson([FromBody] AddRangeLessonCommand command, CancellationToken ct = default)
+        {
+            var lessonIds = await _mediator.Send(command, ct);
+            return CreatedAtAction(nameof(AddRangeLesson), lessonIds);
+        }
 
     }
 }

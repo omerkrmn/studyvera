@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using StudyVera.Contract.Dtos;
+using StudyVera.Domain.Entities.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,8 @@ namespace StudyVera.Application.Mappings
     {
         public MappingProfile()
         {
-            
+            CreateMap<UserForRegistrationDto, AppUser>().ReverseMap();
+            CreateMap<UserForAuthenticationDto, AppUser>().ReverseMap();
         }
     }
 

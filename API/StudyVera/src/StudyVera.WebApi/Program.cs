@@ -1,5 +1,7 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StudyVera.Application.Mappings;
+using StudyVera.Domain.Entities.Identity;
 using StudyVera.WebApi.Extensions;
 
 
@@ -14,7 +16,10 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureUnitOfWork(); 
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureMediatR();
+builder.Services.ConfigureAuthServices(builder.Configuration);
+
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -26,6 +31,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

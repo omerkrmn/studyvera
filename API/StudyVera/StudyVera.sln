@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyVera.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyVera.WebApi", "src\StudyVera.WebApi\StudyVera.WebApi.csproj", "{561681C3-BD85-44EA-ADEC-0C4CF12AB0EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyVera.Contract", "src\StudyVera.Contract\StudyVera.Contract.csproj", "{A75F96E7-6623-4FA5-8EA4-7BA14D660365}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{561681C3-BD85-44EA-ADEC-0C4CF12AB0EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{561681C3-BD85-44EA-ADEC-0C4CF12AB0EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{561681C3-BD85-44EA-ADEC-0C4CF12AB0EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A75F96E7-6623-4FA5-8EA4-7BA14D660365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A75F96E7-6623-4FA5-8EA4-7BA14D660365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A75F96E7-6623-4FA5-8EA4-7BA14D660365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A75F96E7-6623-4FA5-8EA4-7BA14D660365}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +50,7 @@ Global
 		{F1598603-3B87-4397-81D6-7A65D9A54432} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{9451001A-DC09-4E98-AED6-CF668C35E690} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{561681C3-BD85-44EA-ADEC-0C4CF12AB0EF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A75F96E7-6623-4FA5-8EA4-7BA14D660365} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6448FCF8-91F8-421E-B512-E9B5FECEEED5}

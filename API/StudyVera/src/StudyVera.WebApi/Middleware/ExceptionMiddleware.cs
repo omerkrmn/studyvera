@@ -20,6 +20,7 @@ namespace StudyVera.WebApi.Middleware
                         {
                             ConflictException => StatusCodes.Status409Conflict,
                             NotFoundException => StatusCodes.Status404NotFound,
+                            ParameterNullException => StatusCodes.Status400BadRequest,
                             _ => StatusCodes.Status500InternalServerError
                         };
 
