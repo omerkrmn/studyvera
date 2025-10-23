@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using StudyVera.Domain.Entities;
-using StudyVera.Infrastructure.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -5,11 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StudyVera.Infrastructure.Identity
-{
-    public sealed class AppRole : IdentityRole<Guid>
-    {
+namespace StudyVera.Domain.Entities.Identity;
 
-    }
+public sealed class AppRole : IdentityRole<Guid>
+{
 
 }

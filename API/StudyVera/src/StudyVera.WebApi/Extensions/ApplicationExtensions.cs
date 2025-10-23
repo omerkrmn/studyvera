@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application;
+using StudyVera.Contract.Interfaces;
 using StudyVera.Domain.Entities;
+using StudyVera.Domain.Entities.Identity;
 using StudyVera.Domain.Interfaces;
 using StudyVera.Infrastructure.Identity;
 using StudyVera.Infrastructure.Persistence.Repositories;
@@ -38,9 +40,15 @@ public static class ApplicationExtensions
        .AddDefaultTokenProviders();
     }
 
-    public static void ConfigureUnitOfWork(this IServiceCollection services)=>
+    public static void ConfigureUnitOfWork(this IServiceCollection services) =>
         services.AddScoped<IRepositoryManager, RepositoryManager>();
-    
-    public static void ConfigureMediatR(this IServiceCollection services)=>
+
+    public static void ConfigureMediatR(this IServiceCollection services) =>
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyReferance).Assembly));
+
+    public static void ConfigureAuthServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+    }
 }
