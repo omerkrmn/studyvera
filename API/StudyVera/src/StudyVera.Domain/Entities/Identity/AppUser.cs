@@ -23,7 +23,7 @@ public class AppUser : IdentityUser<Guid>
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiryTime { get; set; }
 
-    public ICollection<UserActivityHistory?> UserActivityHistory { get; set; } = [];
-    public ICollection<UserLessonProgress> LessonProgresses { get; set; } = [];
-    public ICollection<UserQuestionStat> QuestionStats { get; set; } = [];
+    public ICollection<UserActivityHistory> UserActivityHistories { get; set; } = new List<UserActivityHistory>();
+    public ICollection<UserLessonProgress> LessonProgresses { get; set; } = new List<UserLessonProgress>();
+    public ICollection<UserQuestionStat> QuestionStats { get; set; } = new List<UserQuestionStat>();
 }

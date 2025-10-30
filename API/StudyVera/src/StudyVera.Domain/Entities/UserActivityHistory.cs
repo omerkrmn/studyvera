@@ -1,4 +1,5 @@
-﻿using StudyVera.Domain.Enums;
+﻿using StudyVera.Domain.Entities.Identity;
+using StudyVera.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ public class UserActivityHistory
     public ActivityType? ActivityType { get; set; }
     public string Description { get; set; } = string.Empty;
     
-    // Navigation
     public Guid UserId { get; set; }
+
+    public AppUser User { get; set; } = null!;
 }

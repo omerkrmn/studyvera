@@ -10,7 +10,7 @@ namespace StudyVera.Domain.Interfaces;
 
 public interface IUserActivityHistoryRepository : IRepository<UserActivityHistory>
 { 
-    public Task AddAsync(Guid userId, string activityType, string description, CancellationToken ct);
+    public Task AddAsync(Guid userId, ActivityType activityType, string description, CancellationToken ct);
     public Task<List<UserActivityHistory>> GetAllByUser(Guid guid, CancellationToken ct);
     public Task<List<UserActivityHistory>> GetAllByUserAndType(Guid guid, ActivityType activityType, CancellationToken ct);
     public Task<List<DateTime>> GetByActivityTimeOfAllTime(Guid userId, CancellationToken ct);
