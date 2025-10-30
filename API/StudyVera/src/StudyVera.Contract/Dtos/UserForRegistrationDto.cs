@@ -13,14 +13,15 @@ public class UserForRegistrationDto
     // auth 
     [Required(ErrorMessage = "Firstname cannot be null!")]
     public string FirstName { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "LastName cannot be null!")]
     public string LastName { get; set; } = string.Empty;
-    [Required(ErrorMessage = "UserName cannot be null!")]
-    public string UserName { get; set; }
+
+    public string UserName { get; set; } = string.Empty;
+
     public ExamTarget TargetExam { get; set; }
-    [Required(ErrorMessage = "E-Mail address cannot be null!")]
-    [EmailAddress]
-    public string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "Password cannot be null!")]
     public string Password { get; set; }
 }
