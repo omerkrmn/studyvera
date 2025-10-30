@@ -25,6 +25,10 @@ namespace StudyVera.WebApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterCommand registerCommand)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new Exception("not invalid");
+            }
             var response = await _mediator.Send(registerCommand);
             return Ok(response);
         }

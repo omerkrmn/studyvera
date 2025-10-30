@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudyVera.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using StudyVera.Infrastructure.Persistence;
 namespace StudyVera.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027101148__update-AppUser-and-UserActivityHistory")]
+    partial class _updateAppUserandUserActivityHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -562,6 +565,9 @@ namespace StudyVera.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid?>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
@@ -576,9 +582,9 @@ namespace StudyVera.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TopicId");
+                    b.HasIndex("AppUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TopicId");
 
                     b.ToTable("UserLessonProgresses");
                 });
@@ -716,21 +722,17 @@ namespace StudyVera.Infrastructure.Migrations
 
             modelBuilder.Entity("StudyVera.Domain.Entities.UserLessonProgress", b =>
                 {
+                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", null)
+                        .WithMany("LessonProgresses")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("StudyVera.Domain.Entities.Topic", "Topic")
                         .WithMany()
                         .HasForeignKey("TopicId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", "User")
-                        .WithMany("LessonProgresses")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Topic");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.UserQuestionStat", b =>

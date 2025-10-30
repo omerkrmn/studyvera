@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using StudyVera.Application.Features.Topics.Queries;
 
 namespace StudyVera.WebApi.Controllers
 {
@@ -14,7 +15,12 @@ namespace StudyVera.WebApi.Controllers
         {
             _mediator = mediator;
         }
-
+        [HttpGet]
+        public async Task<IActionResult> GetTopics(CancellationToken ct)
+        {
+            var response = await _mediator.Send(new GetAllTopicsQuery(), ct);
+            return Ok(response);
+        }
 
     }
 }
