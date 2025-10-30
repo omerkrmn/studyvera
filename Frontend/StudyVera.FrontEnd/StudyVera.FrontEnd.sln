@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyVera.FrontEnd", "StudyVera.FrontEnd\StudyVera.FrontEnd.csproj", "{5A86562F-700F-4AD3-A0BE-5BD5185DC447}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A86562F-700F-4AD3-A0BE-5BD5185DC447}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A86562F-700F-4AD3-A0BE-5BD5185DC447}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A86562F-700F-4AD3-A0BE-5BD5185DC447}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A86562F-700F-4AD3-A0BE-5BD5185DC447}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1D9E5BE8-73B9-4E5C-B340-FA7A4FABED15}
+	EndGlobalSection
+EndGlobal
