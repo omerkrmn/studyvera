@@ -1,4 +1,5 @@
-﻿using StudyVera.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Enums;
 using StudyVera.Domain.Interfaces;
 using System;
@@ -15,22 +16,31 @@ public class UserActivityHistoryRepository : RepositoryBase<UserActivityHistory>
     {
     }
 
-    public Task AddAsync(Guid userId, string activityType, string description, CancellationToken ct)
+    public async Task AddAsync(Guid userId, ActivityType activityType, string description, CancellationToken ct)
     {
-        throw new NotImplementedException();
+
+        Create(new UserActivityHistory()
+                        {
+                            UserId = userId,
+                            ActivityDate = DateTime.Now,
+                            Description = description,
+                            ActivityType = activityType
+                        }
+        );
+
     }
 
-    public Task<List<UserActivityHistory>> GetAllByUser(Guid guid, CancellationToken ct)
+    public async Task<List<UserActivityHistory>> GetAllByUser(Guid guid, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return await FindByCondition(u=>u.UserId == guid,false).ToListAsync(ct);
     }
 
-    public Task<List<UserActivityHistory>> GetAllByUserAndType(Guid guid, ActivityType activityType, CancellationToken ct)
+    public async Task<List<UserActivityHistory>> GetAllByUserAndType(Guid guid, ActivityType activityType, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return await FindByCondition(u => u.UserId == guid && u.ActivityType ==activityType, false).ToListAsync(ct);
     }
 
-    public Task<List<DateTime>> GetByActivityTimeOfAllTime(Guid userId, CancellationToken ct)
+    public async Task<List<DateTime>> GetByActivityTimeOfAllTime(Guid userId, CancellationToken ct)
     {
         throw new NotImplementedException();
     }

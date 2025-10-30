@@ -14,10 +14,10 @@ namespace StudyVera.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<UserActivityHistory> builder)
         {
-            builder.HasOne<AppUser>()
-               .WithMany()                        
-               .HasForeignKey(uah => uah.UserId)  
-               .OnDelete(DeleteBehavior.Cascade); 
+            //builder.HasOne<AppUser>()
+            //   .WithMany()                        
+            //   .HasForeignKey(uah => uah.UserId)  
+            //   .OnDelete(DeleteBehavior.Cascade); 
         }
     }
 
