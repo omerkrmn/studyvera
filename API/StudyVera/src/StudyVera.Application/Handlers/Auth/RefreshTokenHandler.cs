@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using StudyVera.Application.Features.Auth.Commands;
 using StudyVera.Contract.Dtos;
 using StudyVera.Contract.Interfaces;
@@ -14,17 +15,18 @@ namespace StudyVera.Application.Handlers.Auth;
 public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, TokenDto>
 {
     private readonly IAuthenticationService _auth;
-
-    public RefreshTokenHandler(IAuthenticationService auth)
+    private readonly IMapper _mapper;
+    public RefreshTokenHandler(IAuthenticationService auth, IMapper mapper)
     {
         _auth = auth;
+        _mapper = mapper;
     }
 
     public Task<TokenDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        if (request.TokenDto == null)
+        if (request == null)
             throw new ParameterNullException("token dto cannot be null!");
-        var result = _auth.RefreshToken(request.TokenDto);
+        var result = _auth.RefreshToken(_mapper.Map<TokenDto>(request));
         return result;
     }
 }

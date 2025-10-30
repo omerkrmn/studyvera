@@ -27,8 +27,8 @@ namespace StudyVera.Application.Handlers.Auth
         {
             if (request == null)
                 throw new ParameterNullException("parameters cannot be null!");
-            var user = _mapper.Map<AppUser>(request.UserForRegistration);
-            var result = await _userManager.CreateAsync(user, request.UserForRegistration.Password);
+            var user = _mapper.Map<AppUser>(request.UserForRegistrationDto);
+            var result = await _userManager.CreateAsync(user, request.UserForRegistrationDto.Password);
 
             if (result.Succeeded)
                 return user;

@@ -24,7 +24,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, TokenDto>
 
     public async Task<TokenDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var isValid = await _authenticationService.ValidateUser(request.UserForAuthentication);
+        var isValid = await _authenticationService.ValidateUser(request.UserForAuthenticationDto);
 
         // TODO: exceptionları düzenle
         if (!isValid)
