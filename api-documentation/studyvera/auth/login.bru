@@ -1,0 +1,27 @@
+meta {
+  name: login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{API_URL}}auth
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userForAuthenticationDto": {
+      "email": "string@string.com",
+      "password": "string"
+    }
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("API_KEY",res.body.accessToken);
+  bru.setEnvVar("API_KEY_REFRESH", res.body.refreshToken);
+  
+  // if env var is null=> this code created 
+}
