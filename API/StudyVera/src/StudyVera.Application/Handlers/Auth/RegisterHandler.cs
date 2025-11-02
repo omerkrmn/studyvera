@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using StudyVera.Application.Features.Auth.Commands;
@@ -15,19 +16,17 @@ namespace StudyVera.Application.Handlers.Auth
     public class RegisterHandler : IRequestHandler<RegisterCommand, AppUser>
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly IMapper _mapper;
 
-        public RegisterHandler(UserManager<AppUser> userManager, IMapper mapper)
+        public RegisterHandler(UserManager<AppUser> userManager)
         {
             _userManager = userManager;
-            _mapper = mapper;
         }
 
         public async Task<AppUser> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             if (request == null)
                 throw new ParameterNullException("parameters cannot be null!");
-            var user = _mapper.Map<AppUser>(request.UserForRegistrationDto);
+            var user = request.UserForRegistrationDto.Adapt<AppUser>();
             var result = await _userManager.CreateAsync(user, request.UserForRegistrationDto.Password);
 
             if (result.Succeeded)

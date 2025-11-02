@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,12 +18,10 @@ namespace StudyVera.Application.Handlers.UserLessonProgresses
     public class GetAllLessonProgressesHandler : IRequestHandler<GetAllLessonProgressesQuery, List<UserLessonProgressDto>>
     {
         private readonly IRepositoryManager _manager;
-        private readonly IMapper _mapper;
 
-        public GetAllLessonProgressesHandler(IRepositoryManager manager, IMapper mapper)
+        public GetAllLessonProgressesHandler(IRepositoryManager manager)
         {
             _manager = manager;
-            _mapper = mapper;
         }
 
         public async Task<List<UserLessonProgressDto>> Handle(GetAllLessonProgressesQuery request, CancellationToken cancellationToken)
@@ -31,7 +30,7 @@ namespace StudyVera.Application.Handlers.UserLessonProgresses
                 await _manager.UserLessonProgressRepository.FindByCondition(ulp => ulp.UserId == request.UserId, false)
                 .Include(a=>a.Topic)
                 .ToListAsync(cancellationToken);
-            var response = _mapper.Map<List<UserLessonProgressDto>>(userLessonProgresses);
+            var response = userLessonProgresses.Adapt<List<UserLessonProgressDto>>();
             return response;
         }
     }

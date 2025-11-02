@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Features.Topics.Queries;
@@ -15,17 +16,15 @@ namespace StudyVera.Application.Handlers.Topics
     public class GetAllTopicsHandler : IRequestHandler<GetAllTopicsQuery, List<TopicDto>>
     {
         private readonly IRepositoryManager _manager;
-        private readonly IMapper _mapper;
-        public GetAllTopicsHandler(IRepositoryManager manager, IMapper mapper)
+        public GetAllTopicsHandler(IRepositoryManager manager)
         {
             _manager = manager;
-            _mapper = mapper;
         }
 
         public async Task<List<TopicDto>> Handle(GetAllTopicsQuery request, CancellationToken cancellationToken)
         {
             var allTopics = await _manager.TopicRepository.FindAll(false).ToListAsync(cancellationToken);
-            return _mapper.Map<List<TopicDto>>(allTopics);
+            return allTopics.Adapt<List<TopicDto>>();
         }
     }
 
