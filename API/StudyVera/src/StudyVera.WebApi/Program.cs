@@ -30,8 +30,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 var app = builder.Build();
 
 
