@@ -1,12 +1,7 @@
-﻿using StudyVera.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Enums;
 using StudyVera.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
 
 public class TopicRepository : RepositoryBase<Topic>, ITopicRepository
@@ -15,12 +10,12 @@ public class TopicRepository : RepositoryBase<Topic>, ITopicRepository
     {
     }
 
-    public Task<List<Topic>> GetAllByLessonIdAsync(ExamTarget exam, int lessonId, CancellationToken ct = default)
+    public Task<List<Topic>> GetAllByLessonIdAsync(TargetExam exam, int lessonId, CancellationToken ct = default)
     {
         throw new NotImplementedException();
     }
 
-    public Task<List<Topic>> GetAllByTargetAsync(ExamTarget exam, CancellationToken ct = default)
+    public Task<List<Topic>> GetAllByTargetAsync(TargetExam exam, CancellationToken ct = default)
     {
         throw new NotImplementedException();
     }

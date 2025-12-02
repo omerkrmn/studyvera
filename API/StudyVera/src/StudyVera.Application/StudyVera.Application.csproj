@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StudyVera.Contract\StudyVera.Contract.csproj" />
     <ProjectReference Include="..\StudyVera.Domain\StudyVera.Domain.csproj" />
   </ItemGroup>
 
@@ -17,11 +16,8 @@
     <Folder Include="Features\Lessons\Queries\" />
     <Folder Include="Features\Topics\Commands\" />
     <Folder Include="Features\UserActivities\Commands\" />
-    <Folder Include="Features\UserActivities\Queries\" />
-    <Folder Include="Features\UserQuestionStats\Queries\" />
     <Folder Include="Handlers\Exams\" />
-    <Folder Include="Handlers\UserActivities\" />
-    <Folder Include="Services\" />
+    <Folder Include="Abstractions\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 
@@ -29,8 +25,7 @@
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="MediatR" Version="13.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 

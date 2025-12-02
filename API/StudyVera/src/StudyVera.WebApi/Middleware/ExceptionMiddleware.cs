@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using StudyVera.Domain.Exceptions;
+using StudyVera.Application.Common.Exceptions;
 using StudyVera.WebApi.Middleware.ErrorModel;
 
 namespace StudyVera.WebApi.Middleware
@@ -19,6 +19,7 @@ namespace StudyVera.WebApi.Middleware
                         context.Response.StatusCode = contextFeature.Error switch
                         {
                             ConflictException => StatusCodes.Status409Conflict,
+                            BadRequestException=>StatusCodes.Status400BadRequest,
                             NotFoundException => StatusCodes.Status404NotFound,
                             ParameterNullException => StatusCodes.Status400BadRequest,
                             _ => StatusCodes.Status500InternalServerError

@@ -1,10 +1,9 @@
-﻿using StudyVera.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using StudyVera.Application.Common.Models;
+using StudyVera.Application.Dtos;
+using StudyVera.Application.Dtos.UserQuestionStats;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
 
@@ -14,8 +13,29 @@ public class UserQuestionStatRepository : RepositoryBase<UserQuestionStat>, IUse
     {
     }
 
-    public Task<UserQuestionStat> GetAllByUser(Guid userId, CancellationToken ct)
+    public async Task<List<UserQuestionStatDto>> GetAllByUser(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var stats = await FindByCondition(uqs => uqs.UserId == userId, trackChanges: false)
+                            // .Include(uqs => uqs.Topic) // Projeksiyon yaptığımız için gereksiz
+                            .Select(uqs => new UserQuestionStatDto
+                            {
+                                Id = uqs.Id,
+                                TopicId = uqs.TopicId,
+                                Topic = new TopicDto
+                                {
+                                    Id = uqs.Topic.Id,
+                                    LessonId = uqs.Topic.LessonId,
+                                    Name = uqs.Topic.Name
+                                },
+                                SolvedCount = uqs.SolvedCount,
+                                CorrectCount = uqs.CorrectCount,
+                                WrongCount = uqs.WrongCount,
+                                AccuracyRate = uqs.AccuracyRate,
+                                LastAttemptAt = uqs.LastAttemptAt
+                            })
+                            .ToListAsync(ct);
+
+        return stats;
     }
+
 }

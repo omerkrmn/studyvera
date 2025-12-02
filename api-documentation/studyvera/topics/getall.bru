@@ -1,0 +1,15 @@
+meta {
+  name: getall
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{API_URL}}topics
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{API_KEY}}
+}

@@ -1,0 +1,170 @@
+﻿@page "/auth/register"
+@using Blazored.LocalStorage
+@using StudyVera.FrontEnd.Providers
+@using StudyVera.FrontEnd.Utilities
+@using System.Text.Json
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject ILocalStorageService LocalStorage
+@inject CustomAuthStateProvider CustomAuthStateProvider
+
+<PageTitle>Register</PageTitle>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary">Register</h2>
+
+    <EditForm Model="@registerModel" OnValidSubmit="@HandleRegister">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">First Name</label>
+            <InputText @bind-Value="registerModel.FirstName"
+                       class="form-control"
+                       placeholder="Enter first name" />
+            <ValidationMessage For="@(() => registerModel.FirstName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Last Name</label>
+            <InputText @bind-Value="registerModel.LastName"
+                       class="form-control"
+                       placeholder="Enter last name" />
+            <ValidationMessage For="@(() => registerModel.LastName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <InputText @bind-Value="registerModel.UserName"
+                       class="form-control"
+                       placeholder="Enter username" />
+            <ValidationMessage For="@(() => registerModel.UserName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <InputText @bind-Value="registerModel.Email"
+                       class="form-control"
+                       placeholder="Enter email" />
+            <ValidationMessage For="@(() => registerModel.Email)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <InputText @bind-Value="registerModel.Password"
+                       class="form-control"
+                       placeholder="Enter password"
+                       type="password" />
+            <ValidationMessage For="@(() => registerModel.Password)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Sınav Seçiniz</label>
+            <InputSelect @bind-Value="registerModel.TargetExam" class="form-control">
+                <option value="">Seçiniz</option>
+                @foreach (var item in Enum.GetValues<TargetExam>())
+                {
+                    <option value="@item">@item</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => registerModel.TargetExam)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
+            @(isLoading ? "Registering..." : "Register")
+        </button>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-3">@errorMessage</div>
+        }
+    </EditForm>
+</div>
+
+@code {
+    private RegisterModel registerModel = new();
+    private bool isLoading = false;
+    private string? errorMessage;
+
+    private async Task HandleRegister()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync(
+                $"{AppConsts.ApiBaseUrl}auth/register",
+                registerModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+                var token = json.GetProperty("accessToken").GetString();
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    errorMessage = "Access token missing from response.";
+                    return;
+                }
+
+                await LocalStorage.SetItemAsync("accessToken", token);
+                CustomAuthStateProvider.NotifyUserAuthentication(token);
+                Navigation.NavigateTo("/", true);
+            }
+            else
+            {
+                // API hata içeriğini göster (varsa)
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = string.IsNullOrWhiteSpace(errorContent)
+                    ? "Registration failed."
+                    : errorContent;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class RegisterModel
+    {
+        [Required]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required, EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required, MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required]
+        public TargetExam TargetExam { get; set; }
+
+        public override string ToString()
+        {
+            return $"{FirstName}, {LastName}, {UserName}, {Email}, {Password}, {TargetExam}";
+        }
+    }
+
+    public enum TargetExam
+    {
+        TYT = 1,
+        AYT = 2,
+        DGS = 3,
+        ALES = 4,
+        KPSS = 5
+    }
+}

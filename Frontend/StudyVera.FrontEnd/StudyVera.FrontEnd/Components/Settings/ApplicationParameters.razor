@@ -1,0 +1,102 @@
+﻿@using Blazored.LocalStorage
+@using StudyVera.FrontEnd.Models.Common
+@inject ILocalStorageService LocalStorage
+<h3 class="mb-4">Application Parameters</h3>
+
+
+
+<EditForm Model="@parameters" OnValidSubmit="SaveChanges">
+    <div class="mb-3 input-group" style="max-width: 100%;">
+        <label class="input-group-text">Hedef Sınav</label>
+        <span class="form-control">@parameters.TargetExam</span>
+    </div>
+
+    <div class="mb-3 input-group">
+        <label class="input-group-text">Tamamlanan Ders Programı Rengi</label>
+
+        <InputSelect class="form-select" @bind-Value="parameters.ColorHex">
+
+            <option value="#ff0000" style="background-color:#ff0000; color:white;">
+                Kırmızı
+            </option>
+
+            <option value="#ff69b4" style="background-color:#ff69b4; color:white;">
+                Pembe
+            </option>
+
+            <option value="#28a745" style="background-color:#28a745; color:white;">
+                Yeşil
+            </option>
+
+            <option value="#007bff" style="background-color:#007bff; color:white;">
+                Mavi
+            </option>
+
+        </InputSelect>
+    </div>
+
+    <div class="mb-3 input-group" style="max-width: 100%;">
+        <label class="input-group-text">Haftalık Ders Çalışma Süresi (saat)</label>
+        <InputNumber class="form-control" @bind-Value="parameters.HaftalikHedefCalismaSuresi" />
+    </div>
+
+
+
+@*     <div class="mb-3 input-group" style="max-width: 100%;">
+        <label class="input-group-text">Hedef Sınav</label>
+        <InputSelect class="form-select" @bind-Value="parameters.Language">
+            <option value="en">English</option>
+            <option value="tr">Türkçe</option>
+            <option value="de">Deutsch</option>
+        </InputSelect>
+    </div> *@
+
+    @*  <!-- Theme -->
+           <div class="mb-3 input-group" style="max-width: 100%;">
+                <label class="input-group-text">Hedef Sınav</label>
+                <InputSelect class="form-select" @bind-Value="parameters.Theme">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="system">System Default</option>
+                </InputSelect>
+            </div>
+
+           
+
+            <!-- Notifications Toggle -->
+            <div class="form-check form-switch mb-3">
+                <InputCheckbox class="form-check-input" @bind-Value="parameters.NotificationsEnabled" />
+                <label class="form-check-label">Enable Notifications</label>
+            </div>
+
+            <!-- Status -->
+            <div class="form-check form-switch mb-4">
+                <InputCheckbox class="form-check-input" @bind-Value="parameters.IsPublicProfile" />
+                <label class="form-check-label">Public Profile</label>
+            </div> *@
+
+    <button class="btn btn-primary w-100" type="submit">
+        Save Changes
+    </button>
+
+</EditForm>
+
+
+
+@code {
+
+    private UserSettings parameters = new UserSettings();
+
+    private async Task SaveChanges()
+    {
+        await LocalStorage.SetItemAsync("UserSettings", parameters);
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var saved = await LocalStorage.GetItemAsync<UserSettings>("UserSettings");
+
+        parameters = saved ?? new UserSettings();
+    }
+
+
+}

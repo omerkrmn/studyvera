@@ -1,0 +1,62 @@
+﻿@page "/settings"
+@using StudyVera.FrontEnd.Components.Settings
+
+
+<div class="row align-items-start">
+
+    <div class="col-3 border-end" style="min-height: 100vh;">
+        <div class="nav flex-column nav-pills pt-3 text-start w-100">
+
+            <button class="nav-link text-start w-100 @(activeTab == TabSelects.ApplicationParameters ? "active" : "")"
+                    @onclick="() => ChangeTab(TabSelects.ApplicationParameters)">
+                <i class="bi bi-gear-fill me-2"></i> ApplicationParameters
+            </button>
+
+            <button class="nav-link text-start w-100 @(activeTab == TabSelects.appearance ? "active" : "")"
+                    @onclick="() => ChangeTab(TabSelects.appearance)">
+                <i class="bi bi-palette-fill me-2"></i> Appearance
+            </button>
+
+            <button class="nav-link text-start w-100 @(activeTab == TabSelects.notifications ? "active" : "")"
+                    @onclick="() => ChangeTab(TabSelects.notifications)">
+                <i class="bi bi-bell-fill me-2"></i> Notifications
+            </button>
+
+        </div>
+    </div>
+
+
+    <!-- İçerik -->
+    <div class="col-9 p-4">
+        <div class="alert alert-primary" role="alert">
+            Buradaki içeriği cache al eğer cache de yoksa o zaman db den talep et. sürekli sürekli meşgul etmesin.
+        </div>
+        @if (activeTab == TabSelects.ApplicationParameters)
+        {
+            <ApplicationParameters />
+        }
+        else if (activeTab == TabSelects.appearance)
+        {
+            <p>appearance</p>
+        }
+        else if (activeTab == TabSelects.notifications)
+        {
+            <p>notifications</p>
+        }
+    </div>
+
+</div>
+
+
+@code {
+    enum TabSelects
+    {
+        ApplicationParameters, appearance, notifications
+    }
+    private TabSelects activeTab = TabSelects.ApplicationParameters;
+
+    private void ChangeTab(TabSelects tabSelects)
+    {
+        activeTab = tabSelects;
+    }
+}

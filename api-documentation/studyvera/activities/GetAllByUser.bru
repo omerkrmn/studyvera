@@ -1,0 +1,15 @@
+meta {
+  name: GetAllByUser
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{API_URL}}user-activities
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{API_KEY}}
+}

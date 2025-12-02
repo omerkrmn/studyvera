@@ -1,15 +1,9 @@
-﻿using AutoMapper;
-using Mapster;
+﻿using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using StudyVera.Application.Common.Exceptions;
 using StudyVera.Application.Features.Auth.Commands;
 using StudyVera.Domain.Entities.Identity;
-using StudyVera.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Application.Handlers.Auth
 {
@@ -26,8 +20,8 @@ namespace StudyVera.Application.Handlers.Auth
         {
             if (request == null)
                 throw new ParameterNullException("parameters cannot be null!");
-            var user = request.UserForRegistrationDto.Adapt<AppUser>();
-            var result = await _userManager.CreateAsync(user, request.UserForRegistrationDto.Password);
+            var user = request.Adapt<AppUser>();
+            var result = await _userManager.CreateAsync(user, request.Password);
 
             if (result.Succeeded)
                 return user;

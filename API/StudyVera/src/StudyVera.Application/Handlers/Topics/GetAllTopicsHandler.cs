@@ -1,31 +1,41 @@
-﻿using AutoMapper;
-using Mapster;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using StudyVera.Application.Dtos;
 using StudyVera.Application.Features.Topics.Queries;
-using StudyVera.Contract.Dtos;
 using StudyVera.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Application.Handlers.Topics
 {
+
     public class GetAllTopicsHandler : IRequestHandler<GetAllTopicsQuery, List<TopicDto>>
     {
         private readonly IRepositoryManager _manager;
+
         public GetAllTopicsHandler(IRepositoryManager manager)
         {
             _manager = manager;
         }
 
-        public async Task<List<TopicDto>> Handle(GetAllTopicsQuery request, CancellationToken cancellationToken)
+        public async Task<List<TopicDto>> Handle(GetAllTopicsQuery request, CancellationToken ct)
         {
-            var allTopics = await _manager.TopicRepository.FindAll(false).ToListAsync(cancellationToken);
-            return allTopics.Adapt<List<TopicDto>>();
+            var query = _manager.TopicRepository
+                                .FindByCondition(t => t.Lesson.ExamId == (int)request.TargetExam, false)
+                                .Select(t => new TopicDto
+                                {
+                                    Id = t.Id,
+                                    Name = t.Name,
+                                    LessonId = t.LessonId
+                                });
+
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                var term = request.SearchTerm.Trim();
+                query = query.Where(t => EF.Functions.Like(t.Name, $"%{term}%"));
+            }
+
+            return await query.ToListAsync(ct);
         }
+
     }
 
 }

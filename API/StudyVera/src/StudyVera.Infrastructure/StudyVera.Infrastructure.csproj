@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="12.0.0" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
       <PrivateAssets>all</PrivateAssets>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StudyVera.Contract\StudyVera.Contract.csproj" />
+    <ProjectReference Include="..\StudyVera.Application\StudyVera.Application.csproj" />
     <ProjectReference Include="..\StudyVera.Domain\StudyVera.Domain.csproj" />
   </ItemGroup>
 

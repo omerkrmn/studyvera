@@ -1,0 +1,163 @@
+﻿@using Blazored.LocalStorage
+@using StudyVera.FrontEnd.Models.Common
+@using StudyVera.FrontEnd.Models.Topics
+@inject ILocalStorageService LocalStorage
+
+<h3 class="mt-3 mb-3">📘 Haftalık Çalışma Programı</h3>
+
+<table class="table table-bordered table-striped text-center align-middle">
+    <thead class="table-primary">
+        <tr>
+            <th>Pazartesi</th>
+            <th>Salı</th>
+            <th>Çarşamba</th>
+            <th>Perşembe</th>
+            <th>Cuma</th>
+            <th>Cumartesi</th>
+            <th>Pazar</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr class="align-text-top">
+            @foreach (var day in WeeklyProgram)
+            {
+                <td style="min-width:150px;">
+                    @if (day.Sessions.Count == 0)
+                    {
+                        <div class="text-muted">—</div>
+                    }
+                    else
+                    {
+                        @foreach (var session in day.Sessions)
+                        {
+                            <div class="p-1 mb-1 border rounded" style="background-color:@parameters.ColorHex">
+                                <strong>@session.Topic.Name</strong> <br />
+                                <small class="text-secondary">@session.Action</small>
+                            </div>
+                        }
+                    }
+                </td>
+            }
+        </tr>
+    </tbody>
+</table>
+
+
+@code {
+    string color = "#f8f9fa";
+    private UserSettings parameters = new();
+    protected override async Task OnInitializedAsync()
+    {
+        var saved = await LocalStorage.GetItemAsync<UserSettings>("UserSettings");
+
+        if (saved != null)
+            parameters = saved;
+        color = parameters.ColorHex;
+    }
+    private List<StudyDay> WeeklyProgram = new()
+    {
+        new StudyDay
+        {
+            DayName = "Pazartesi",
+            Sessions = new()
+            {
+                new StudySession
+                {
+                    Id = 1,
+                    Topic = new TopicDto { Id = 101, Name = "Matematik - Fonksiyonlar" },
+                    Action = "Konu Çalışma"
+                },
+                new StudySession
+                {
+                    Id = 2,
+                    Topic = new TopicDto { Id = 102, Name = "Fizik - Kuvvet ve Hareket" },
+                    Action = "Soru Çözme"
+                }
+            }
+        },
+
+        new StudyDay
+        {
+            DayName = "Salı",
+            Sessions = new()
+            {
+                new StudySession
+                {
+                    Id = 3,
+                    Topic = new TopicDto { Id = 103, Name = "Kimya - Asit Baz" },
+                    Action = "Tekrar"
+                }
+            }
+        },
+
+        new StudyDay
+        {
+            DayName = "Çarşamba",
+            Sessions = new()
+            {
+                new StudySession
+                {
+                    Id = 4,
+                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
+                    Action = "Soru Çözme"
+                }
+            }
+        },
+
+        new StudyDay {
+            DayName = "Perşembe",
+        Sessions= new()
+        {
+            new StudySession
+                {
+                    Id = 4,
+                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
+                    Action = "Soru Çözme"
+                },
+                new StudySession
+                {
+                    Id = 4,
+                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
+                    Action = "Soru Çözme"
+                },
+                new StudySession
+                {
+                    Id = 4,
+                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
+                    Action = "Soru Çözme"
+                },
+                new StudySession
+                {
+                    Id = 4,
+                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
+                    Action = "Soru Çözme"
+                },
+                new StudySession
+                {
+                    Id = 4,
+                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
+                    Action = "Soru Çözme"
+                }
+        }},
+        new StudyDay { DayName = "Cuma" },
+        new StudyDay { DayName = "Cumartesi" },
+        new StudyDay { DayName = "Pazar" }
+    };
+
+
+    // ----- SAYFADA KULLANILAN MODELLER -----
+
+    class StudyDay
+    {
+        public string DayName { get; set; }
+        public List<StudySession> Sessions { get; set; } = new();
+    }
+
+    class StudySession
+    {
+        public int Id { get; set; }
+        public TopicDto Topic { get; set; }
+        public string Action { get; set; }
+    }
+}

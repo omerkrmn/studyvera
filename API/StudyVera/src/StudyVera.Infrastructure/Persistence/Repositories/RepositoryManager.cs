@@ -1,10 +1,5 @@
 ﻿using StudyVera.Domain.Interfaces;
 using StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Infrastructure.Persistence.Repositories
 {

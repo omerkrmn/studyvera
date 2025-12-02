@@ -1,35 +1,29 @@
 ﻿@inherits LayoutComponentBase
+
 <div class="container-fluid p-0 m-0">
     <div class="row g-0">
 
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-            <div class="container-fluid">
-
-                <a class="navbar-brand d-flex align-items-center" href="">
-                    <img src="assets/images/app-icon.png" alt="StudyVera Logo"
-                         style="width: 32px; height: 32px;" class="me-2">
-                    <span class="fw-bold fs-5">StudyVera</span>
-                </a>
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarNav" aria-controls="navbarNav"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <NavMenu />
-                    </ul>
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+                <div class="container-fluid">
+                    <NavMenu />
                 </div>
+            </nav>
+        </div>
 
-            </div>
-        </nav>
+        <div class="col-12">
+            <main class="px-0" >
+                <article class="content p-4">
+                    @Body
+                </article>
+            </main>
+        </div>
 
-        <main class="col-12 col-md-9 col-lg-10 px-0">
-            <article class="content p-4">
-                @Body
-            </article>
-        </main>
+        <div class="col-12">
+            <footer class="bg-dark text-center text-white py-3 mt-4">
+                <p class="mb-0">&copy; 2025 StudyVera. Tüm hakları saklıdır.</p>
+            </footer>
+        </div>
+
     </div>
 </div>

@@ -1,0 +1,28 @@
+﻿<div class="d-flex align-items-center gap-2 p-2">
+    <i class="bi bi-star-fill" style="color: gold; font-size: 2rem;"></i>
+
+    <h3 class="m-0 fw-bold">@UScore</h3>
+
+    <button class="btn btn-outline-primary btn-sm ms-3" @onclick="IncreaseScore">
+        +
+    </button>
+    <button class="btn btn-outline-danger btn-sm" @onclick="DecreaseScore">
+        -
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public int UScore { get; set; } = 0;
+
+    private void IncreaseScore()
+    {
+        UScore++;
+    }
+
+    private void DecreaseScore()
+    {
+        if (UScore > 0)
+            UScore--;
+    }
+}

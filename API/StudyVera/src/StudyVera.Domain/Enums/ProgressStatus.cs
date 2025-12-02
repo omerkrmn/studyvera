@@ -12,4 +12,5 @@ namespace StudyVera.Domain.Enums
         Completed = 1
     }
 
+
 }

@@ -1,0 +1,69 @@
+﻿@using StudyVera.FrontEnd.Services.Concrats
+@inject IUserHistoryService HistoryService
+@inject IJSRuntime JS
+
+<div class="card shadow">
+    <div class="card-header bg-primary text-white text-center">
+        Günlük Aktivite Grafiği
+    </div>
+
+    <div style="width:100%; max-width:500px; aspect-ratio:1/1; margin:auto; position:relative;">
+        <canvas id="lineChartCanvas"
+                style="position:absolute; inset:0; width:100%; height:100%;">
+        </canvas>
+    </div>
+</div>
+
+@code {
+    private List<DayActivity>? heatmapDays;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var allDates = await HistoryService.GetAllTime();
+
+            var grouped = allDates
+                .Select(x => x.Date.Date)
+                .GroupBy(x => x)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            DateTime today = DateTime.Today;
+
+            heatmapDays = Enumerable.Range(0, 365)
+                .Select(offset => today.AddDays(-offset))
+                .OrderBy(d => d)
+                .Select(date =>
+                {
+                    grouped.TryGetValue(date, out int count);
+                    return new DayActivity { Date = date, Count = count };
+                })
+                .ToList();
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (heatmapDays != null && heatmapDays.Any())
+        {
+            var labels = heatmapDays.Select(d => d.Date.ToString("dd.MM")).ToArray();
+            var data = heatmapDays.Select(d => d.Count.ToString()).ToArray();
+
+            await JS.InvokeVoidAsync("drawLineChart", "lineChartCanvas", labels, data, "Günlük Aktivite");
+        }
+    }
+
+
+    private class DayActivity
+    {
+        public DateTime Date { get; set; }
+        public int Count { get; set; }
+    }
+}

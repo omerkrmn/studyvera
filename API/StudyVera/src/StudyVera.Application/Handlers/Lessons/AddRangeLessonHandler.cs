@@ -2,11 +2,6 @@
 using StudyVera.Application.Features.Lessons.Commands;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Application.Handlers.Lessons;
 
@@ -32,7 +27,7 @@ public class AddRangeLessonHandler : IRequestHandler<AddRangeLessonCommand, List
 
         for (int i = 0; i < newLessons.Count; i++)
         {
-             _manager.LessonRepository.Create(newLessons[i]);
+            _manager.LessonRepository.Create(newLessons[i]);
         }
 
         await _manager.SaveChangesAsync(cancellationToken);

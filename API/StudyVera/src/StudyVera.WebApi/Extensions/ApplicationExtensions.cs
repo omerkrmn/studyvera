@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using StudyVera.Application;
-using StudyVera.Contract.Interfaces;
+using Microsoft.IdentityModel.Tokens;
+using StudyVera.Application.Services;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Entities.Identity;
 using StudyVera.Domain.Interfaces;
 using StudyVera.Infrastructure.Identity;
 using StudyVera.Infrastructure.Persistence.Repositories;
+using System.Text;
 using AppDbContext = StudyVera.Infrastructure.Persistence.AppDbContext;
 
 namespace StudyVera.WebApi.Extensions;
@@ -43,12 +45,41 @@ public static class ApplicationExtensions
     public static void ConfigureUnitOfWork(this IServiceCollection services) =>
         services.AddScoped<IRepositoryManager, RepositoryManager>();
 
-    public static void ConfigureMediatR(this IServiceCollection services) =>
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyReferance).Assembly));
+    public static void ConfigureServiceManager(this IServiceCollection services) =>
+        services.AddScoped<IAuthenticationManager, AuthenticationManager>();
 
-    public static void ConfigureAuthServices(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureMediatR(this IServiceCollection services)
     {
-        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssembly(typeof(StudyVera.Application.AssemblyReferance).Assembly));
     }
+
+    public static void ConfigureJwtSettings(this IServiceCollection services, IConfiguration configuration)=>
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+    
+    public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+        var secretKey = jwtSettings?.SecretKey;
+
+        services.AddAuthentication(opt =>
+        {
+            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings!.ValidIssuer,
+                ValidAudience = jwtSettings.ValidAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
+            };
+        });
+    }
+
 }

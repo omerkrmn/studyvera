@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,15 +7,18 @@
     <base href="/" />
     <link rel="icon" type="image/x-icon" href="assets/images/app-icon.ico" />
     <link rel="stylesheet" href="css/bootstrap.min.css" />
-    <style>
+    <link rel="stylesheet" href="css/heatmap.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!--chart-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-        /* Hata UI'sini tamamen gizle */
+    <style>
         #blazor-error-ui {
             display: none !important;
             visibility: hidden;
         }
 
-        /* Sayfa yüklenirken arka plan beyaz olsun */
         body {
             background-color: #ffffff;
             margin: 0;
@@ -27,7 +30,11 @@
     <div id="app"></div>
 
     <script src="_framework/blazor.webassembly.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script src="js/bootstrap.bundle.js"></script>
+    <script src="js/chartHelper.js"></script>
+
 </body>
 </html>
-    

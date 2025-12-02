@@ -17,5 +17,4 @@ public class UserLessonProgress
     
     public ProgressStatus ProgressStatus { get; set; }
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
-
 }

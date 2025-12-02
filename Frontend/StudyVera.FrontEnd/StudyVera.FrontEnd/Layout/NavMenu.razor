@@ -1,41 +1,104 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using Blazored.LocalStorage
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
 
-<!-- Top Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 shadow-sm">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold text-info" href="">StudyVera</a>
 
-        <button class="navbar-toggler border-0" type="button" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
 
-        <div class="@NavMenuCssClass navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item px-2">
-                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                        <i class="bi bi-house-door-fill me-1"></i> Home
-                    </NavLink>
-                </li>
+<a class="navbar-brand fw-bold text-info" href="">StudyVera</a>
 
-                <li class="nav-item px-2">
-                    <NavLink class="nav-link" href="/topics">
-                        <i class="bi bi-calendar-check me-1"></i> Topics
-                    </NavLink>
-                </li>
+<button class="navbar-toggler border-0" type="button" @onclick="ToggleNavMenu">
+    <span class="navbar-toggler-icon"></span>
+</button>
 
-                
-            </ul>
+<div class="@NavMenuCssClass collapse navbar-collapse">
+    <div class="navbar-nav">
+
+        <div class="nav-item px-2">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                <i class="bi bi-house-door-fill me-1"></i> Ana Sayfa
+            </NavLink>
         </div>
+
+        <div class="nav-item px-2">
+            <NavLink class="nav-link" href="/info">
+                <i class="bi bi-info-circle me-1"></i> Bilgi
+            </NavLink>
+        </div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-2">
+                    <NavLink class="nav-link" href="/user-lesson-progresses">
+                        <i class="bi bi-bar-chart me-1"></i> İlerlemelerim
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-2">
+                    <NavLink class="nav-link" href="/solved-questions">
+                        <i class="bi bi-bar-chart me-1"></i> Çözdüğüm Sorular
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-2">
+                    <NavLink class="nav-link" href="/history">
+                        <i class="bi bi-clock-history me-1"></i> Geçmiş
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
     </div>
-</nav>
+
+    <div class="navbar-nav ms-auto">
+
+        <AuthorizeView>
+            <NotAuthorized>
+                <div class="nav-item px-2">
+                    <NavLink class="nav-link" href="/auth/login">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Giriş Yap
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-2">
+                    <NavLink class="nav-link" href="/auth/register">
+                        <i class="bi bi-pencil-square me-1"></i> Kayıt Ol
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+            <Authorized>
+
+                <div class="nav-item px-2">
+                    <NavLink class="nav-link" href="/settings">
+                        <i class="bi bi-gear me-1"></i> Ayarlar
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-2 align-content-center">
+                    <button class="btn btn-outline-danger btn-sm" @onclick="Logout">
+                        <i class="bi bi-box-arrow-right me-1"></i> Çıış Yap
+                    </button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+
+
+
+
 
 @code {
     private bool collapseNavMenu = true;
-
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : "collapse show";
 
-    private void ToggleNavMenu()
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+
+    private async Task Logout()
     {
-        collapseNavMenu = !collapseNavMenu;
+        await LocalStorage.RemoveItemAsync("accessToken");
+        NavigationManager.NavigateTo("/auth/login", forceLoad: true);
     }
 }

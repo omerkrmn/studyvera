@@ -1,0 +1,214 @@
+﻿@page "/user-lesson-progresses"
+@using StudyVera.FrontEnd.Components
+@using StudyVera.FrontEnd.Enums
+@using StudyVera.FrontEnd.Models.Topics
+@using StudyVera.FrontEnd.Models.UserLessonProgress
+@using StudyVera.FrontEnd.Services
+@using StudyVera.FrontEnd.Services.Concrats
+@inject IUserLessonProgressService UserLessonProgressService
+@inject TopicService     TopicService
+
+<PageTitle>Kullanıcı Ders İlerlemeleri</PageTitle>
+<StudyWorkProgram />
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary fw-bold">📘 Kullanıcı Ders İlerlemeleri</h2>
+     
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-primary">➕ Yeni İlerleme Ekle</h5>
+
+            <EditForm Model="@newProgress" OnValidSubmit="AddProgressAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="row g-3">
+                    <div class="col-md-6 position-relative">
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Konu ara..."
+                               @bind="searchTerm"
+                               @bind:event="oninput"
+                               @onfocus="() => showDropdown = true"
+                               @onblur="HideDropdownDelayed" />
+
+                        @if (showDropdown && FilteredTopics.Any())
+                        {
+                            <ul class="list-group position-absolute w-100 shadow-sm mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                @foreach (var topic in FilteredTopics)
+                                {
+                                    <li class="list-group-item list-group-item-action"
+                                        @onclick="() => SelectTopic(topic)">
+                                        @topic.Name
+                                    </li>
+                                }
+                            </ul>
+                        }
+
+                        <ValidationMessage For="@(() => newProgress.TopicId)" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <InputSelect TValue="ProgressStatus"
+                                     @bind-Value="newProgress.ProgressStatus"
+                                     class="form-select">
+                            @foreach (var status in Enum.GetValues<ProgressStatus>())
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-success px-4">Kaydet</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2 text-secondary">Veriler yükleniyor...</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger text-center">@errorMessage</div>
+    }
+    else if (progresses is not null && progresses.Any())
+    {
+        <table class="table table-striped table-hover shadow-sm">
+            <thead class="table-info">
+                <tr>
+                    <th>#</th>
+                    <th>Konu Adı</th>
+                    <th>Konu ID</th>
+                    <th>Durum</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in progresses)
+                {
+                    <tr>
+                        <td>@p.Id</td>
+                        <td>@p.Topic?.Name</td>
+                        <td>@p.TopicId</td>
+                        <td>
+                            @switch ((int)p.ProgressStatus)
+                            {
+                                case 0:
+                                    <span class="badge bg-secondary">Başladı</span>
+                                    <button class="badge btn btn-sm btn-primary ms-2"
+                                            @onclick="() => MarkAsCompleted(p.Id)">
+                                        Bitti Olarak Güncelle
+                                    </button>
+                                    break;
+                                case 1:
+                                    <span class="badge bg-success text-light">Bitti</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-light text-dark">Bilinmiyor</span>
+                                    break;
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info text-center mt-4">Henüz ilerleme kaydı bulunamadı.</div>
+    }
+</div>
+
+@code {
+    private List<UserLessonProgressDto>? progresses;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private List<TopicDto>? Topics;
+    private string searchTerm = "";
+    private bool showDropdown;
+    private AddUserLessonProgressDto newProgress = new();
+
+    private IEnumerable<TopicDto> FilteredTopics =>
+        string.IsNullOrWhiteSpace(searchTerm)
+            ? new List<TopicDto>()
+            : Topics!.Where(t => t.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            Topics = await TopicService.GetTopics();
+            progresses = await UserLessonProgressService.GetAll();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Veri alınırken hata oluştu: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SelectTopic(TopicDto topic)
+    {
+        newProgress.TopicId = topic.Id;
+        searchTerm = topic.Name;
+        showDropdown = false;
+    }
+
+    private async Task AddProgressAsync()
+    {
+        try
+        {
+            isLoading = true;
+            await UserLessonProgressService.Add(newProgress);
+            progresses = await UserLessonProgressService.GetAll();
+            newProgress = new();
+            searchTerm = "";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"İlerleme eklenirken hata oluştu: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task MarkAsCompleted(int id)
+    {
+        try
+        {
+            isLoading = true;
+            await UserLessonProgressService.Update(id);
+
+            var updatedItem = progresses?.FirstOrDefault(p => p.Id == id);
+                if (updatedItem != null)
+                    updatedItem.ProgressStatus = Enums.ProgressStatus.Completed;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Veri güncellenirken hata oluştu: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void HideDropdownDelayed()
+    {
+        _ = Task.Delay(150).ContinueWith(_ => showDropdown = false);
+    }
+}

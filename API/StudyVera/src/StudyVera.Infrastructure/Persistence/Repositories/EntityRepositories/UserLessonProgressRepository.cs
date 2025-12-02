@@ -1,10 +1,7 @@
-﻿using StudyVera.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using StudyVera.Domain.Entities;
+using StudyVera.Domain.Enums;
 using StudyVera.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
 
@@ -14,13 +11,12 @@ public class UserLessonProgressRepository : RepositoryBase<UserLessonProgress>, 
     {
     }
 
-    public Task<List<UserLessonProgress>> GetAllByProgressStatusAndLastUpdatedBeforeAsync(Guid userId, int progressStatus, DateTime lastUpdated, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<bool> ExistsAsync(Guid userId, int topicId, CancellationToken ct)=>
+          await FindByCondition(ulp => ulp.UserId == userId && ulp.TopicId == topicId, false).AnyAsync(ct);
 
-    public Task<List<UserLessonProgress>> GetAllByProgressStatusAsync(Guid userId, int progressStatus, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<List<UserLessonProgress>> GetAllByProgressStatusAndLastUpdatedBeforeAsync(Guid userId, ProgressStatus progressStatus, DateTime lastUpdated, bool trackChanges, CancellationToken ct) =>
+        await FindByCondition(ulp => ulp.UserId == userId && ulp.ProgressStatus == progressStatus, trackChanges).Where(ulp => ulp.LastUpdated < lastUpdated).ToListAsync(ct);
+
+    public async Task<List<UserLessonProgress>> GetAllByProgressStatusAsync(Guid userId, ProgressStatus progressStatus, bool trackChanges, CancellationToken ct) =>
+                                          await FindByCondition(ulp => ulp.UserId == userId && ulp.ProgressStatus == progressStatus, trackChanges).ToListAsync(ct);
 }

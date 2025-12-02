@@ -1,13 +1,8 @@
 ﻿using MediatR;
+using StudyVera.Application.Common.Exceptions;
 using StudyVera.Application.Features.Lessons.Commands;
 using StudyVera.Domain.Entities;
-using StudyVera.Domain.Exceptions;
 using StudyVera.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Application.Handlers.Lessons;
 

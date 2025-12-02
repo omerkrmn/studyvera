@@ -1,12 +1,6 @@
-﻿using StudyVera.Domain.Entities;
-using StudyVera.Domain.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
 
 public class ProfileStatRepository : RepositoryBase<ProfileStat>, IProfileStatRepository
@@ -15,13 +9,23 @@ public class ProfileStatRepository : RepositoryBase<ProfileStat>, IProfileStatRe
     {
     }
 
-    public Task<int> GetScoreByUser(Guid userId, CancellationToken ct)
+    public async Task<int> GetScoreByUser(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var userscore = await FindByCondition(u => u.UserId == userId, false).FirstOrDefaultAsync(ct);
+        return userscore?.Score ?? 0;
     }
 
-    public void UpdateScore(Guid userId, ProgressStatus progressStatus, CancellationToken ct)
+    public async Task UpdateScore(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var userScore = FindByCondition(u => u.UserId == userId, true).FirstOrDefault();
+
+        if (userScore != null)
+        {
+            userScore.Score += 10;
+            Update(userScore);
+        }
+        Create(new ProfileStat { UserId = userId, Score = 10 });
+        await _context.SaveChangesAsync(ct);
+
     }
 }

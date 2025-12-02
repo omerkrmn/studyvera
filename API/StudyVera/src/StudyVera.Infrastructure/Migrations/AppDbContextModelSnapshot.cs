@@ -152,23 +152,37 @@ namespace StudyVera.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            Description = "Temel Yeterlilik Testi",
-                            ExamDate = new DateTime(2025, 6, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Yükseköğretim Kurumları Sınavı",
+                            ExamDate = new DateTime(2026, 6, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "TYT"
                         },
                         new
                         {
                             Id = 2,
-                            Description = "Alan Yeterlilik Testi",
-                            ExamDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Yükseköğretim Kurumları Sınavı",
+                            ExamDate = new DateTime(2026, 6, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "AYT"
                         },
                         new
                         {
                             Id = 3,
+                            Description = "Dikey Geçiş Sınavı",
+                            ExamDate = new DateTime(2026, 7, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "DGS"
+                        },
+                        new
+                        {
+                            Id = 4,
                             Description = "Kamu Personeli Seçme Sınavı",
-                            ExamDate = new DateTime(2025, 6, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ExamDate = new DateTime(2026, 6, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "KPSS"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Akademik Personel ve Lisansüstü Eğitimi Giriş Sınavı",
+                            ExamDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "ALES"
                         });
                 });
 
@@ -268,9 +282,6 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ProfileStatId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
@@ -280,7 +291,7 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TargetExam")
+                    b.Property<int>("TargetExam")
                         .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -289,6 +300,9 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<int?>("UserSettingsId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -300,7 +314,7 @@ namespace StudyVera.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("ProfileStatId");
+                    b.HasIndex("UserSettingsId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -485,6 +499,50 @@ namespace StudyVera.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("StudyVera.Domain.Entities.LessonSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LessonId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("TopicId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId");
+
+                    b.HasIndex("TopicId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("LessonSchedules");
+                });
+
             modelBuilder.Entity("StudyVera.Domain.Entities.ProfileStat", b =>
                 {
                     b.Property<int>("Id")
@@ -500,6 +558,9 @@ namespace StudyVera.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("ProfileStats");
                 });
@@ -518,6 +579,9 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("Priority")
+                        .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 
@@ -591,9 +655,6 @@ namespace StudyVera.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid?>("AppUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -609,16 +670,26 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("WrongCount")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("TopicId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("UserQuestionStats");
+                });
+
+            modelBuilder.Entity("StudyVera.Domain.Entities.UserSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserSettings");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -674,11 +745,11 @@ namespace StudyVera.Infrastructure.Migrations
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Identity.AppUser", b =>
                 {
-                    b.HasOne("StudyVera.Domain.Entities.ProfileStat", "ProfileStat")
+                    b.HasOne("StudyVera.Domain.Entities.UserSettings", "UserSettings")
                         .WithMany()
-                        .HasForeignKey("ProfileStatId");
+                        .HasForeignKey("UserSettingsId");
 
-                    b.Navigation("ProfileStat");
+                    b.Navigation("UserSettings");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Lesson", b =>
@@ -690,6 +761,42 @@ namespace StudyVera.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Exam");
+                });
+
+            modelBuilder.Entity("StudyVera.Domain.Entities.LessonSchedule", b =>
+                {
+                    b.HasOne("StudyVera.Domain.Entities.Lesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StudyVera.Domain.Entities.Topic", "Topic")
+                        .WithMany()
+                        .HasForeignKey("TopicId");
+
+                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", "User")
+                        .WithOne("LessonSchedule")
+                        .HasForeignKey("StudyVera.Domain.Entities.LessonSchedule", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("Topic");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StudyVera.Domain.Entities.ProfileStat", b =>
+                {
+                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", "User")
+                        .WithOne("ProfileStat")
+                        .HasForeignKey("StudyVera.Domain.Entities.ProfileStat", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Topic", b =>
@@ -735,17 +842,21 @@ namespace StudyVera.Infrastructure.Migrations
 
             modelBuilder.Entity("StudyVera.Domain.Entities.UserQuestionStat", b =>
                 {
-                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", null)
-                        .WithMany("QuestionStats")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("StudyVera.Domain.Entities.Topic", "Topic")
                         .WithMany()
                         .HasForeignKey("TopicId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", "User")
+                        .WithMany("QuestionStats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Topic");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Exam", b =>
@@ -756,6 +867,10 @@ namespace StudyVera.Infrastructure.Migrations
             modelBuilder.Entity("StudyVera.Domain.Entities.Identity.AppUser", b =>
                 {
                     b.Navigation("LessonProgresses");
+
+                    b.Navigation("LessonSchedule");
+
+                    b.Navigation("ProfileStat");
 
                     b.Navigation("QuestionStats");
 

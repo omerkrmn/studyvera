@@ -1,7 +1,10 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudyVera.Application.Features.UserQuestionStats.Commands;
+using StudyVera.Application.Features.UserQuestionStats.Queries;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace StudyVera.WebApi.Controllers
 {
@@ -15,15 +18,41 @@ namespace StudyVera.WebApi.Controllers
         {
             _mediator = mediator;
         }
-        [HttpPost("solve")]
-        public async Task<IActionResult> SolveQuestion([FromBody] SolveQuestionCommand command, CancellationToken ct)
-        {
-            // JWT varsa buradan UserId’yi al
-            // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // command.UserId = Guid.Parse(userId);
 
-            var result = await _mediator.Send(command, ct);
-            return result ? Ok("İstatistik güncellendi") : BadRequest("İşlem başarısız");
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> SolveQuestion([FromBody] AddUserQuestionStatCommand command, CancellationToken ct)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null)
+                return Unauthorized();
+
+            command.UserId = Guid.Parse(userId);
+
+            await _mediator.Send(command, ct);
+
+            return Ok("İstatistik güncellendi");
+        }
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult>
+            Get([FromQuery] GetAllUserQuestionStatsByUserQuery query)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null)
+                return Unauthorized();
+
+            query.UserId = Guid.Parse(userId);
+
+            var result = await _mediator.Send(query);
+
+            var metaDataJson = JsonSerializer.Serialize(result.MetaData, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+            Response.Headers.Append("X-Pagination", metaDataJson);
+
+            return Ok(result);
         }
     }
 }

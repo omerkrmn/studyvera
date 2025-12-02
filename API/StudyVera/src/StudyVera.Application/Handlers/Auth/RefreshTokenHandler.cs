@@ -1,24 +1,19 @@
-﻿using AutoMapper;
-using Mapster;
+﻿using Mapster;
 using MediatR;
+using StudyVera.Application.Common.Exceptions;
+using StudyVera.Application.Dtos;
 using StudyVera.Application.Features.Auth.Commands;
-using StudyVera.Contract.Dtos;
-using StudyVera.Contract.Interfaces;
-using StudyVera.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using StudyVera.Application.Services;
 
 namespace StudyVera.Application.Handlers.Auth;
 
 public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, TokenDto>
 {
-    private readonly IAuthenticationService _auth;
-    public RefreshTokenHandler(IAuthenticationService auth)
+    private readonly IAuthenticationManager _auth;
+
+    public RefreshTokenHandler(IAuthenticationManager service)
     {
-        _auth = auth;
+        _auth = service;
     }
 
     public Task<TokenDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)

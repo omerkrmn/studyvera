@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StudyVera.Application.Features.Auth.Commands;
 
@@ -17,7 +16,7 @@ namespace StudyVera.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody]LoginCommand loginCommand)
+        public async Task<IActionResult> Login([FromBody] LoginCommand loginCommand)
         {
             var response = await _mediator.Send(loginCommand);
             return Ok(response);
@@ -25,13 +24,10 @@ namespace StudyVera.WebApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterCommand registerCommand)
         {
-            if (!ModelState.IsValid)
-            {
-                throw new Exception("not invalid");
-            }
             var response = await _mediator.Send(registerCommand);
             return Ok(response);
         }
+
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenCommand refreshTokenCommand)
         {

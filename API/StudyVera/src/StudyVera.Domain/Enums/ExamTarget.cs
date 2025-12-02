@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace StudyVera.Domain.Enums;
 
-public enum ExamTarget
+public enum TargetExam
 {
-    None = 0,
-    YKS = 1,
-    KPSS = 2,
+    TYT = 1,
+    AYT = 2,
     DGS = 3,
+    KPSS = 5,
     ALES = 4
 }

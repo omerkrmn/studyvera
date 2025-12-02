@@ -16,4 +16,4 @@ namespace StudyVera.Contract.Dtos.UserLessonProgress
         public ProgressStatus ProgressStatus { get; set; }
     }
 
-}
+}   

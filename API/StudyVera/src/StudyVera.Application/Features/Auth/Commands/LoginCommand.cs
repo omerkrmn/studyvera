@@ -1,18 +1,14 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
-using StudyVera.Contract.Dtos;
-using StudyVera.Domain.Entities.Identity;
-using System;
-using System.Collections.Generic;
+using StudyVera.Application.Dtos;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudyVera.Application.Features.Auth.Commands;
 
 public class LoginCommand : IRequest<TokenDto>
 {
-    public UserForAuthenticationDto UserForAuthenticationDto { get; set; }
+    [Required(ErrorMessage = "E-Mail address cannot be null!")]
+    public string Email { get; set; }
+    [Required(ErrorMessage = "Password cannot be null!")]
+    public string Password { get; set; }
 
 }

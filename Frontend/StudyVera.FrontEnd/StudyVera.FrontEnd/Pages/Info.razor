@@ -1,0 +1,47 @@
+﻿@page "/info"
+<PageTitle>Info</PageTitle>
+
+<h3>📘 Sistem Nasıl Çalışıyor?</h3>
+
+<p>
+    <strong>Eksik konu tespiti</strong>, öğrencinin çalışma düzeni ve konu ilerleme sırasına göre dinamik bir
+    algoritmayla belirlenir.
+</p>
+
+<p>
+    Matematik gibi derslerde konular belirli bir sıraya göre işlenir. Örneğin temel işlemler, üslü sayılar gibi
+    konular tamamlandıktan sonra problemlere geçilir. Bu konu akışı için örnek bir yapı görmek isterseniz
+    <a href="https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:foundations-of-algebra"
+       target="_blank" rel="noopener noreferrer">
+        buraya tıklayabilirsiniz.
+    </a>
+</p>
+
+<p>
+    Öğrencinin haftalık çalışma günleri, belirli periyotlara bölünür. Örneğin haftada <strong>5 gün</strong>
+    çalışacağınızı belirttiğinizde, ilk aşamada bu günlerin <strong>n/2 + 1</strong> kadarı
+    “konu çalışma”ya ayrılır. Eğer konular henüz tamamlanmamışsa bu oran geçerliliğini korur.
+</p>
+
+<p>
+    Tüm konular tamamlandığında sistem, tekrar edilmesi gereken konuları belirlemek için
+    <strong>soru çözüm performansınızı</strong> analiz eder. Örneğin matematik problemlerin
+    “Havuz Problemleri” bölümünü çözdüğünüzü varsayalım. Bu konudaki sorularda doğru–yanlış oranınız
+    belirli bir eşik değerinin altına düşerse, sistem otomatik olarak bu konuyu tekrar etmeniz
+    gerektiğini tespit eder.
+</p>
+
+<p>
+    Bu eşik değerleri, zaman içerisinde sürekli güncellenir. Ayrıca bazı dersler için
+    <strong>özel eğitim koçlarıyla birlikte hazırlanmış gelişmiş katsayılar</strong> da kullanılarak
+    çok daha doğru bir konu öneri sistemi oluşturulur.
+    Buradan elde edilen sonuçlar ile size <strong>ders programı</strong> ve <strong>eksik konuya yönelik notlar</strong> verili.
+</p>
+
+<dev>
+    <ul>
+        <li>Eksik konu tespiti için konu önceliği sıralamsı da katsayı ile belirlenir.</li>
+        <li>Her kullanıcı için bu katsayı ayrı ayrı hesaplanır.</li>
+    </ul>
+</dev>
+

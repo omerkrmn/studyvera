@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudyVera.Domain.Entities.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,4 +14,5 @@ public class ProfileStat
     public int Score { get; set; }
 
     public Guid UserId { get; set; }
+    public AppUser User { get; set; } = null!;
 }

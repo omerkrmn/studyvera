@@ -1,0 +1,25 @@
+meta {
+  name: Update
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{API_URL}}user-lesson-progresses/1017
+  body: json
+  auth: bearer
+}
+
+headers {
+  : 
+}
+
+auth:bearer {
+  token: {{API_KEY}}
+}
+
+body:json {
+  {
+    "progressStatus": 1
+  }
+}

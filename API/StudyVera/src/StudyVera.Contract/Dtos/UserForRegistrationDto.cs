@@ -19,9 +19,9 @@ public class UserForRegistrationDto
 
     public string UserName { get; set; } = string.Empty;
 
-    public ExamTarget TargetExam { get; set; }
+    public TargetExam TargetExam { get; set; }
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password cannot be null!")]
-    public string Password { get; set; }
+    public string Password { get; set; } = string.Empty;
 }

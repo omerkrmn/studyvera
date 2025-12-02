@@ -5,7 +5,18 @@ meta {
 }
 
 post {
-  url: 
-  body: none
+  url: {{API_URL}}auth/register
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "ömer",
+    "lastName": "karaman",
+    "userName": "xaxm22.",
+    "targetExam": 3,
+    "email": "drakken120@gmail.com",
+    "password": "string1"
+  }
 }
