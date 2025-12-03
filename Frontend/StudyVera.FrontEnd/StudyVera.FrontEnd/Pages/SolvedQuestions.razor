@@ -1,4 +1,5 @@
 ﻿@page "/solved-questions"
+@using StudyVera.FrontEnd.Components
 @using StudyVera.FrontEnd.Models.Topics
 @using StudyVera.FrontEnd.Models.UserQuestionStat
 @using StudyVera.FrontEnd.Services
@@ -6,141 +7,113 @@
 @inject IUserQuestionStatsService UserQuestionStatsService
 @inject TopicService TopicService
 @inject IJSRuntime JS
+@inject HttpClient Http
 
 <PageTitle>Soru Çözme İstatistikleri 📚</PageTitle>
 
-<h2 class="mb-4 text-center text-secondary">📚 Soru Çözme İstatistikleri</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-secondary mb-0">📚 Soru Çözme İstatistikleri</h2>
 
----
+    <button class="btn btn-primary btn-lg" @onclick="OpenModalForNew">
+        <span class="me-1">➕</span> Yeni
+    </button>
+</div>
 
-## ➕ Yeni İlerleme Ekle
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,.5);">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
 
-<div class="card shadow-lg mb-5 border-0">
-    <div class="card-body">
-
-        <EditForm Model="@newQuestion" OnValidSubmit="AddQuestionAsync">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="alert alert-danger p-2" />
-
-            <div class="row g-3 align-items-end">
-
-                @* 1. Konu Arama ve Seçme *@
-                <div class="col-md-5 position-relative">
-                    <label class="form-label fw-bold">Konu Seçimi</label>
-                    <input type="text"
-                           class="form-control form-control-lg"
-                           placeholder="Konu ara veya seç..."
-                           @bind="searchTerm"
-                           @bind:event="oninput"
-                           @onfocus="() => showDropdown = true"
-                           @onblur="HideDropdownDelayed" />
-
-                    @if (showDropdown && FilteredTopics.Any())
-                    {
-                        <ul class="list-group position-absolute w-100 shadow-lg mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
-                            @foreach (var topic in FilteredTopics)
-                            {
-                                <li class="list-group-item list-group-item-action @(newQuestion.TopicId == topic.Id ? "active" : "")"
-                                    @onclick="() => SelectTopic(topic)">
-                                    @topic.Name
-                                </li>
-                            }
-                        </ul>
-                    }
-                    <ValidationMessage For="@(() => newQuestion.TopicId)" class="text-danger small" />
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
                 </div>
 
-                @* 2. Çözülen Soru Sayısı *@
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Çözülen (Toplam)</label>
-                    <InputNumber TValue="int"
-                                 @bind-Value="newQuestion.SolvedCount"
-                                 class="form-control form-control-lg"
-                                 placeholder="Adet" />
-                    <ValidationMessage For="@(() => newQuestion.SolvedCount)" class="text-danger small" />
-                </div>
+                <div class="modal-body">
+                    <EditForm Model="@newQuestion" OnValidSubmit="AddQuestionAsync">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger p-2" />
 
-                @* 3. Doğru Soru Sayısı *@
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Doğru Sayısı</label>
-                    <InputNumber TValue="int"
-                                 @bind-Value="newQuestion.CorrectCount"
-                                 class="form-control form-control-lg"
-                                 placeholder="Adet" />
-                    <ValidationMessage For="@(() => newQuestion.CorrectCount)" class="text-danger small" />
-                </div>
+                        <div class="row g-3 align-items-end">
 
-                @* 4. Kaydet Butonu *@
-                <div class="col-md-3 d-grid">
-                    <button type="submit" class="btn btn-success btn-lg">💾 İlerleme Kaydet</button>
+                            @* 1. Konu Arama ve Seçme *@
+                            <div class="col-md-5 position-relative">
+                                <label class="form-label fw-bold">Konu Seçimi</label>
+                                <input type="text"
+                                       class="form-control form-control-lg"
+                                       placeholder="Konu ara veya seç..."
+                                       @bind="searchTerm"
+                                       @bind:event="oninput"
+                                       @onfocus="() => showDropdown = true"
+                                       @onblur="HideDropdownDelayed" />
+
+                                @if (showDropdown && FilteredTopics.Any())
+                                {
+                                    <ul class="list-group position-absolute w-100 shadow-lg mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                        @foreach (var topic in FilteredTopics)
+                                        {
+                                            <li class="list-group-item list-group-item-action @(newQuestion.TopicId == topic.Id ? "active" : "")"
+                                                @onclick="() => SelectTopic(topic)">
+                                                @topic.Name
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                <ValidationMessage For="@(() => newQuestion.TopicId)" class="text-danger small" />
+                            </div>
+
+                            @* 2. Çözülen Soru Sayısı *@
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Çözülen (Toplam)</label>
+                                <InputNumber TValue="int"
+                                             @bind-Value="newQuestion.SolvedCount"
+                                             class="form-control form-control-lg"
+                                             placeholder="Adet" />
+                                <ValidationMessage For="@(() => newQuestion.SolvedCount)" class="text-danger small" />
+                            </div>
+
+                            @* 3. Doğru Soru Sayısı *@
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Doğru Sayısı</label>
+                                <InputNumber TValue="int"
+                                             @bind-Value="newQuestion.CorrectCount"
+                                             class="form-control form-control-lg"
+                                             placeholder="Adet" />
+                                <ValidationMessage For="@(() => newQuestion.CorrectCount)" class="text-danger small" />
+                            </div>
+
+                            @* 4. Kaydet Butonu *@
+                            <div class="col-md-3 d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">💾 İlerleme Kaydet</button>
+                            </div>
+
+                        </div>
+
+                    </EditForm>
                 </div>
 
             </div>
-
-        </EditForm>
+        </div>
     </div>
-</div>
+}
+<SolvedQuestionsList Questions="questions" Topics="Topics" />
 
----
-
-## 📊 Genel İstatistikler
-
-<div class="table-responsive">
-    <table class="table table-striped table-hover table-bordered caption-top">
-        <caption class="text-muted">Son eklenen soru çözme kayıtları.</caption>
-        <thead class="table-dark">
-            <tr>
-                <th scope="col" style="width: 30%;">Konu Adı</th>
-                <th scope="col" class="text-center">Çözülen (Adet)</th>
-                <th scope="col" class="text-center">Doğru (Adet)</th>
-                <th scope="col" class="text-center">Yanlış (Adet)</th>
-                <th scope="col" class="text-center">Doğruluk Oranı</th>
-                <th scope="col" class="text-center" style="width: 15%;">Son Güncelleme</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (questions == null || !questions.Any())
-            {
-                <tr>
-                    <td colspan="6" class="text-center text-muted p-4">Henüz çözülmüş soru kaydı bulunmamaktadır.</td>
-                </tr>
-            }
-            else
-            {
-                <tr class="align-middle">
-                    <th scope="row" class="text-primary fw-bold">Toplam @questions.Count</th>
-                    <td class="text-center">@questions.Select(a => a.SolvedCount).Sum()</td>
-                    <td class="text-center text-success fw-bold">@questions.Select(a => a.CorrectCount).Sum()</td>
-                    <td class="text-center text-danger">@questions.Select(a => a.WrongCount).Sum()</td>
-                </tr>
-                @foreach (var question in questions)
-                {
-                    <tr class="align-middle">
-                        <th scope="row" class="text-primary fw-bold">@question.Topic.Name</th>
-                        <td class="text-center">@question.SolvedCount</td>
-                        <td class="text-center text-success fw-bold">@question.CorrectCount</td>
-                        <td class="text-center text-danger">@question.WrongCount</td>
-                        <td class="text-center">
-                            <span class="badge @(question.AccuracyRate >= 75 ? "bg-success" : question.AccuracyRate >= 50 ? "bg-warning text-dark" : "bg-danger")">
-                                @question.AccuracyRate%
-                            </span>
-                        </td>
-                        <td class="text-center small text-muted">@question.LastAttemptAt.ToShortDateString()</td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
-</div>
 
 @code {
-    [Inject] public IJSRuntime JSRuntime { get; set; } // Ekledik
 
     private List<UserQuestionStatDto> questions = new();
     AddUserQuestionStatDto newQuestion = new();
+    private List<TopicDto>? Topics;
     private string searchTerm = string.Empty;
     private bool showDropdown;
-    private List<TopicDto>? Topics;
+    private bool isModalOpen = false;
+    private string modalTitle = "Yeni İlerleme Ekle";
+
+
+
+    private float konuEksiklikOlcegi = 0.0f;
+
 
 
     private IEnumerable<TopicDto> FilteredTopics =>
@@ -154,16 +127,21 @@
         {
             await UserQuestionStatsService.Add(newQuestion);
             newQuestion = new AddUserQuestionStatDto();
-            searchTerm = string.Empty; 
+            searchTerm = string.Empty;
             questions = await UserQuestionStatsService.GetAll();
             await ShowSuccessToast("İlerleme başarıyla kaydedildi! 🎉");
+            isModalOpen = false;
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode.HasValue)
+        {
+            var code = ((int)httpEx.StatusCode.Value);
+            await ShowErrorToast($"Kayıt sırasında bir hata oluştu. Status Code {code}");
         }
         catch (Exception ex)
         {
-            await ShowErrorToast($"Kayıt sırasında bir hata oluştu. {ex.Message}");
+            await ShowErrorToast($"Kayıt sırasında beklenmeyen bir hata oluştu. {ex.Message}");
         }
     }
-
     private void SelectTopic(TopicDto topic)
     {
         newQuestion.TopicId = topic.Id;
@@ -185,6 +163,7 @@
     }
 
     private CancellationTokenSource cts = new CancellationTokenSource();
+
     private void HideDropdownDelayed()
     {
         cts.Cancel();
@@ -204,8 +183,44 @@
     {
         await JS.InvokeVoidAsync("alert", message);
     }
+
     private async Task ShowErrorToast(string message)
     {
         await JS.InvokeVoidAsync("alert", message);
     }
+
+    // ----- Modal aç/kapa metotları -----
+
+    private void OpenModalForNew()
+    {
+        newQuestion = new AddUserQuestionStatDto();
+        searchTerm = string.Empty;
+        showDropdown = false;
+
+        modalTitle = "Yeni İlerleme Ekle";
+        isModalOpen = true;
+    }
+
+    private void OpenModalForTopic(UserQuestionStatDto question)
+    {
+        // Konu otomatik gelsin
+        newQuestion = new AddUserQuestionStatDto
+        {
+            TopicId = question.Topic.Id
+        };
+
+        searchTerm = question.Topic.Name;
+        showDropdown = false;
+
+        modalTitle = $"{question.Topic.Name} için yeni ilerleme ekle";
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+   
+
 }

@@ -116,7 +116,7 @@
             }
             else
             {
-                // API hata içeriğini göster (varsa)
+
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = string.IsNullOrWhiteSpace(errorContent)
                     ? "Registration failed."

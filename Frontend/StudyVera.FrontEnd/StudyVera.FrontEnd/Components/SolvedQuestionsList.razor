@@ -1,0 +1,139 @@
+﻿@using StudyVera.FrontEnd.Models.Topics
+@using StudyVera.FrontEnd.Models.UserQuestionStat
+@using StudyVera.FrontEnd.Services.Concrats
+@inject IUserQuestionStatsService UserQuestionStatsService
+<h3>Çözülen Sorular</h3>
+
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover caption-top">
+        <caption class="text-muted">Son eklenen soru çözme kayıtları.</caption>
+        <thead class="table-dark">
+            <tr>
+                <th scope="col" style="width: 30%;">Konu Adı</th>
+                <th scope="col" style="width: 30%;">Eksik Konu oranı</th>
+                <th scope="col" class="text-center">Çözülen (Adet)</th>
+                <th scope="col" class="text-center">Doğru (Adet)</th>
+                <th scope="col" class="text-center">Yanlış (Adet)</th>
+                <th scope="col" class="text-center">Doğruluk Oranı</th>
+                <th scope="col" class="text-center" style="width: 15%;">Son Güncelleme</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Questions == null || !Questions.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted p-4">Henüz çözülmüş soru kaydı bulunmamaktadır.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var question in Questions)
+                {
+                    var isExpanded = expandedTopicId == question.Topic.Id; // veya question.Id varsa onu kullan
+
+                    <tr class="align-middle"
+                        style="cursor: pointer;"
+                        @ondblclick="@(() => ToggleExpand(question))">
+                        <th scope="row" class="text-primary fw-bold">@question.Topic.Name</th>
+                        <td>@intCalculateEksik(question.TotalSolvedCount,question.TotalCorrectCount,question.LastAttemptAt,question.TopicId)</td>
+                        <td class="text-center">@question.TotalSolvedCount</td>
+                        <td class="text-center text-success fw-bold">@question.TotalCorrectCount</td>
+                        <td class="text-center text-danger">@question.TotalWrongCount</td>
+                        <td class="text-center">
+                            <span class="badge @(question.AccuracyRate >= 0.75 ? "bg-success" : question.AccuracyRate >= 0.50 ? "bg-warning text-dark" : "bg-danger")">
+                                @question.AccuracyRate%
+                            </span>
+                        </td>
+                        <td class="text-center small text-muted">@question.LastAttemptAt.ToShortDateString()</td>
+                    </tr>
+
+                    @if (isExpanded)
+                    {
+                        @foreach (var item in question.QuestionStatDetail)
+                        {
+                            <tr class="table-secondary">
+                                <td></td>
+                                <td></td>
+                                <td class="text-center">@item.SolvedCount</td>
+                                <td class="text-center text-success fw-bold">@item.CorrectCount</td>
+                                <td class="text-center text-danger">@item.WrongCount</td>
+                                <td class="text-center">
+                                    <span class="badge @((float)item.CorrectCount / item.SolvedCount >= 0.75 ? "bg-success" : ((float)item.CorrectCount / item.SolvedCount) >= 0.50 ? "bg-warning text-dark" : "bg-danger")">
+                                        @((float)item.CorrectCount / item.SolvedCount)%
+                                    </span>
+                                </td>
+                                <td class="text-center small text-muted">@item.AttemptedAt.ToShortDateString()</td>
+                            </tr>
+                        }
+                    }
+                }
+
+            }
+        </tbody>
+    </table>
+</div>
+@code {
+    [Parameter] public List<UserQuestionStatDto> Questions { get; set; } = new();
+    [Parameter] public List<TopicDto> Topics { get; set; } = new();
+    private int? expandedTopicId;
+
+
+    private void ToggleExpand(UserQuestionStatDto question)
+    {
+        if (expandedTopicId == question.Topic.Id)
+        {
+            expandedTopicId = null;
+        }
+        else
+        {
+            expandedTopicId = question.Topic.Id;
+        }
+    }
+    private float intCalculateEksik(int TotalSolvedCount, int CorrectCount, DateTime AttemptedAt,int topicId)
+    {
+
+        // Güncel zaman farkı (Güncellik Puanı)
+        int beforeDays = (DateTime.Now - AttemptedAt).Days;
+
+        // Varsayılan Ortalama Başarı Oranı (Genel istatistik veya varsayım)
+        // Bu değer 0 ile 1 arasında olmalıdır.
+        float p = 0.60f;
+
+        // Minimum Güven Sayısı (Örneklem Eşiği)
+        int minGuven = 10;
+
+        // Konunun Stratejik Önemi (Problemler için 1.5, diğer konular için 1.0 vb.)
+        float priorty = Topics.Where(t => t.Id == topicId).Select(t => t.Priority).FirstOrDefault();
+
+        // Başarı Kaybı Ağırlığı    
+        float w1 = 0.7f;
+
+        // Güncellik Ağırlığı (Toplam w1+w2 genelde 1 olur)
+        float w2 = 0.3f;
+
+        // Güncellik Puanı Limiti (3 aydan sonra unutulma riskinin sabit kabul edilmesi)
+        int GuncellikSiniri = 90;
+        float GuncellikPuanı = Math.Min(beforeDays, GuncellikSiniri);
+
+
+        // --- 2. Ağırlıklı Başarı Yüzdesi (A-BY) Hesaplama ---
+
+        // Dikkat: Tam sayı bölmesinden kaçınmak için (float) dönüşümü kritik!
+        float ABY_Ratio = (((float)CorrectCount + minGuven * p) / ((float)TotalSolvedCount + minGuven));
+
+        // Oranı Yüzdeye Çevirme (örn: 0.75 -> 75.0)
+        float ABY_Percent = ABY_Ratio * 100f;
+
+        // Başarı Kayıp Puanı (Eksiklik)
+        float BasariKayipPuanı = 100f - ABY_Percent;
+
+
+        // --- 3. Nihai Eksik Puanı Hesaplama ---
+
+        float EksikPuanı = (w1 * BasariKayipPuanı) + (w2 * GuncellikPuanı);
+
+        // Nihai Eksik Puanı, Konu Önemi ile çarpılır.
+        return EksikPuanı * priorty;
+    }
+}
