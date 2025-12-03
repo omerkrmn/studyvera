@@ -24,7 +24,8 @@ namespace StudyVera.Application.Handlers.Topics
                                 {
                                     Id = t.Id,
                                     Name = t.Name,
-                                    LessonId = t.LessonId
+                                    LessonId = t.LessonId,
+                                    Priority=t.Priority
                                 });
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))

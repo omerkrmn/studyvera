@@ -1,4 +1,5 @@
-﻿using StudyVera.Domain.Entities.Identity;
+﻿using StudyVera.Application.Dtos.QuestionStatDetails;
+using StudyVera.Domain.Entities.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,15 @@ public class UserQuestionStatDto
     public int TopicId { get; set; }
     public TopicDto Topic { get; set; } = null!;
 
-    public int SolvedCount { get; set; }
-    public int CorrectCount { get; set; }
-    public int WrongCount { get; set; }
+    public int TotalSolvedCount { get; set; }
+    public int TotalCorrectCount { get; set; }
+    public int TotalWrongCount => TotalSolvedCount - TotalCorrectCount;
 
-    public float AccuracyRate { get; set; }
+    public float AccuracyRate => TotalSolvedCount == 0 ? 0 : (float)TotalCorrectCount / (float)TotalSolvedCount;
 
-    public DateTime LastAttemptAt { get; set; } = DateTime.UtcNow;
+    public List<QuestionStatDetailDto> QuestionStatDetail { get; set; }
+
+
+    public DateTime LastAttemptAt { get; set; }
 
 }

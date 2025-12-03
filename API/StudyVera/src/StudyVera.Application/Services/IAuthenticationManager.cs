@@ -9,4 +9,5 @@ public interface IAuthenticationManager
     Task<bool> ValidateUser(UserForAuthenticationDto dto);
     Task<TokenDto> CreateToken(bool populateExp);
     Task<TokenDto> RefreshToken(TokenDto tokenDto);
+    Guid GetUserId();
 }

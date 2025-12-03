@@ -32,7 +32,8 @@ namespace StudyVera.Application.Handlers.UserLessonProgresses
                     {
                         Id = ulp.Topic.Id,
                         LessonId = ulp.Topic.LessonId,
-                        Name = ulp.Topic.Name
+                        Name = ulp.Topic.Name,
+                        Priority = ulp.Topic.Priority
                     }
                 })
 

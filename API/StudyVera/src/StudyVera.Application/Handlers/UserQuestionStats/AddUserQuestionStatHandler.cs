@@ -20,28 +20,42 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
 
     public async Task<Unit> Handle(AddUserQuestionStatCommand request, CancellationToken ct)
     {
-        if (request.SolvedCount < request.CorrectCount)
-            throw new BadRequestException("SolvedCount cannot be less than CorrectCount.");
-        
-        var stat = await _manager.UserQuestionStatRepository
-            .FindByCondition(x => x.UserId == request.UserId && x.TopicId == request.TopicId, trackChanges: false)
-            .FirstOrDefaultAsync(ct);
+        var uqs = await _manager.UserQuestionStatRepository.FindByCondition(
+            uqs => uqs.UserId == request.UserId && uqs.TopicId == request.TopicId,
+            true 
+        ).FirstOrDefaultAsync(ct);
 
-        if (stat is null)
+        var newDetail = new QuestionStatDetail
         {
-            var newStat = request.Adapt<UserQuestionStat>();
-            Console.WriteLine($"Creating new UserQuestionStat for UserId: {request.UserId}, TopicId: {request.TopicId}");
-            newStat.LastAttemptAt = DateTime.UtcNow;
-            _manager.UserQuestionStatRepository.Create(newStat);
+            CorrectCount = request.CorrectCount,
+            SolvedCount = request.SolvedCount,
+            AttemptedAt = DateTime.UtcNow,
+        };
+
+        if (uqs is not null)
+        {
+            uqs.TotalSolvedCount += request.SolvedCount;
+            uqs.TotalCorrectCount += request.CorrectCount;
+            uqs.LastAttemptAt = DateTime.UtcNow;
+            newDetail.UserQuestionStatId = uqs.Id;
+            _manager.QuestionStatDetailRepository.Create(newDetail);
         }
         else
         {
-            stat.SolvedCount += request.SolvedCount;
-            stat.CorrectCount += request.CorrectCount;
-            stat.LastAttemptAt = DateTime.UtcNow;
-            _manager.UserQuestionStatRepository.Update(stat);
-        }
+            var newStat = new UserQuestionStat
+            {
+                UserId = request.UserId,
+                TopicId = request.TopicId,
+                TotalCorrectCount = request.CorrectCount,
+                TotalSolvedCount = request.SolvedCount,
+                LastAttemptAt = DateTime.UtcNow,
+         
+                QuestionStatDetails = new List<QuestionStatDetail> { newDetail }
+            };
 
+            _manager.UserQuestionStatRepository.Create(newStat);
+        }
+        
         _manager.UserActivityHistoryRepository.Create(new()
         {
             UserId = request.UserId,
@@ -51,6 +65,7 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
         });
 
         await _manager.SaveChangesAsync(ct);
+
         return Unit.Value;
     }
 }

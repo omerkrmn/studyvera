@@ -1,7 +1,9 @@
-﻿using MediatR;
+﻿using Mapster;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Models;
 using StudyVera.Application.Dtos;
+using StudyVera.Application.Dtos.QuestionStatDetails;
 using StudyVera.Application.Dtos.UserQuestionStats;
 using StudyVera.Application.Features.UserQuestionStats.Queries;
 using StudyVera.Domain.Interfaces;
@@ -28,6 +30,7 @@ namespace StudyVera.Application.Handlers.UserQuestionStats
             var totalCount = await baseQuery.CountAsync(cancellationToken);
 
             var pagedAndProjectedQuery = baseQuery
+                                         .Include(a => a.QuestionStatDetails)
                                          .Skip(request.PageSize * (request.PageNumber - 1))
                                          .Take(request.PageSize)
                                          .Select(uqs => new UserQuestionStatDto
@@ -38,13 +41,13 @@ namespace StudyVera.Application.Handlers.UserQuestionStats
                                              {
                                                  Id = uqs.Topic.Id,
                                                  LessonId = uqs.Topic.LessonId,
-                                                 Name = uqs.Topic.Name
+                                                 Name = uqs.Topic.Name,
+                                                 Priority = uqs.Topic.Priority
                                              },
-                                             SolvedCount = uqs.SolvedCount,
-                                             CorrectCount = uqs.CorrectCount,
-                                             WrongCount = uqs.WrongCount,
-                                             AccuracyRate = uqs.AccuracyRate,
-                                             LastAttemptAt = uqs.LastAttemptAt
+                                             TotalSolvedCount = uqs.TotalSolvedCount,
+                                             TotalCorrectCount = uqs.TotalCorrectCount,
+                                             LastAttemptAt = uqs.LastAttemptAt,
+                                             QuestionStatDetail = uqs.QuestionStatDetails.Adapt<List<QuestionStatDetailDto>>()
                                          });
 
             var items = await pagedAndProjectedQuery.ToListAsync(cancellationToken);
