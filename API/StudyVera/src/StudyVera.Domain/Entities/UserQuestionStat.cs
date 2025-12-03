@@ -18,10 +18,14 @@ public class UserQuestionStat
     public int TopicId { get; set; }
     public Topic Topic { get; set; } = null!;
 
-    public int SolvedCount { get; set; }
-    public int CorrectCount { get; set; }
-    public int WrongCount => SolvedCount - CorrectCount; 
-    public float AccuracyRate => SolvedCount == 0 ? 0 : (float) CorrectCount / (float)SolvedCount;
+    public int TotalSolvedCount { get; set; }
+    public int TotalCorrectCount { get; set; }
+
+    public int TotalWrongCount => TotalSolvedCount - TotalCorrectCount;
+
+    public float AccuracyRate => TotalSolvedCount == 0 ? 0 : (float)TotalCorrectCount / (float)TotalSolvedCount;
+
 
     public DateTime LastAttemptAt { get; set; } = DateTime.UtcNow;
+    public ICollection<QuestionStatDetail> QuestionStatDetails { get; set; } = new List<QuestionStatDetail>();
 }

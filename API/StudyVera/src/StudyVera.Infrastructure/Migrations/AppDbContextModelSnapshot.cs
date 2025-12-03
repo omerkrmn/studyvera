@@ -565,6 +565,33 @@ namespace StudyVera.Infrastructure.Migrations
                     b.ToTable("ProfileStats");
                 });
 
+            modelBuilder.Entity("StudyVera.Domain.Entities.QuestionStatDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AttemptedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CorrectCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SolvedCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserQuestionStatId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserQuestionStatId");
+
+                    b.ToTable("QuestionStatDetails");
+                });
+
             modelBuilder.Entity("StudyVera.Domain.Entities.Topic", b =>
                 {
                     b.Property<int>("Id")
@@ -655,16 +682,16 @@ namespace StudyVera.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CorrectCount")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("LastAttemptAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SolvedCount")
+                    b.Property<int>("TopicId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TopicId")
+                    b.Property<int>("TotalCorrectCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalSolvedCount")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -799,6 +826,17 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("StudyVera.Domain.Entities.QuestionStatDetail", b =>
+                {
+                    b.HasOne("StudyVera.Domain.Entities.UserQuestionStat", "userQuestionStat")
+                        .WithMany("QuestionStatDetails")
+                        .HasForeignKey("UserQuestionStatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("userQuestionStat");
+                });
+
             modelBuilder.Entity("StudyVera.Domain.Entities.Topic", b =>
                 {
                     b.HasOne("StudyVera.Domain.Entities.Lesson", "Lesson")
@@ -880,6 +918,11 @@ namespace StudyVera.Infrastructure.Migrations
             modelBuilder.Entity("StudyVera.Domain.Entities.Lesson", b =>
                 {
                     b.Navigation("Topics");
+                });
+
+            modelBuilder.Entity("StudyVera.Domain.Entities.UserQuestionStat", b =>
+                {
+                    b.Navigation("QuestionStatDetails");
                 });
 #pragma warning restore 612, 618
         }

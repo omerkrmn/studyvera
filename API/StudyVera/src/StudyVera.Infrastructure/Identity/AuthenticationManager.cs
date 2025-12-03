@@ -155,4 +155,7 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
         }
         return principal;
     }
+
+    public Guid GetUserId()
+        => _user!.Id;
 }

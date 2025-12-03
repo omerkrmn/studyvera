@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StudyVera.Application.Common.Exceptions;
 using StudyVera.Application.Features.UserQuestionStats.Commands;
 using StudyVera.Application.Features.UserQuestionStats.Queries;
 using System.Security.Claims;
@@ -38,9 +39,14 @@ namespace StudyVera.WebApi.Controllers
         public async Task<IActionResult>
             Get([FromQuery] GetAllUserQuestionStatsByUserQuery query)
         {
+            if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("");
+            }
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId is null)
                 return Unauthorized();
+
 
             query.UserId = Guid.Parse(userId);
 

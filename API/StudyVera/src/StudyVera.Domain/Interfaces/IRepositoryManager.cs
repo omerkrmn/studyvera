@@ -11,6 +11,9 @@ public interface IRepositoryManager
     IUserLessonProgressRepository UserLessonProgressRepository { get; }
     IUserQuestionStatRepository UserQuestionStatRepository { get; }
     IProfileStatRepository ProfileStatRepository { get; }
+    IUserSettingsRepository UserSettingsRepository { get; }
+    ILessonScheduleRepository LessonScheduleRepository { get; }
+    IQuestionStatDetailRepository QuestionStatDetailRepository { get; }
 
     Task SaveChangesAsync(CancellationToken ct = default);
 }

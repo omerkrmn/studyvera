@@ -353,8 +353,8 @@ namespace StudyVera.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TopicId = table.Column<int>(type: "int", nullable: false),
-                    SolvedCount = table.Column<int>(type: "int", nullable: false),
-                    CorrectCount = table.Column<int>(type: "int", nullable: false),
+                    TotalSolvedCount = table.Column<int>(type: "int", nullable: false),
+                    TotalCorrectCount = table.Column<int>(type: "int", nullable: false),
                     LastAttemptAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -370,6 +370,28 @@ namespace StudyVera.Infrastructure.Migrations
                         name: "FK_UserQuestionStats_Topics_TopicId",
                         column: x => x.TopicId,
                         principalTable: "Topics",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuestionStatDetails",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserQuestionStatId = table.Column<int>(type: "int", nullable: false),
+                    SolvedCount = table.Column<int>(type: "int", nullable: false),
+                    CorrectCount = table.Column<int>(type: "int", nullable: false),
+                    AttemptedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionStatDetails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuestionStatDetails_UserQuestionStats_UserQuestionStatId",
+                        column: x => x.UserQuestionStatId,
+                        principalTable: "UserQuestionStats",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -500,6 +522,11 @@ namespace StudyVera.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuestionStatDetails_UserQuestionStatId",
+                table: "QuestionStatDetails",
+                column: "UserQuestionStatId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Topics_LessonId",
                 table: "Topics",
                 column: "LessonId");
@@ -555,16 +582,19 @@ namespace StudyVera.Infrastructure.Migrations
                 name: "ProfileStats");
 
             migrationBuilder.DropTable(
+                name: "QuestionStatDetails");
+
+            migrationBuilder.DropTable(
                 name: "UserActivityHistories");
 
             migrationBuilder.DropTable(
                 name: "UserLessonProgresses");
 
             migrationBuilder.DropTable(
-                name: "UserQuestionStats");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "UserQuestionStats");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
