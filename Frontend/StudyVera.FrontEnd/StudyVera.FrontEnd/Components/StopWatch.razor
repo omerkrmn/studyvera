@@ -1,0 +1,143 @@
+﻿@page "/stopwatch"
+@using System.Timers
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Kronometre</PageTitle>
+
+<div id="titleContainer" class="container mt-5 mb-5">
+    <div class="card text-center">
+        <div class="card-body">
+            <h1 class="card-title">
+                <u>BLAZOR STOPWATCH</u>
+            </h1>
+            <p class="card-text">
+                A handy stopwatch for measuring time.
+                <br>
+                <strong>Keyboard Controls (Needs JS Interop):</strong>
+                <br>
+                Play: 'a' | Stop: 's' | Reset: 'Backspace' | Lap: 'Enter' | Clear Laps: 'Shift + Enter'
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="timerContainer" class="container text-center bg-white p-4 rounded border border-secondary">
+    <span id="timerDisplay" class="display-4 text-primary">@TimeDisplay</span>
+</div>
+
+<br>
+
+<div class="container text-center">
+    @if (LapTimes.Count>0)
+    {
+        <div>
+            <h3>Lap Times</h3>
+        </div>
+        <ul id="lapList" class="list-unstyled">
+            @foreach (var lapTime in LapTimes)
+            {
+                <li>@lapTime</li>
+            }
+        </ul>
+    }
+</div>
+
+<br>
+
+<div id="buttonContainer" class="container text-center">
+    <button @onclick="ResetTimer" class="btn btn-outline-danger mx-2">Reset</button>
+    <button @onclick="StartTimer" class="btn btn-outline-success mx-2">Play</button>
+    <button @onclick="StopTimer" class="btn btn-outline-danger mx-2">Stop</button>
+    <button @onclick="Lap" class="btn btn-outline-primary mx-2">Lap</button>
+    <button @onclick="LapClear" class="btn btn-outline-secondary mx-2">Clear Lap List</button>
+</div>
+
+@code {
+    private System.Timers.Timer? _timer;
+    private DateTime _startTime;
+    private TimeSpan _elapsedTime = TimeSpan.Zero;
+    private List<string> LapTimes { get; set; } = new List<string>();
+
+    // JS Interop için bu bileşene bir referans tutarız
+    private DotNetObjectReference<StopWatch>? dotNetHelper;
+
+    private string TimeDisplay => $"{_elapsedTime.Minutes:D2}:{_elapsedTime.Seconds:D2}:{_elapsedTime.Milliseconds:D3}";
+
+    // --- C# Kontrol Metotları ---
+
+    [JSInvokable] // JavaScript'ten erişime izin verir
+    public void StartTimer()
+    {
+        if (_timer != null) return;
+
+        _timer = new Timer(1);
+        _timer.Elapsed += OnTimerElapsed;
+
+        _startTime = DateTime.Now - _elapsedTime;
+
+        _timer.Start();
+    }
+
+    private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+    {
+        _elapsedTime = DateTime.Now - _startTime;
+        // UI'ı güncellemek için StateHasChanged'i Blazor bağlamında çağır
+        InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public void StopTimer()
+    {
+        if (_timer == null) return;
+
+        _timer.Stop();
+        _timer.Dispose();
+        _timer = null;
+    }
+
+    [JSInvokable]
+    public void ResetTimer()
+    {
+        StopTimer();
+        _elapsedTime = TimeSpan.Zero;
+        LapClear();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void Lap()
+    {
+        // Yalnızca timer çalışıyorsa tur kaydı yap
+        if (_timer != null)
+        {
+            LapTimes.Add(TimeDisplay);
+        }
+    }
+
+    [JSInvokable]
+    public void LapClear()
+    {
+        LapTimes.Clear();
+    }
+
+    // --- Blazor Yaşam Döngüsü ve Temizlik ---
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Bu bileşenin bir .NET nesne referansını oluştur
+            dotNetHelper = DotNetObjectReference.Create(this);
+
+            // JS Interop ile JavaScript dosyasındaki initialize fonksiyonunu çağır
+            await JSRuntime.InvokeVoidAsync("stopwatchInterop.initializeKeyboardControl", dotNetHelper);
+        }
+    }
+
+    public void Dispose()
+    {
+        StopTimer();
+        // Bileşen atıldığında .NET referansını temizle
+        dotNetHelper?.Dispose();
+    }
+}
