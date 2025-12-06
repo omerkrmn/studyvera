@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Interfaces;
 
@@ -14,9 +15,19 @@ public class LessonScheduleRepository : RepositoryBase<LessonSchedule>, ILessonS
     public async Task<IEnumerable<LessonSchedule>> GetWeeklyScheduleAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await _context.LessonSchedules
-            .Where(x => x.UserId == userId)
-            .OrderBy(x => x.DayOfWeek)
-            .ThenBy(x => x.StartTime)
+            .Where(dto => dto.UserId == userId)
+            .OrderBy(dto => dto.DayOfWeek)
+            .ThenBy(dto => dto.StartTime)
+            .Select(dto => new LessonSchedule
+            {
+                UserId = dto.UserId,
+                LessonId = dto.LessonId,
+                TopicId = dto.TopicId,
+                DayOfWeek = dto.DayOfWeek,
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                LastUpdatedAt = dto.LastUpdatedAt
+            })
             .ToListAsync(cancellationToken);
     }
 

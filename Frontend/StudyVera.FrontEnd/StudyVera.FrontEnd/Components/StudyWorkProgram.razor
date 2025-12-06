@@ -1,163 +1,259 @@
 ﻿@using Blazored.LocalStorage
-@using StudyVera.FrontEnd.Models.Common
-@using StudyVera.FrontEnd.Models.Topics
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+@using StudyVera.FrontEnd.Models.LessonSchedules
+@using StudyVera.FrontEnd.Services.Concrats
 @inject ILocalStorageService LocalStorage
+@inject ILessonScheduleService LessonScheduleService
 
 <h3 class="mt-3 mb-3">📘 Haftalık Çalışma Programı</h3>
 
-<table class="table table-bordered table-striped text-center align-middle">
-    <thead class="table-primary">
-        <tr>
-            <th>Pazartesi</th>
-            <th>Salı</th>
-            <th>Çarşamba</th>
-            <th>Perşembe</th>
-            <th>Cuma</th>
-            <th>Cumartesi</th>
-            <th>Pazar</th>
-        </tr>
-    </thead>
+@* --- YENİ DERS EKLEME ARAYÜZÜ BURAYA EKLENECEKTİR --- *@
 
-    <tbody>
-        <tr class="align-text-top">
-            @foreach (var day in WeeklyProgram)
-            {
-                <td style="min-width:150px;">
-                    @if (day.Sessions.Count == 0)
-                    {
-                        <div class="text-muted">—</div>
-                    }
-                    else
-                    {
-                        @foreach (var session in day.Sessions)
+@*
+    NOT: Bu kod, LessonScheduleDto'nun sadece LessonId, TopicId, DayOfWeek, StartTime, EndTime içerdiği 
+    ve Topic nesnesine sahip OLMADIĞI varsayımıyla düzenlenmiştir.
+*@
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped text-center align-middle">
+        <thead class="table-primary">
+            <tr>
+                @foreach (var day in WeeklyProgram)
+                {
+                    <th>@day.DayName</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr class="align-text-top">
+                @foreach (var day in WeeklyProgram)
+                {
+                    <td style="min-width:150px; height: 100%;"
+                        @ondragover:preventDefault
+                        @ondragover="HandleDragEnter"
+                        @ondrop="() => HandleDayDrop(day)">
+
+                        @if (day.Schedules.Count == 0)
                         {
-                            <div class="p-1 mb-1 border rounded" style="background-color:@parameters.ColorHex">
-                                <strong>@session.Topic.Name</strong> <br />
-                                <small class="text-secondary">@session.Action</small>
-                            </div>
+                            <div class="text-muted" style="min-height:70px;">—</div>
                         }
-                    }
-                </td>
-            }
-        </tr>
-    </tbody>
-</table>
+                        else
+                        {
+                            @foreach (var schedule in day.Schedules.OrderBy(s => s.StartTime))
+                            {
+                                string dropClass = "";
+                                if (schedule == targetScheduleForDrop)
+                                {
+                                    dropClass = dropIndicatorClass;
+                                }
+
+                                <div class="p-1 mb-1 border rounded shadow-sm @dropClass"
+                                     draggable="true"
+                                     @ondragstart="() => HandleDragStart(schedule, day)"
+                                     @ondragover:preventDefault
+                                     @ondragover="(args) => HandleDragOverSession(schedule, args)"
+                                     @ondragleave="() => HandleDragLeave(schedule)"
+                                     @ondrop:stopPropagation
+                                     @ondrop="() => HandleSessionDrop(day, schedule)"
+                                     style="cursor: move; /* Topic rengi DTO'da olmadığı için varsayılan bırakıldı */">
+
+                                    <strong>Topic ID: @schedule.TopicId</strong> <br />
+
+                                    <small class="text-secondary">
+                                        @schedule.StartTime.Hours:@schedule.StartTime.Minutes:00 -
+                                        @schedule.EndTime.Hours:@schedule.EndTime.Minutes:00
+                                    </small>
+                                    <br />
+
+                                    @* DTO'da Topic nesnesi olmadığı için Topic Name ve Color kaldırıldı. *@
+                                    @* <small class="text-dark">Lesson ID: @schedule.LessonId</small> *@
+
+                                    <small class="text-dark">Lesson ID: @schedule.LessonId</small>
+                                </div>
+                            }
+                        }
+                    </td>
+                }
+            </tr>
+        </tbody>
+    </table>
+</div>
 
 
 @code {
-    string color = "#f8f9fa";
-    private UserSettings parameters = new();
+    // ----------------------------------------------------
+    // 1. Bileşen State'leri
+    // ----------------------------------------------------
+    private LessonScheduleDto? draggedSchedule;
+    private DayProgramView? sourceDay;
+    private List<DayProgramView> WeeklyProgram { get; set; } = new List<DayProgramView>();
+    private LessonScheduleDto? targetScheduleForDrop;
+    private string? dropIndicatorClass;
+    private string HataMesaji { get; set; } = string.Empty; // Hata yönetimi
+
+    // ----------------------------------------------------
+    // 2. Yaşam Döngüsü Metotları
+    // ----------------------------------------------------
+
     protected override async Task OnInitializedAsync()
     {
-        var saved = await LocalStorage.GetItemAsync<UserSettings>("UserSettings");
+        List<LessonScheduleDto> schedules;
+        HataMesaji = string.Empty;
 
-        if (saved != null)
-            parameters = saved;
-        color = parameters.ColorHex;
-    }
-    private List<StudyDay> WeeklyProgram = new()
-    {
-        new StudyDay
+        // Önbellekteki veriyi kontrol et
+        var storedSchedules = await LocalStorage.GetItemAsync<List<LessonScheduleDto>>("lessonSchedules");
+
+        if (storedSchedules != null && storedSchedules.Any())
         {
-            DayName = "Pazartesi",
-            Sessions = new()
+            schedules = storedSchedules;
+        }
+        else
+        {
+            // Önbellekte veri yoksa Servisi Çağır (API'den veriyi çek)
+            try
             {
-                new StudySession
-                {
-                    Id = 1,
-                    Topic = new TopicDto { Id = 101, Name = "Matematik - Fonksiyonlar" },
-                    Action = "Konu Çalışma"
-                },
-                new StudySession
-                {
-                    Id = 2,
-                    Topic = new TopicDto { Id = 102, Name = "Fizik - Kuvvet ve Hareket" },
-                    Action = "Soru Çözme"
-                }
+                schedules = await LessonScheduleService.GetAll();
             }
-        },
-
-        new StudyDay
-        {
-            DayName = "Salı",
-            Sessions = new()
+            catch (Exception ex)
             {
-                new StudySession
-                {
-                    Id = 3,
-                    Topic = new TopicDto { Id = 103, Name = "Kimya - Asit Baz" },
-                    Action = "Tekrar"
-                }
+                schedules = new List<LessonScheduleDto>();
+                HataMesaji = $"Program yüklenirken bir sorun oluştu: {ex.Message}";
+                Console.WriteLine(HataMesaji);
             }
-        },
+        }
 
-        new StudyDay
-        {
-            DayName = "Çarşamba",
-            Sessions = new()
-            {
-                new StudySession
-                {
-                    Id = 4,
-                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
-                    Action = "Soru Çözme"
-                }
-            }
-        },
-
-        new StudyDay {
-            DayName = "Perşembe",
-        Sessions= new()
-        {
-            new StudySession
-                {
-                    Id = 4,
-                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
-                    Action = "Soru Çözme"
-                },
-                new StudySession
-                {
-                    Id = 4,
-                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
-                    Action = "Soru Çözme"
-                },
-                new StudySession
-                {
-                    Id = 4,
-                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
-                    Action = "Soru Çözme"
-                },
-                new StudySession
-                {
-                    Id = 4,
-                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
-                    Action = "Soru Çözme"
-                },
-                new StudySession
-                {
-                    Id = 4,
-                    Topic = new TopicDto { Id = 104, Name = "Biyoloji - Hücre Bölünmesi" },
-                    Action = "Soru Çözme"
-                }
-        }},
-        new StudyDay { DayName = "Cuma" },
-        new StudyDay { DayName = "Cumartesi" },
-        new StudyDay { DayName = "Pazar" }
-    };
-
-
-    // ----- SAYFADA KULLANILAN MODELLER -----
-
-    class StudyDay
-    {
-        public string DayName { get; set; }
-        public List<StudySession> Sessions { get; set; } = new();
+        // Veriyi Gün bazında grupla ve bileşenin state'ini ayarla
+        WeeklyProgram = GroupSchedulesByDay(schedules);
     }
 
-    class StudySession
+    // ----------------------------------------------------
+    // 3. Sürükle-Bırak (Drag-and-Drop) İşleyicileri
+    // ----------------------------------------------------
+
+    private void HandleDragStart(LessonScheduleDto schedule, DayProgramView day)
     {
-        public int Id { get; set; }
-        public TopicDto Topic { get; set; }
-        public string Action { get; set; }
+        draggedSchedule = schedule;
+        sourceDay = day;
+        targetScheduleForDrop = null;
+        dropIndicatorClass = null;
     }
+
+    private void HandleDragEnter(DragEventArgs args)
+    {
+        args.DataTransfer.DropEffect = "move";
+    }
+
+    private void HandleDragOverSession(LessonScheduleDto targetSchedule, DragEventArgs args)
+    {
+        // LessonScheduleDto'da Id alanı olmadığı için LessonId'yi Id olarak kullanıyorum
+        if (draggedSchedule == null || draggedSchedule.LessonId == targetSchedule.LessonId) return;
+
+        targetScheduleForDrop = targetSchedule;
+        dropIndicatorClass = "drop-zone-top";
+        args.DataTransfer.DropEffect = "move";
+    }
+
+    private void HandleDragLeave(LessonScheduleDto targetSchedule)
+    {
+        if (targetScheduleForDrop == targetSchedule)
+        {
+            targetScheduleForDrop = null;
+            dropIndicatorClass = null;
+        }
+    }
+
+    private async Task HandleSessionDrop(DayProgramView targetDay, LessonScheduleDto targetSchedule)
+    {
+        if (draggedSchedule == null || sourceDay == null) return;
+
+        // Eski yerden kaldır
+        sourceDay.Schedules.Remove(draggedSchedule);
+
+        // Yeni yeri bul ve ekle
+        int insertIndex = targetDay.Schedules.IndexOf(targetSchedule);
+
+        // Sürüklenen öğenin gününü güncelle
+        draggedSchedule.DayOfWeek = targetDay.DayOfWeek;
+
+        // Yeni konuma ekle
+        targetDay.Schedules.Insert(insertIndex, draggedSchedule);
+
+        await SaveAndCleanup();
+    }
+
+    private async Task HandleDayDrop(DayProgramView targetDay)
+    {
+        if (draggedSchedule == null || sourceDay == null) return;
+        if (sourceDay == targetDay) return;
+
+        // Eski yerden kaldır
+        sourceDay.Schedules.Remove(draggedSchedule);
+
+        // Yeni yere ekle (listenin sonuna)
+        draggedSchedule.DayOfWeek = targetDay.DayOfWeek;
+        targetDay.Schedules.Add(draggedSchedule);
+
+        await SaveAndCleanup();
+    }
+
+    // ----------------------------------------------------
+    // 4. Yardımcı Metotlar
+    // ----------------------------------------------------
+
+    private async Task SaveAndCleanup()
+    {
+        // Tüm program listesini Local Storage'a kaydet
+        var allSchedules = WeeklyProgram.SelectMany(d => d.Schedules).ToList();
+
+        await LocalStorage.SetItemAsync("WeeklySchedulesData", allSchedules);
+
+        // Sunucuya API çağrısı (örneğin UpdateScheduleOrder) burada yapılmalıdır.
+
+        StateHasChanged();
+
+        // State'leri temizle
+        draggedSchedule = null;
+        sourceDay = null;
+        targetScheduleForDrop = null;
+        dropIndicatorClass = null;
+    }
+
+    private List<DayProgramView> GroupSchedulesByDay(List<LessonScheduleDto> schedules)
+    {
+        var days = new List<DayProgramView>();
+        var dayNames = new[] { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar" };
+
+        for (int i = 0; i < 7; i++)
+        {
+            int dayIndex = i + 1;
+
+            days.Add(new DayProgramView
+            {
+                DayOfWeek = dayIndex,
+                DayName = dayNames[i],
+                // Schedules listesini filtrele ve başlangıç saatine göre sırala
+                Schedules = schedules
+                    .Where(s => s.DayOfWeek == dayIndex)
+                    .OrderBy(s => s.StartTime)
+                    .ToList()
+            });
+        }
+        return days;
+    }
+
+    // ----------------------------------------------------
+    // 5. Veri Modelleri (Sadece sağladığınız DTO yapısına uygun olanlar)
+    // ----------------------------------------------------
+
+    // WeeklyProgram'da kullanılan yapı
+    public class DayProgramView
+    {
+        public int DayOfWeek { get; set; }
+        public string DayName { get; set; } = string.Empty;
+        public List<LessonScheduleDto> Schedules { get; set; } = new List<LessonScheduleDto>();
+    }
+
+ 
 }
