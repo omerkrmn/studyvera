@@ -3,6 +3,7 @@
 @using Blazored.LocalStorage
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage
+@inject IJSRuntime JS
 
 
 
@@ -82,6 +83,12 @@
                 </div>
             </Authorized>
         </AuthorizeView>
+        <div class="nav-item px-2 align-content-center">
+            <button id="themeToggle" class="btn btn-outline-secondary" type="button"
+                    title="Gece/Gündüz Modunu Değiştir">
+                ☀️ Gündüz Modu
+            </button>
+        </div>
     </div>
 </div>
 
@@ -91,6 +98,8 @@
 
 
 @code {
+    
+
     private bool collapseNavMenu = true;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : "collapse show";
 
@@ -100,5 +109,14 @@
     {
         await LocalStorage.RemoveItemAsync("accessToken");
         NavigationManager.NavigateTo("/auth/login", forceLoad: true);
+    }
+
+    // Bileşen ilk kez render edildikten sonra (DOM hazır olduğunda) çalışır.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initApp");
+        }
     }
 }
