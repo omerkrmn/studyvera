@@ -24,7 +24,7 @@ public class AppUser : IdentityUser<Guid>
     public DateTime RefreshTokenExpiryTime { get; set; }
 
     public UserSettings? UserSettings { get; set; }
-    public LessonSchedule? LessonSchedule { get; set; }
+    public ICollection<LessonSchedule>? LessonSchedule { get; set; }
 
     [Range(0,5)]
     public TargetExam TargetExam { get; set; } 
