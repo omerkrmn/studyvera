@@ -5,13 +5,9 @@ meta {
 }
 
 post {
-  url: {{API_URL}}UserQuestion
+  url: {{API_URL}}question-stats
   body: json
-  auth: bearer
-}
-
-auth:bearer {
-  token: {{API_KEY}}
+  auth: inherit
 }
 
 body:json {

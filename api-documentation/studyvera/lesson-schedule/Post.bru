@@ -1,0 +1,19 @@
+meta {
+  name: Post
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{API_URL}}lesson-schedule
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "lessonId": 1,
+    "topicId": 1,
+    "dayOfWeek": 1
+  }
+}

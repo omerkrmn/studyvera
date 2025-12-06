@@ -7,15 +7,11 @@ meta {
 put {
   url: {{API_URL}}user-lesson-progresses/1017
   body: json
-  auth: bearer
+  auth: inherit
 }
 
 headers {
   : 
-}
-
-auth:bearer {
-  token: {{API_KEY}}
 }
 
 body:json {

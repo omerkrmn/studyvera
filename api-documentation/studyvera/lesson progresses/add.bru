@@ -7,11 +7,7 @@ meta {
 post {
   url: {{API_URL}}user-lesson-progresses
   body: json
-  auth: bearer
-}
-
-auth:bearer {
-  token: {{API_KEY}}
+  auth: inherit
 }
 
 body:json {
