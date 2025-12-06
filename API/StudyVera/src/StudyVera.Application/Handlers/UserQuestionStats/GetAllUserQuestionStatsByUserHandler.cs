@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Models;
 using StudyVera.Application.Dtos;
 using StudyVera.Application.Dtos.QuestionStatDetails;
+using StudyVera.Application.Dtos.Topic;
 using StudyVera.Application.Dtos.UserQuestionStats;
 using StudyVera.Application.Features.UserQuestionStats.Queries;
 using StudyVera.Domain.Interfaces;
@@ -37,9 +38,8 @@ namespace StudyVera.Application.Handlers.UserQuestionStats
                                          {
                                              Id = uqs.Id,
                                              TopicId = uqs.TopicId,
-                                             Topic = new TopicDto
+                                             Topic = new TopicWithoutIdColumnDto
                                              {
-                                                 Id = uqs.Topic.Id,
                                                  LessonId = uqs.Topic.LessonId,
                                                  Name = uqs.Topic.Name,
                                                  Priority = uqs.Topic.Priority
@@ -47,7 +47,6 @@ namespace StudyVera.Application.Handlers.UserQuestionStats
                                              TotalSolvedCount = uqs.TotalSolvedCount,
                                              TotalCorrectCount = uqs.TotalCorrectCount,
                                              LastAttemptAt = uqs.LastAttemptAt,
-                                             QuestionStatDetail = uqs.QuestionStatDetails.Adapt<List<QuestionStatDetailDto>>()
                                          });
 
             var items = await pagedAndProjectedQuery.ToListAsync(cancellationToken);

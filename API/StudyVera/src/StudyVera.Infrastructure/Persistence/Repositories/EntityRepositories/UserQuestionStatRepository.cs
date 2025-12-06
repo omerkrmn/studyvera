@@ -15,27 +15,7 @@ public class UserQuestionStatRepository : RepositoryBase<UserQuestionStat>, IUse
 
     public async Task<List<UserQuestionStatDto>> GetAllByUser(Guid userId, CancellationToken ct)
     {
-
-        
-        var stats = await FindByCondition(uqs => uqs.UserId == userId, trackChanges: false)
-                            // .Include(uqs => uqs.Topic) // Projeksiyon yaptığımız için gereksiz
-                            .Select(uqs => new UserQuestionStatDto
-                            {
-                                Id = uqs.Id,
-                                TopicId = uqs.TopicId,
-                                Topic = new TopicDto
-                                {
-                                    Id = uqs.Topic.Id,
-                                    LessonId = uqs.Topic.LessonId,
-                                    Name = uqs.Topic.Name
-                                },
-                                TotalSolvedCount = uqs.TotalSolvedCount,
-                                TotalCorrectCount = uqs.TotalCorrectCount,
-                                LastAttemptAt = uqs.LastAttemptAt
-                            })
-                            .ToListAsync(ct);
-
-        return stats;
+        throw new NotImplementedException();
     }
 
 }
