@@ -5,7 +5,7 @@ using StudyVera.Application.Features.Lessons.Commands;
 
 namespace StudyVera.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/lessons")]
     [ApiController]
     public class LessonControllers : ControllerBase
     {

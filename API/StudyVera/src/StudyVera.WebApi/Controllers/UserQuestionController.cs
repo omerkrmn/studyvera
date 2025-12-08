@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace StudyVera.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/question-stats")]
     [ApiController]
     public class UserQuestionController : ControllerBase
     {

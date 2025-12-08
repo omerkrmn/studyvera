@@ -6,7 +6,7 @@ using StudyVera.Application.Features.QuestionStatDetails.Queries;
 
 namespace StudyVera.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/question-stat-details")]
     [ApiController]
     public class QuestionStatDetailController : ControllerBase
     {
