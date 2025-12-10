@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.UserLessonProgress;
 using StudyVera.FrontEnd.Services.Concrats;
+using StudyVera.FrontEnd.Services.Helpers;
 using StudyVera.FrontEnd.Utilities;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -9,13 +10,14 @@ using static System.Net.WebRequestMethods;
 
 namespace StudyVera.FrontEnd.Services;
 
-public class UserLessonProgressService : IUserLessonProgressService
+public class UserLessonProgressService :ServiceHelper, IUserLessonProgressService
 {
     private readonly HttpClient _client;
     private readonly ILocalStorageService _localStorage;
     private string _baseUrl= $"{AppConsts.ApiBaseUrl}user-lesson-progresses";
 
     public UserLessonProgressService(HttpClient client, ILocalStorageService localStorage)
+        : base(localStorage, client)
     {
         _client = client;
         _localStorage = localStorage;
@@ -23,13 +25,7 @@ public class UserLessonProgressService : IUserLessonProgressService
 
     public async Task Add(AddUserLessonProgressDto dto)
     {
-        var token = await _localStorage.GetItemAsync<string>("accessToken");
-
-        if (string.IsNullOrEmpty(token))
-            throw new Exception("Kullanıcı oturumu bulunamadı. Lütfen giriş yapın.");
-
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        await AddAuthorizationHeader();
 
         var response = await _client.PostAsJsonAsync(_baseUrl, dto);
 
@@ -43,13 +39,7 @@ public class UserLessonProgressService : IUserLessonProgressService
 
     public async Task<List<UserLessonProgressDto>> GetAll()
     {
-        var token = await _localStorage.GetItemAsync<string>("accessToken");
-
-        if (string.IsNullOrEmpty(token))
-            throw new Exception("Token bulunamadı, lütfen giriş yapın.");
-
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        await AddAuthorizationHeader();
 
         var response = await _client.GetAsync(_baseUrl);
         var content = await response.Content.ReadAsStringAsync();

@@ -2,6 +2,7 @@
 using StudyVera.FrontEnd.Models.UserLessonProgress;
 using StudyVera.FrontEnd.Models.UserQuestionStat;
 using StudyVera.FrontEnd.Services.Concrats;
+using StudyVera.FrontEnd.Services.Helpers;
 using StudyVera.FrontEnd.Utilities;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -9,13 +10,13 @@ using System.Text.Json;
 
 namespace StudyVera.FrontEnd.Services;
 
-public class UserQuestionStatsService : IUserQuestionStatsService
+public class UserQuestionStatsService : ServiceHelper, IUserQuestionStatsService
 {
     private readonly HttpClient _client;
     private readonly ILocalStorageService _localStorage;
-    private string _baseUrl = $"{AppConsts.ApiBaseUrl}UserQuestion";
+    private string _baseUrl = $"{AppConsts.ApiBaseUrl}question-stats";
 
-    public UserQuestionStatsService(HttpClient client, ILocalStorageService localStorage)
+    public UserQuestionStatsService(HttpClient client, ILocalStorageService localStorage) : base(localStorage, client)
     {
         _client = client;
         _localStorage = localStorage;
@@ -23,11 +24,7 @@ public class UserQuestionStatsService : IUserQuestionStatsService
 
     public async Task Add(AddUserQuestionStatDto request)
     {
-        var token = await _localStorage.GetItemAsync<string>("accessToken");
-        if (string.IsNullOrEmpty(token))
-            throw new Exception("Kullanıcı oturumu bulunamadı. Lütfen giriş yapın.");
-        _client.DefaultRequestHeaders.Authorization =
-           new AuthenticationHeaderValue("Bearer", token);
+        await AddAuthorizationHeader();
 
         var response = await _client.PostAsJsonAsync(_baseUrl, request);
 
@@ -40,13 +37,7 @@ public class UserQuestionStatsService : IUserQuestionStatsService
 
     public async Task<List<UserQuestionStatDto>> GetAll()
     {
-        var token = await _localStorage.GetItemAsync<string>("accessToken");
-
-        if (string.IsNullOrEmpty(token))
-            throw new Exception("Token bulunamadı, lütfen giriş yapın.");
-
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        await AddAuthorizationHeader();
 
         var response = await _client.GetAsync(_baseUrl);
         var content = await response.Content.ReadAsStringAsync();

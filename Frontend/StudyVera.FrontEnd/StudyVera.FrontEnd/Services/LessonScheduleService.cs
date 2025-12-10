@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.LessonSchedules;
 using StudyVera.FrontEnd.Services.Concrats;
+using StudyVera.FrontEnd.Services.Helpers;
 using StudyVera.FrontEnd.Utilities;
 using System;
 using System.Net.Http.Headers;
@@ -8,14 +9,14 @@ using System.Net.Http.Json;
 
 namespace StudyVera.FrontEnd.Services;
 
-public class LessonScheduleService : ILessonScheduleService
+public class LessonScheduleService :ServiceHelper, ILessonScheduleService
 {
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorage;
 
     private readonly string _apiUrl = $"{AppConsts.ApiBaseUrl}lesson-schedule";
 
-    public LessonScheduleService(HttpClient httpClient, ILocalStorageService localStorage)
+    public LessonScheduleService(HttpClient httpClient, ILocalStorageService localStorage) : base(localStorage,httpClient)
     {
         _httpClient = httpClient;
         _localStorage = localStorage;
@@ -23,14 +24,7 @@ public class LessonScheduleService : ILessonScheduleService
 
     public async Task Add(AddLessonScheduleDto dto)
     {
-        var token = await _localStorage.GetItemAsync<string>("accessToken");
-        if (string.IsNullOrEmpty(token))
-        {
-            throw new Exception("Kullanıcı oturumu bulunamadı. Lütfen giriş yapın.");
-        }
-
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+       await AddAuthorizationHeader();
 
         try
         {
@@ -53,12 +47,7 @@ public class LessonScheduleService : ILessonScheduleService
     }
     public async Task<List<LessonScheduleDto>> GetAll()
     {
-        var token = await _localStorage.GetItemAsync<string>("accessToken");
-        if (string.IsNullOrEmpty(token))
-            throw new Exception("Kullanıcı oturumu bulunamadı. Lütfen giriş yapın.");
-
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        await AddAuthorizationHeader();
 
         var cachedSchedules = await _localStorage.GetItemAsync<List<LessonScheduleDto>>("lessonSchedules");
 
