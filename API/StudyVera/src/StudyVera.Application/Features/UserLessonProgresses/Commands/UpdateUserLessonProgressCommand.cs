@@ -16,8 +16,9 @@ public class UpdateUserLessonProgressCommand : IRequest<Unit>
     public Guid UserId { get; set; }
 
     [JsonIgnore]
-    [Required(ErrorMessage = "TopicId is required.")]
-    public int TopicId { get; set; }
-    [Required(ErrorMessage = "TopicId is required.")]
+    [Required(ErrorMessage = "ulpId is required.")]
+    public int ulpId { get; set; }
+
+    [Required(ErrorMessage = "ProgressStatus is required.")]
     public ProgressStatus ProgressStatus { get; set; }
 }

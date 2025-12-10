@@ -65,8 +65,8 @@ namespace StudyVera.WebApi.Controllers
             return Ok(result);
         }
         [Authorize]
-        [HttpPut("{topicId}")]
-        public async Task<IActionResult> Update([FromRoute] int topicId, [FromBody] UpdateUserLessonProgressCommand command, CancellationToken ct)
+        [HttpPut("{ulpId}")]
+        public async Task<IActionResult> Update([FromRoute] int ulpId, [FromBody] UpdateUserLessonProgressCommand command, CancellationToken ct)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -74,8 +74,7 @@ namespace StudyVera.WebApi.Controllers
                 return Unauthorized("UserId claim not found in token");
 
             command.UserId = Guid.Parse(userIdClaim);
-
-            command.TopicId = topicId;
+            command.ulpId = ulpId;
 
             await _mediator.Send(command, ct);
             return NoContent();

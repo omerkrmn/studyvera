@@ -3,6 +3,7 @@ using MediatR;
 using StudyVera.Application.Common.Exceptions;
 using StudyVera.Application.Features.UserLessonProgresses.Commands;
 using StudyVera.Domain.Entities;
+using StudyVera.Domain.Enums;
 using StudyVera.Domain.Interfaces;
 
 namespace StudyVera.Application.Handlers.UserLessonProgresses
@@ -28,6 +29,14 @@ namespace StudyVera.Application.Handlers.UserLessonProgresses
 
             entity.LastUpdated = DateTime.UtcNow;
             _manager.UserLessonProgressRepository.Create(entity);
+
+            _manager.UserActivityHistoryRepository.Create(new()
+            {
+                UserId = request.UserId,
+                ActivityType = ActivityType.LessonProgressed,
+                Description = $"Kullanıcı {request.TopicId} numaralı konuda güncelleme yaptı {request.ProgressStatus}",
+                ActivityDate = DateTime.UtcNow,
+            });
 
             await _manager.SaveChangesAsync(cancellationToken);
             return Unit.Value;

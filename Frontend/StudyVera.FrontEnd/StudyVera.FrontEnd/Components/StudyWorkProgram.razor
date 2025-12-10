@@ -8,13 +8,6 @@
 
 <h3 class="mt-3 mb-3">📘 Haftalık Çalışma Programı</h3>
 
-@* --- YENİ DERS EKLEME ARAYÜZÜ BURAYA EKLENECEKTİR --- *@
-
-@*
-    NOT: Bu kod, LessonScheduleDto'nun sadece LessonId, TopicId, DayOfWeek, StartTime, EndTime içerdiği 
-    ve Topic nesnesine sahip OLMADIĞI varsayımıyla düzenlenmiştir.
-*@
-
 <div class="table-responsive">
     <table class="table table-bordered table-striped text-center align-middle">
         <thead class="table-primary">
@@ -67,9 +60,6 @@
                                     </small>
                                     <br />
 
-                                    @* DTO'da Topic nesnesi olmadığı için Topic Name ve Color kaldırıldı. *@
-                                    @* <small class="text-dark">Lesson ID: @schedule.LessonId</small> *@
-
                                     <small class="text-dark">Lesson ID: @schedule.LessonId</small>
                                 </div>
                             }
@@ -83,26 +73,20 @@
 
 
 @code {
-    // ----------------------------------------------------
-    // 1. Bileşen State'leri
-    // ----------------------------------------------------
+   
     private LessonScheduleDto? draggedSchedule;
     private DayProgramView? sourceDay;
     private List<DayProgramView> WeeklyProgram { get; set; } = new List<DayProgramView>();
     private LessonScheduleDto? targetScheduleForDrop;
     private string? dropIndicatorClass;
-    private string HataMesaji { get; set; } = string.Empty; // Hata yönetimi
+    private string HataMesaji { get; set; } = string.Empty;
 
-    // ----------------------------------------------------
-    // 2. Yaşam Döngüsü Metotları
-    // ----------------------------------------------------
 
     protected override async Task OnInitializedAsync()
     {
         List<LessonScheduleDto> schedules;
         HataMesaji = string.Empty;
 
-        // Önbellekteki veriyi kontrol et
         var storedSchedules = await LocalStorage.GetItemAsync<List<LessonScheduleDto>>("lessonSchedules");
 
         if (storedSchedules != null && storedSchedules.Any())
@@ -111,7 +95,6 @@
         }
         else
         {
-            // Önbellekte veri yoksa Servisi Çağır (API'den veriyi çek)
             try
             {
                 schedules = await LessonScheduleService.GetAll();
@@ -123,14 +106,8 @@
                 Console.WriteLine(HataMesaji);
             }
         }
-
-        // Veriyi Gün bazında grupla ve bileşenin state'ini ayarla
         WeeklyProgram = GroupSchedulesByDay(schedules);
     }
-
-    // ----------------------------------------------------
-    // 3. Sürükle-Bırak (Drag-and-Drop) İşleyicileri
-    // ----------------------------------------------------
 
     private void HandleDragStart(LessonScheduleDto schedule, DayProgramView day)
     {
@@ -147,7 +124,6 @@
 
     private void HandleDragOverSession(LessonScheduleDto targetSchedule, DragEventArgs args)
     {
-        // LessonScheduleDto'da Id alanı olmadığı için LessonId'yi Id olarak kullanıyorum
         if (draggedSchedule == null || draggedSchedule.LessonId == targetSchedule.LessonId) return;
 
         targetScheduleForDrop = targetSchedule;
@@ -168,16 +144,12 @@
     {
         if (draggedSchedule == null || sourceDay == null) return;
 
-        // Eski yerden kaldır
         sourceDay.Schedules.Remove(draggedSchedule);
 
-        // Yeni yeri bul ve ekle
         int insertIndex = targetDay.Schedules.IndexOf(targetSchedule);
 
-        // Sürüklenen öğenin gününü güncelle
         draggedSchedule.DayOfWeek = targetDay.DayOfWeek;
 
-        // Yeni konuma ekle
         targetDay.Schedules.Insert(insertIndex, draggedSchedule);
 
         await SaveAndCleanup();
@@ -188,32 +160,24 @@
         if (draggedSchedule == null || sourceDay == null) return;
         if (sourceDay == targetDay) return;
 
-        // Eski yerden kaldır
         sourceDay.Schedules.Remove(draggedSchedule);
 
-        // Yeni yere ekle (listenin sonuna)
         draggedSchedule.DayOfWeek = targetDay.DayOfWeek;
         targetDay.Schedules.Add(draggedSchedule);
 
         await SaveAndCleanup();
     }
 
-    // ----------------------------------------------------
-    // 4. Yardımcı Metotlar
-    // ----------------------------------------------------
 
     private async Task SaveAndCleanup()
     {
-        // Tüm program listesini Local Storage'a kaydet
         var allSchedules = WeeklyProgram.SelectMany(d => d.Schedules).ToList();
 
         await LocalStorage.SetItemAsync("WeeklySchedulesData", allSchedules);
 
-        // Sunucuya API çağrısı (örneğin UpdateScheduleOrder) burada yapılmalıdır.
 
         StateHasChanged();
 
-        // State'leri temizle
         draggedSchedule = null;
         sourceDay = null;
         targetScheduleForDrop = null;
@@ -233,7 +197,6 @@
             {
                 DayOfWeek = dayIndex,
                 DayName = dayNames[i],
-                // Schedules listesini filtrele ve başlangıç saatine göre sırala
                 Schedules = schedules
                     .Where(s => s.DayOfWeek == dayIndex)
                     .OrderBy(s => s.StartTime)
@@ -243,11 +206,6 @@
         return days;
     }
 
-    // ----------------------------------------------------
-    // 5. Veri Modelleri (Sadece sağladığınız DTO yapısına uygun olanlar)
-    // ----------------------------------------------------
-
-    // WeeklyProgram'da kullanılan yapı
     public class DayProgramView
     {
         public int DayOfWeek { get; set; }

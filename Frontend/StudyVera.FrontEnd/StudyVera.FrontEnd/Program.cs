@@ -40,5 +40,6 @@ builder.Services.AddScoped<IUserHistoryService, UserHistoryService>();
 builder.Services.AddScoped<IUserLessonProgressService, UserLessonProgressService>();
 builder.Services.AddScoped<IUserQuestionStatsService, UserQuestionStatsService>();
 builder.Services.AddScoped<ILessonScheduleService, LessonScheduleService>();    
+builder.Services.AddScoped<IQuestionStatDetailService,QuestionStatDetailService>();
 
 await builder.Build().RunAsync();

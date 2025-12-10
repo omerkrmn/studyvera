@@ -58,14 +58,12 @@
     private TimeSpan _elapsedTime = TimeSpan.Zero;
     private List<string> LapTimes { get; set; } = new List<string>();
 
-    // JS Interop için bu bileşene bir referans tutarız
     private DotNetObjectReference<StopWatch>? dotNetHelper;
 
     private string TimeDisplay => $"{_elapsedTime.Minutes:D2}:{_elapsedTime.Seconds:D2}:{_elapsedTime.Milliseconds:D3}";
 
-    // --- C# Kontrol Metotları ---
 
-    [JSInvokable] // JavaScript'ten erişime izin verir
+    [JSInvokable]
     public void StartTimer()
     {
         if (_timer != null) return;
@@ -81,7 +79,6 @@
     private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
     {
         _elapsedTime = DateTime.Now - _startTime;
-        // UI'ı güncellemek için StateHasChanged'i Blazor bağlamında çağır
         InvokeAsync(StateHasChanged);
     }
 
@@ -107,7 +104,6 @@
     [JSInvokable]
     public void Lap()
     {
-        // Yalnızca timer çalışıyorsa tur kaydı yap
         if (_timer != null)
         {
             LapTimes.Add(TimeDisplay);
@@ -120,16 +116,12 @@
         LapTimes.Clear();
     }
 
-    // --- Blazor Yaşam Döngüsü ve Temizlik ---
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Bu bileşenin bir .NET nesne referansını oluştur
             dotNetHelper = DotNetObjectReference.Create(this);
-
-            // JS Interop ile JavaScript dosyasındaki initialize fonksiyonunu çağır
             await JSRuntime.InvokeVoidAsync("stopwatchInterop.initializeKeyboardControl", dotNetHelper);
         }
     }
@@ -137,7 +129,6 @@
     public void Dispose()
     {
         StopTimer();
-        // Bileşen atıldığında .NET referansını temizle
         dotNetHelper?.Dispose();
     }
 }

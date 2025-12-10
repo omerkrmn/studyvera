@@ -19,7 +19,7 @@ public class UpdateUserLessonProgressHandler : IRequestHandler<UpdateUserLessonP
     public async Task<Unit> Handle(UpdateUserLessonProgressCommand request, CancellationToken cancellationToken)
     {
         var ulp = await _manager.UserLessonProgressRepository
-            .FindByCondition(u => u.UserId == request.UserId && u.TopicId == request.TopicId, trackChanges: true)
+            .FindByCondition(u => u.Id == request.ulpId, trackChanges: true)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (ulp == null)
@@ -35,7 +35,6 @@ public class UpdateUserLessonProgressHandler : IRequestHandler<UpdateUserLessonP
             ActivityType = ActivityType.LessonCompleted,
             Description = $"User updated lesson progress for Topic ID {ulp.TopicId} → Status: {ulp.ProgressStatus}"
         });
-
         _manager.UserLessonProgressRepository.Update(ulp);
         await _manager.SaveChangesAsync(cancellationToken);
 
