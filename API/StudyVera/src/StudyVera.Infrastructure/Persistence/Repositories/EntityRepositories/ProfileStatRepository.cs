@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Interfaces;
 namespace StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
@@ -7,6 +8,33 @@ public class ProfileStatRepository : RepositoryBase<ProfileStat>, IProfileStatRe
 {
     public ProfileStatRepository(AppDbContext context) : base(context)
     {
+    }
+
+    public async Task<int> GetGlobalRankAsync(Guid userId, CancellationToken ct)
+    {
+        string sql = @"
+        SELECT 
+            t.UserRank
+        FROM  
+            (
+                SELECT 
+                    UserId,
+                    CAST(ROW_NUMBER() OVER (ORDER BY Score DESC) AS INT) AS UserRank
+                FROM 
+                    ProfileStats
+            ) AS t
+        WHERE 
+            t.UserId = @p0
+    ";
+
+        var userIdParameter = new SqlParameter("@p0", userId);
+
+        var result = await _context.RankResults 
+                                   .FromSqlRaw(sql, userIdParameter) 
+                                   .AsNoTracking()
+                                   .Select(r => r.UserRank) 
+                                   .FirstOrDefaultAsync(ct);
+        return result;
     }
 
     public async Task<int> GetScoreByUser(Guid userId, CancellationToken ct)
