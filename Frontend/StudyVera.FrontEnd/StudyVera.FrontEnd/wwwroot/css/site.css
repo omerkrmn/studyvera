@@ -1,31 +1,24 @@
 ﻿
-/* Gece (Dark) Tema */
 [data-bs-theme="dark"] {
-    /* Genel arka plan ve metin rengi */
-    --bs-body-color: #f8f9fa; /* Açık metin */
-    --bs-body-bg: #212529; /* Koyu arka plan */
-    /* Navbar, Card vb. gibi bileşenlerin koyu arka planı */
+    --bs-body-color: #f8f9fa; 
+    --bs-body-bg: #212529; 
     --bs-tertiary-bg: #343a40;
     --bs-secondary-bg: #495057;
-    /* Opsiyonel: Metin renginin daha açık olması için */
     color: var(--bs-body-color) !important;
 }
-
-/* NOT: Eğer Bootstrap 5 kullanıyorsanız, body veya diğer elemanlarınızın
-   arka planı (BG) rengini CSS değişkenleriyle tanımlamalısınız. */
 body {
     background-color: var(--bs-body-bg) !important;
     color: var(--bs-body-color);
 }
 .drop-zone-top {
-    border-top: 2px solid #007bff; /* Mavi çizgi */
-    padding-top: 10px !important; /* Çizgi için biraz boşluk */
+    border-top: 2px solid #007bff; 
+    padding-top: 10px !important; 
 }
 
 .drop-zone-bottom {
-    border-bottom: 2px solid #007bff; /* Mavi çizgi */
-    padding-bottom: 10px !important; /* Çizgi için biraz boşluk */
+    border-bottom: 2px solid #007bff; 
+    padding-bottom: 10px !important; 
 }
 .drop-zone-empty {
-    border: 2px dashed #3498db; /* Boş günler için kesikli çerçeve */
+    border: 2px dashed #3498db; 
 }

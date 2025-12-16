@@ -1,57 +1,154 @@
 ﻿@page "/"
-<PageTitle>Home</PageTitle>
-<div class="container mt-5 mb-3 py-5">
+<PageTitle>StudyVera - Dijital Özel Koçunuz</PageTitle>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6 text-center text-md-start">
-            <h1 class="text-info fw-bold mb-3">StudyVera Dijital Özel Koçun</h1>
-            <p class="lead">
-                Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...
+<style>
+    .hero-section {
+        background-color: #f8f9fa; 
+        padding-top: 6rem;
+        padding-bottom: 6rem;
+    }
+    [data-bs-theme="dark"] .hero-section {
+        background-color: var(--bs-tertiary-bg);
+    }
+    [data-bs-theme="dark"] .text-muted {
+        color: #b0b0b0 !important;
+    }
+
+
+    .feature-card {
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+        }
+
+    .cta-section {
+        background-color: #17a2b8; 
+        color: white;
+    }
+
+    [data-bs-theme="dark"] .cta-section {
+        background-color: #0d6efd;
+    }
+
+    
+</style>
+
+<section class="hero-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-3 fw-bolder text-info mb-3">
+                    StudyVera: <span class="text-dark">Dijital Özel Koçun</span>
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Öğrenme yolculuğunuzu kişiselleştiren, eksiklerinizi anında tespit eden ve sizi hedeflerinize ulaştıran yapay zeka destekli eğitim asistanı.
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <a href="/auth/register" class="btn btn-info btn-lg px-4 me-md-2 fw-bold shadow-sm">
+                        Hemen Başla!
+                    </a>
+                    <a href="#nasil-calisir" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
+                        Nasıl Çalışır?
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="https://studyvera.tech/assets/images/mainpage-work.jpg"
+                     class="img-fluid rounded-4 shadow-lg border border-info border-3"
+                     alt="StudyVera çalışma görseli" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="my-5" />
+
+<section class="container py-5" id="ozellikler">
+    <h2 class="text-center fw-bold mb-5 text-dark">
+        StudyVera Farkı: <span class="text-info">Başarıya Giden 3 Adım</span>
+    </h2>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card h-100 p-3 shadow-sm border-info feature-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up-arrow display-4 text-success mb-3"></i>
+                    <h5 class="card-title fw-bold">1. Eksik Konu Tespiti</h5>
+                    <p class="card-text text-muted">
+                        Yapay zeka, ilerlemenizi analiz ederek hangi konularda eksiğiniz olduğunu milimetrik hassasiyetle belirler.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 p-3 shadow-sm border-primary feature-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check display-4 text-primary mb-3"></i>
+                    <h5 class="card-title fw-bold">2. Kişiselleştirilmiş Takip</h5>
+                    <p class="card-text text-muted">
+                        Günlük çalışma saatlerinizi, çözdüğünüz soru sayılarını ve ilerlemenizi disiplinli bir şekilde takip eder.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 p-3 shadow-sm border-warning feature-card">
+                <div class="card-body text-center">
+                    <i class="bi bi-lightbulb display-4 text-warning mb-3"></i>
+                    <h5 class="card-title fw-bold">3. Özel Öğrenme Çıktıları</h5>
+                    <p class="card-text text-muted">
+                        Tespit edilen eksik konulara dayalı olarak, size özel çalışma planları ve rehberlik sağlar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5" id="nasil-calisir">
+    <div class="row align-items-center gx-5">
+        <div class="col-lg-6 order-lg-2 mb-4 mb-lg-0">
+            <h3 class="fw-bold text-dark mb-3">
+                <span class="text-info">Neden</span> StudyVera?
+            </h3>
+            <p class="lead text-muted">
+                StudyVera, sadece bir takip uygulaması değil, başarıya giden yolda size özel olarak atanmış dijital bir akıl hocasıdır. Sıradan çalışma düzenlerini unutun, yapay zeka ile hedeflerinize daha hızlı ulaşın.
             </p>
+            <ul class="list-group list-group-flush mt-4">
+                <li class="list-group-item d-flex align-items-center px-0">
+                    <i class="bi bi-check-circle-fill text-info me-2 fs-5"></i>
+                    Gerçek zamanlı ilerleme analizi.
+                </li>
+                <li class="list-group-item d-flex align-items-center px-0">
+                    <i class="bi bi-check-circle-fill text-info me-2 fs-5"></i>
+                    Hedefe özel dinamik çalışma programları.
+                </li>
+                <li class="list-group-item d-flex align-items-center px-0">
+                    <i class="bi bi-check-circle-fill text-info me-2 fs-5"></i>
+                    Motivasyon ve hatırlatma bildirimleri.
+                </li>
+            </ul>
         </div>
-
-        <div class="col-md-6 text-center">
+        <div class="col-lg-6 order-lg-1 text-center">
             <img src="https://studyvera.tech/assets/images/mainpage-work.jpg"
-                 class="img-fluid rounded shadow-sm"
-                 alt="StudyVera çalışma görseli" />
+                 class="img-fluid rounded-4 shadow-lg"
+                 alt="StudyVera Detay görseli" />
         </div>
     </div>
+</section>
 
-
-    <div class="row align-items-center justify-content-center mt-5 mx-5">
-        <div class="col-md-6 text-center">
-            <img src="https://studyvera.tech/assets/images/mainpage-work.jpg"
-                 class="img-fluid rounded shadow-sm"
-                 alt="StudyVera çalışma görseli" />
-        </div>
-
-        <div class="col-md-6 text-center text-md-start">
-            <h1 class="text-info fw-bold mb-3">StudyVera Dijital Özel Koçun</h1>
-            <p class="lead">
-                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s...
-            </p>
-        </div>
+<section class=" text-center py-5 mt-5">
+    <div class="container">
+        <h2 class="fw-bold mb-3">Hazır Mısın? Başarıya Bugün Adım At!</h2>
+        <p class="lead mb-4">
+            Binlerce öğrenci gibi sen de StudyVera ile potansiyelini maksimize et.
+        </p>
+        <a href="/kayitol" class="btn btn-light btn-lg px-5 fw-bold shadow-lg text-info">
+            StudyVera'yı Ücretsiz Dene
+        </a>
     </div>
-    <div class="row justify-content-center text-start mt-5">
-        <div class="col-lg-8">
-            <h3 class="fw-bold text-info mb-4">StudyVera ile</h3>
-
-            <ol class="list-group list-group-numbered shadow-sm rounded-3">
-                <li class="list-group-item py-3">
-                    <i class="bi bi-graph-up-arrow text-success me-2"></i>
-                    <strong>Eksik konu tespiti</strong> — ilerlemeni analiz ederek hangi konularda eksiğin olduğunu belirler.
-                </li>
-                <li class="list-group-item py-3">
-                    <i class="bi bi-calendar-check text-primary me-2"></i>
-                    <strong>Günlük takip</strong> — her gün ne kadar ilerlediğini takip eder.
-                </li>
-                <li class="list-group-item py-3">
-                    <i class="bi bi-lightbulb text-warning me-2"></i>
-                    <strong>Eksik konuya dayalı öğrenme çıktıları</strong> — eksik olduğun konularda sana özel yönlendirme sağlar.
-                </li>
-            </ol>
-        </div>
-    </div>
-</div>
-
+</section>

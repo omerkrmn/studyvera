@@ -1,0 +1,100 @@
+﻿@page "/contact"
+@using System.ComponentModel.DataAnnotations
+@using StudyVera.FrontEnd.ComponentModel.DataAnnotations
+@using StudyVera.FrontEnd.Services.Concrats
+
+<p>Sorularınızı, geri bildirimlerinizi veya iş tekliflerinizi aşağıdaki formu kullanarak bize iletebilirsiniz. En kısa sürede size dönüş yapacağız!</p>
+
+<div class="contact-form-container">
+    <EditForm Model="@ContactModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label for="name">Adınız Soyadınız:</label>
+            <InputText id="name" class="form-control" @bind-Value="ContactModel.Name" />
+            <ValidationMessage For="@(() => ContactModel.Name)" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-posta Adresiniz:</label>
+            <InputText id="email" class="form-control" @bind-Value="ContactModel.Email" />
+            <ValidationMessage For="@(() => ContactModel.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label for="subject">Konu:</label>
+            <InputText id="subject" class="form-control" @bind-Value="ContactModel.Subject" />
+            <ValidationMessage For="@(() => ContactModel.Subject)" />
+        </div>
+
+        <div class="form-group">
+            <label for="message">Mesajınız:</label>
+            <InputTextArea id="message" class="form-control" @bind-Value="ContactModel.Message" rows="5" />
+            <ValidationMessage For="@(() => ContactModel.Message)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3" disabled="@IsLoading">
+            @if (IsLoading)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span> Gönderiliyor...</span>
+            }
+            else
+            {
+                <span>Mesajı Gönder</span>
+            }
+        </button>
+
+        @if (!string.IsNullOrEmpty(MessageStatus))
+        {
+            <div class="alert @MessageStatusCss mt-3" role="alert">
+                @MessageStatus
+            </div>
+        }
+    </EditForm>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public ContactFormModel ContactModel { get; set; } = new ContactFormModel();
+
+    private bool IsLoading = false;
+    private string MessageStatus = string.Empty;
+    private string MessageStatusCss = string.Empty;
+
+    [Inject]
+    private IEmailService EmailService { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        IsLoading = true;
+        MessageStatus = string.Empty; 
+
+        try
+        {
+            var success = await EmailService.SendContactEmail(ContactModel);
+
+            if (success)
+            {
+                MessageStatus = "✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.";
+                MessageStatusCss = "alert-success";
+                ContactModel = new ContactFormModel(); 
+            }
+            else
+            {
+                throw new Exception("Mail gönderme servisi bir hata ile karşılaştı.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Mail Gönderim Hatası: {ex.Message}");
+            MessageStatus = "❌ Mesajınızı gönderirken bir hata oluştu. Lütfen daha sonra tekrar deneyin veya doğrudan " +
+                            "**info@sizinadresiniz.com** adresine mail atın.";
+            MessageStatusCss = "alert-danger";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}

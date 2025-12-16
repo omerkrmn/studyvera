@@ -10,83 +10,112 @@
 @inject ILocalStorageService LocalStorage
 @inject CustomAuthStateProvider CustomAuthStateProvider
 
-<PageTitle>Register</PageTitle>
+<PageTitle>StudyVera - Kayıt Ol</PageTitle>
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4 text-primary">Register</h2>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
 
-    <EditForm Model="@registerModel" OnValidSubmit="@HandleRegister">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+                    <h2 class="text-center mb-4 text-info fw-bold">
+                        StudyVera'ya Katılın
+                    </h2>
+                    <p class="text-center text-muted mb-4">
+                        Dijital Koçunuzla tanışmak için bilgilerinizi girin.
+                    </p>
 
-        <div class="mb-3">
-            <label class="form-label">First Name</label>
-            <InputText @bind-Value="registerModel.FirstName"
-                       class="form-control"
-                       placeholder="Enter first name" />
-            <ValidationMessage For="@(() => registerModel.FirstName)" />
+                    <EditForm Model="@registerModel" OnValidSubmit="@HandleRegister">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-warning p-2" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Adınız</label>
+                                <InputText @bind-Value="registerModel.FirstName"
+                                           class="form-control"
+                                           placeholder="Örn: John" />
+                                <ValidationMessage For="@(() => registerModel.FirstName)" class="text-danger small" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Soyadınız</label>
+                                <InputText @bind-Value="registerModel.LastName"
+                                           class="form-control"
+                                           placeholder="Örn: Doe" />
+                                <ValidationMessage For="@(() => registerModel.LastName)" class="text-danger small" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Kullanıcı Adı</label>
+                            <InputText @bind-Value="registerModel.UserName"
+                                       class="form-control"
+                                       placeholder="studyvera_kullanicisi" />
+                            <ValidationMessage For="@(() => registerModel.UserName)" class="text-danger small" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">E-posta</label>
+                            <InputText @bind-Value="registerModel.Email"
+                                       class="form-control"
+                                       placeholder="john_doe@email.com" />
+                            <ValidationMessage For="@(() => registerModel.Email)" class="text-danger small" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Şifre</label>
+                            <InputText @bind-Value="registerModel.Password"
+                                       class="form-control"
+                                       placeholder="Minimum 6 karakter"
+                                       type="password" />
+                            <ValidationMessage For="@(() => registerModel.Password)" class="text-danger small" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Hedef Sınavınızı Seçiniz</label>
+                            <InputSelect @bind-Value="registerModel.TargetExam" class="form-select">
+                                <option value="">--- Sınav Seçiniz ---</option>
+                                @foreach (var item in Enum.GetValues<TargetExam>())
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => registerModel.TargetExam)" class="text-danger small" />
+                        </div>
+
+                        <button type="submit" class="btn btn-info btn-lg w-100 fw-bold" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                        }
+                            else
+                            {
+                                <span>Hesap Oluştur</span>
+                            }
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger mt-3 text-center">@errorMessage</div>
+                        }
+                    </EditForm>
+
+                    <div class="text-center mt-4">
+                        <a href="/auth/login" class="text-muted">Zaten hesabın var mı? Giriş Yap</a>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Last Name</label>
-            <InputText @bind-Value="registerModel.LastName"
-                       class="form-control"
-                       placeholder="Enter last name" />
-            <ValidationMessage For="@(() => registerModel.LastName)" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Username</label>
-            <InputText @bind-Value="registerModel.UserName"
-                       class="form-control"
-                       placeholder="Enter username" />
-            <ValidationMessage For="@(() => registerModel.UserName)" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <InputText @bind-Value="registerModel.Email"
-                       class="form-control"
-                       placeholder="Enter email" />
-            <ValidationMessage For="@(() => registerModel.Email)" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <InputText @bind-Value="registerModel.Password"
-                       class="form-control"
-                       placeholder="Enter password"
-                       type="password" />
-            <ValidationMessage For="@(() => registerModel.Password)" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Sınav Seçiniz</label>
-            <InputSelect @bind-Value="registerModel.TargetExam" class="form-control">
-                <option value="">Seçiniz</option>
-                @foreach (var item in Enum.GetValues<TargetExam>())
-                {
-                    <option value="@item">@item</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="@(() => registerModel.TargetExam)" />
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
-            @(isLoading ? "Registering..." : "Register")
-        </button>
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger mt-3">@errorMessage</div>
-        }
-    </EditForm>
+    </div>
 </div>
 
 @code {
     private RegisterModel registerModel = new();
     private bool isLoading = false;
     private string? errorMessage;
+
+    // Diğer tüm C# kodları (HandleRegister, RegisterModel, TargetExam Enum) aynı kalmıştır.
 
     private async Task HandleRegister()
     {
@@ -112,20 +141,27 @@
 
                 await LocalStorage.SetItemAsync("accessToken", token);
                 CustomAuthStateProvider.NotifyUserAuthentication(token);
+
+                // Başarılı kayıt sonrası bir karşılama mesajı gösterilebilir
+                await JS.InvokeVoidAsync("alert", "Kayıt başarılı! StudyVera'ya hoş geldiniz.");
+
                 Navigation.NavigateTo("/", true);
             }
             else
             {
 
                 var errorContent = await response.Content.ReadAsStringAsync();
+
+                // Hata içeriğini JSON olarak ayrıştırmak ve daha kullanıcı dostu mesaj vermek daha iyi olabilir
+                // Ancak şimdilik mevcut yapıyı koruyalım:
                 errorMessage = string.IsNullOrWhiteSpace(errorContent)
-                    ? "Registration failed."
+                    ? "Kayıt işlemi başarısız oldu. Lütfen bilgilerinizi kontrol edin."
                     : errorContent;
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"An error occurred: {ex.Message}";
+            errorMessage = $"Bir hata oluştu: {ex.Message}";
         }
         finally
         {
@@ -135,22 +171,22 @@
 
     public class RegisterModel
     {
-        [Required]
+        [Required(ErrorMessage = "Ad alanı zorunludur.")]
         public string FirstName { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Soyad alanı zorunludur.")]
         public string LastName { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Kullanıcı adı zorunludur.")]
         public string UserName { get; set; } = string.Empty;
 
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "E-posta alanı zorunludur."), EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
         public string Email { get; set; } = string.Empty;
 
-        [Required, MinLength(6)]
+        [Required(ErrorMessage = "Şifre alanı zorunludur."), MinLength(6, ErrorMessage = "Şifreniz en az 6 karakter olmalıdır.")]
         public string Password { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Hedef sınav seçimi zorunludur.")]
         public TargetExam TargetExam { get; set; }
 
         public override string ToString()
