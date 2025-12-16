@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using StudyVera.Application.Dtos.ProfileSummary;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Entities.Identity;
+using System.Reflection.Emit;
 
 namespace StudyVera.Infrastructure.Persistence;
 
@@ -18,6 +20,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public DbSet<LessonSchedule> LessonSchedules { get; set; }
     public DbSet<UserSettings> UserSettings { get; set; }
     public DbSet<QuestionStatDetail> QuestionStatDetails { get; set; }
+    public DbSet<UserRankResult> RankResults { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -26,6 +29,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<UserRankResult>().HasNoKey();
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
     
