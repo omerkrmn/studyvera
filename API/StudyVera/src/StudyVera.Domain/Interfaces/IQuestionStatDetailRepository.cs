@@ -14,6 +14,6 @@ public interface IQuestionStatDetailRepository : IRepository<QuestionStatDetail>
     /// </summary>
     /// <param name="questionStatDetailId"></param>
     /// <returns></returns>
-    public (Task<int> TotalSolvedCount,  Task<int> TotalCorrectCount) GetSum(int questionStatDetailId);
+    public (Task<int> TotalSolvedCount,  Task<int> TotalCorrectCount) GetSumAsync(int questionStatDetailId);
 
 }

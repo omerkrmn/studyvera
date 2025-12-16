@@ -14,17 +14,16 @@ public class QuestionStatDetailRepository : RepositoryBase<QuestionStatDetail>, 
     public QuestionStatDetailRepository(AppDbContext context) : base(context)
     {
     }
-
-    public (Task<int> TotalSolvedCount, Task<int> TotalCorrectCount) GetSum(int questionStatDetailId)
+    public (Task<int> TotalSolvedCount, Task<int> TotalCorrectCount) GetSumAsync(int questionStatDetailId)
     {
         return (_context.QuestionStatDetails
-                .Select(q => new { q.Id, q.SolvedCount })
-                .Where(q => q.Id == questionStatDetailId)
-                .SumAsync(q => q.SolvedCount),
+               .Select(q => new { q.Id, q.SolvedCount })
+               .Where(q => q.Id == questionStatDetailId)
+               .SumAsync(q => q.SolvedCount),
 
-                _context.QuestionStatDetails
-                .Select(q => new { q.Id, q.CorrectCount })
-                .Where(q => q.Id == questionStatDetailId)
-                .SumAsync(q => q.CorrectCount));
+               _context.QuestionStatDetails
+               .Select(q => new { q.Id, q.CorrectCount })
+               .Where(q => q.Id == questionStatDetailId)
+               .SumAsync(q => q.CorrectCount));
     }
 }
