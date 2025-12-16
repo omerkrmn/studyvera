@@ -4,5 +4,5 @@ namespace StudyVera.Domain.Interfaces;
 
 public interface IUserQuestionStatRepository : IRepository<UserQuestionStat>
 {
-    //public Task<List<UserQuestionStatDto>> GetAllByUser(Guid userId, UserQuestionStatParameters uqsParameters, CancellationToken ct);
+    public Task<(int TotalSolvedCount, int TotalCorrectCount)> GetSumAsync(Guid userId, CancellationToken c);
 }
