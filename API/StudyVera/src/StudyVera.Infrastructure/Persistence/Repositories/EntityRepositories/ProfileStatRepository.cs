@@ -29,21 +29,37 @@ public class ProfileStatRepository : RepositoryBase<ProfileStat>, IProfileStatRe
 
         var userIdParameter = new SqlParameter("@p0", userId);
 
-        var result = await _context.RankResults 
-                                   .FromSqlRaw(sql, userIdParameter) 
+        var result = await _context.RankResults
+                                   .FromSqlRaw(sql, userIdParameter)
                                    .AsNoTracking()
-                                   .Select(r => r.UserRank) 
+                                   .Select(r => r.UserRank)
                                    .FirstOrDefaultAsync(ct);
         return result;
     }
 
-    public async Task<int> GetScoreByUser(Guid userId, CancellationToken ct)
+    public async Task<int> GetScoreByUserAsync(Guid userId, CancellationToken ct)
     {
         var userscore = await FindByCondition(u => u.UserId == userId, false).FirstOrDefaultAsync(ct);
         return userscore?.Score ?? 0;
     }
 
-    public async Task UpdateScore(Guid userId, CancellationToken ct)
+    public async Task UpdateScoreByCorrectQuestionCountAsync(Guid userId, int solvedQuestinCount, CancellationToken ct,int priority = 5)
+    {
+        var userScore = FindByCondition(u => u.UserId == userId, true).FirstOrDefault();
+
+        if (userScore != null)
+        {
+            userScore.Score += solvedQuestinCount * priority;
+            Update(userScore);
+        }
+        else
+        {
+            Create(new ProfileStat { UserId = userId, Score = solvedQuestinCount * 10 });
+        }
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task UpdateScoreAsync(Guid userId, CancellationToken ct)
     {
         var userScore = FindByCondition(u => u.UserId == userId, true).FirstOrDefault();
 
@@ -54,6 +70,5 @@ public class ProfileStatRepository : RepositoryBase<ProfileStat>, IProfileStatRe
         }
         Create(new ProfileStat { UserId = userId, Score = 10 });
         await _context.SaveChangesAsync(ct);
-
     }
 }
