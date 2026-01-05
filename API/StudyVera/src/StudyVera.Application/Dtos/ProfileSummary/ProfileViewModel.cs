@@ -19,11 +19,6 @@ public class ProfileViewModel
 
     public Dictionary<DateTime, int> ActivityData { get; set; } = new();
 
-    public Dictionary<string, int> WeakTopics { get; set; } = new()
-        {
-            { "Kimya: Çözeltiler", 55 },
-            { "Matematik: Trigonometri", 62 },
-            { "Biyoloji: Kalıtım", 59 }
-        };
+    public Dictionary<string, int> DeficiencyTopics { get; set; } = new();
 
 }
