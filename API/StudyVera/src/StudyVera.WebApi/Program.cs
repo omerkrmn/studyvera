@@ -50,6 +50,8 @@ builder.Services.ConfigureMediatR();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureJwtSettings(builder.Configuration);
 builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.ConfigureServices();
+
 
 builder.Services.AddCors(options =>
 {

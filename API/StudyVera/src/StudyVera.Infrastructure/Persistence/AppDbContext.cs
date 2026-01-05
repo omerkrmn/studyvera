@@ -29,7 +29,11 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.Entity<UserRankResult>().HasNoKey();
+        builder.Entity<UserRankResult>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView(null);
+        });
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
     

@@ -22,6 +22,8 @@ public class GetAllByUserQuestionStatHandler : IRequestHandler<GetAllByUserQuest
 
     public async Task<List<QuestionStatDetailDto>> Handle(GetAllByUserQuestionStatQuery request, CancellationToken cancellationToken)
     {
+
+        
         var allQuestionStatDetails =  await _manager
                                             .QuestionStatDetailRepository
                                             .FindByCondition(qsd => qsd.UserQuestionStatId == request.QuestionStatId, false)

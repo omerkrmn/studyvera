@@ -125,6 +125,14 @@ namespace StudyVera.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("StudyVera.Application.Dtos.ProfileSummary.UserRankResult", b =>
+                {
+                    b.Property<int>("UserRank")
+                        .HasColumnType("int");
+
+                    b.ToTable("RankResults");
+                });
+
             modelBuilder.Entity("StudyVera.Domain.Entities.Exam", b =>
                 {
                     b.Property<int>("Id")

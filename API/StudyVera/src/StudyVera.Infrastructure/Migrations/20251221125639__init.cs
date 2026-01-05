@@ -43,6 +43,16 @@ namespace StudyVera.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RankResults",
+                columns: table => new
+                {
+                    UserRank = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserSettings",
                 columns: table => new
                 {
@@ -290,8 +300,8 @@ namespace StudyVera.Infrastructure.Migrations
                     LessonId = table.Column<int>(type: "int", nullable: false),
                     TopicId = table.Column<int>(type: "int", nullable: true),
                     DayOfWeek = table.Column<int>(type: "int", nullable: false),
-                    StartTime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    EndTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    StartTime = table.Column<TimeSpan>(type: "time", nullable: true),
+                    EndTime = table.Column<TimeSpan>(type: "time", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastUpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -512,8 +522,7 @@ namespace StudyVera.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_LessonSchedules_UserId",
                 table: "LessonSchedules",
-                column: "UserId",
-                unique: true);
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProfileStats_UserId",
@@ -583,6 +592,9 @@ namespace StudyVera.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "QuestionStatDetails");
+
+            migrationBuilder.DropTable(
+                name: "RankResults");
 
             migrationBuilder.DropTable(
                 name: "UserActivityHistories");

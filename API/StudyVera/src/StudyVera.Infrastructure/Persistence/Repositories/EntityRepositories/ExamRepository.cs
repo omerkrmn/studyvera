@@ -1,4 +1,5 @@
-﻿using StudyVera.Application.Common.Exceptions;
+﻿using Microsoft.EntityFrameworkCore;
+using StudyVera.Application.Common.Exceptions;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Interfaces;
 

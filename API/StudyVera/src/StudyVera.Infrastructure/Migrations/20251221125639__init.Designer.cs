@@ -12,8 +12,8 @@ using StudyVera.Infrastructure.Persistence;
 namespace StudyVera.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251206144815__lessonschedule-update")]
-    partial class _lessonscheduleupdate
+    [Migration("20251221125639__init")]
+    partial class _init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -126,6 +126,14 @@ namespace StudyVera.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("StudyVera.Application.Dtos.ProfileSummary.UserRankResult", b =>
+                {
+                    b.Property<int>("UserRank")
+                        .HasColumnType("int");
+
+                    b.ToTable("RankResults");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Exam", b =>
@@ -516,7 +524,7 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("EndTime")
+                    b.Property<TimeSpan?>("EndTime")
                         .HasColumnType("time");
 
                     b.Property<DateTime>("LastUpdatedAt")
@@ -525,7 +533,7 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("StartTime")
+                    b.Property<TimeSpan?>("StartTime")
                         .HasColumnType("time");
 
                     b.Property<int?>("TopicId")
