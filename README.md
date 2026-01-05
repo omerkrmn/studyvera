@@ -1,4 +1,7 @@
 # studyvera
+
+<a href="studyvera.tech">Site Address</a>
+
 Proje Amacı
 ***
 Sınava yönelik çalışan öğrencilerin çalışma takibini almak. hangi konudan kaç soru çözdüğünü barındırmak ve bunlar üzerinden eksik olduğu konuları tespit etmek ve yine eksik konulara ve çalışılmış konulara göre uygun haftalık çalışma programı hazırlamak.
