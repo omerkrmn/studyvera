@@ -6,6 +6,8 @@ using StudyVera.Application.Services;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Entities.Identity;
 using StudyVera.Domain.Interfaces;
+using StudyVera.Domain.Interfaces.Analysis;
+using StudyVera.Domain.Services;
 using StudyVera.Infrastructure.Identity;
 using StudyVera.Infrastructure.Persistence.Repositories;
 using System.Text;
@@ -56,7 +58,10 @@ public static class ApplicationExtensions
 
     public static void ConfigureJwtSettings(this IServiceCollection services, IConfiguration configuration)=>
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
-    
+    public static void ConfigureServices(this IServiceCollection services)
+    {
+        services.AddScoped<ITopicDeficiencyService, TopicDeficiencyService>();
+    }
     public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
