@@ -22,7 +22,7 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
     {
         var uqs = await _manager.UserQuestionStatRepository.FindByCondition(
             uqs => uqs.UserId == request.UserId && uqs.TopicId == request.TopicId,
-            true 
+            true
         ).FirstOrDefaultAsync(ct);
 
         var newDetail = new QuestionStatDetail
@@ -49,13 +49,18 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
                 TotalCorrectCount = request.CorrectCount,
                 TotalSolvedCount = request.SolvedCount,
                 LastAttemptAt = DateTime.UtcNow,
-         
+
                 QuestionStatDetails = new List<QuestionStatDetail> { newDetail }
             };
 
             _manager.UserQuestionStatRepository.Create(newStat);
         }
-        
+        var topic = await _manager.TopicRepository.FindByCondition(t => t.Id == request.TopicId, false).SingleOrDefaultAsync(ct);
+
+        int topicPriority = topic?.Priority is byte p ? p : 5;
+
+        await _manager.ProfileStatRepository.UpdateScoreByCorrectQuestionCountAsync(request.UserId, request.CorrectCount, ct, topicPriority);
+
         _manager.UserActivityHistoryRepository.Create(new()
         {
             UserId = request.UserId,
