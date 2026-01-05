@@ -1,10 +1,13 @@
 ﻿@page "/profile"
 @using Microsoft.AspNetCore.Components.Authorization
 @using StudyVera.FrontEnd.Components
+@using StudyVera.FrontEnd.Models.Common
 @using StudyVera.FrontEnd.Services.Common
+@using StudyVera.FrontEnd.Services.Concrats
 @using static StudyVera.FrontEnd.Pages.Auth.Register
 <PageTitle>StudyVera - Profil ve Performans Analizi</PageTitle>
 @inject UserSettingsService UserSettings
+@inject IProfileSummaryService ProfileSummaryService
 
 <div class="container my-5">
     <h2 class="text-info fw-bold mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
@@ -93,14 +96,17 @@
                 Yapay zeka analizine göre, bu konulara odaklanmanız skorunuzu en hızlı şekilde yükseltecektir.
             </p>
             <ul class="list-group list-group-flush">
-                @foreach (var topic in profileData.WeakTopics)
+                @foreach (var topic in profileData.DeficiencyTopics)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        @topic.Key
-                        <span class="badge bg-danger rounded-pill">
-                            %@topic.Value Başarı Oranı
-                        </span>
-                    </li>
+                    if (topic.Value >100)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            @topic.Key
+                            <span class="badge bg-@(topic.Value > 200 ? "danger" : "warning") rounded-pill">
+                                @topic.Value Başarı Puanı
+                            </span>
+                        </li>
+                    }
                 }
             </ul>
         </div>
@@ -181,30 +187,7 @@
         var settings = await UserSettings.Load();
         try
         {
-            profileData = new ProfileViewModel
-            {
-                UserName = "VeraBaşarılıÖğrenci",
-                Email = "basarili@studyvera.com",
-
-                TargetExam =settings.TargetExam,
-
-                TotalQuestions = 78945,
-                UserScore = 2105,
-                GlobalRank = 123,
-                BadgesEarned = 12,
-                CurrentStreak = 42,
-                GoalRemainingQuestions = 150,
-                GoalCompletionPercentage = 95,
-                WeakTopics = new Dictionary<string, int>
-                {
-                    { "Fizik: Elektrik ve Manyetizma", 51 },
-                    { "Edebiyat: Divan Şiiri", 60 },
-                    { "Matematik: Türev", 58 }
-                },
-                ActivityData = GenerateMockActivityData() 
-            };
-
-
+            profileData = await ProfileSummaryService.GetProfileSummaryAsync();
             isDataLoaded = true;
         }
         catch (Exception ex)
@@ -217,31 +200,6 @@
         }
     }
 
-    
-    public class ProfileViewModel
-    {
-        public string UserName { get; set; } = "StudyVeraKullanicisi";
-        public string Email { get; set; } = "user@studyvera.com";
-        public string TargetExam { get; set; } = "TYT & AYT";
-        public int TotalQuestions { get; set; } = 78945;
-        public int UserScore { get; set; } = 2105;
-        public int GlobalRank { get; set; } = 123;
-
-        public int BadgesEarned { get; set; } = 8;
-        public int CurrentStreak { get; set; } = 35;
-        public int GoalRemainingQuestions { get; set; } = 250;
-        public int GoalCompletionPercentage { get; set; } = 75;
-
-        public Dictionary<DateTime, int> ActivityData { get; set; } = new();
-
-        public Dictionary<string, int> WeakTopics { get; set; } = new()
-        {
-            { "Kimya: Çözeltiler", 55 },
-            { "Matematik: Trigonometri", 62 },
-            { "Biyoloji: Kalıtım", 59 }
-        };
-
-    }
 
     public enum TargetExam
     {

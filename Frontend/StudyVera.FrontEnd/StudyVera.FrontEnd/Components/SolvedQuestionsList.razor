@@ -27,7 +27,7 @@
             {
                 @foreach (var question in Questions)
                 {
-                    float eksik = intCalculateEksik(question.TotalSolvedCount, question.TotalCorrectCount, question.LastAttemptAt, question.TopicId);
+                    float eksik = CalculateDeficiencyScore(question.TotalSolvedCount, question.TotalCorrectCount, question.LastAttemptAt, question.TopicId);
                     var isExpanded = expandedId == question.Id;
                     <tr class="align-middle"
                         title="konu eksik skoru : @eksik"
@@ -100,20 +100,25 @@
 
         StateHasChanged();
     }
-    private float intCalculateEksik(int TotalSolvedCount, int CorrectCount, DateTime AttemptedAt, int topicId)
+    public float CalculateDeficiencyScore(int totalSolvedCount, int correctCount, DateTime lastAttemptAt, float topicPriority)
     {
-        int beforeDays = (DateTime.Now - AttemptedAt).Days;
-        float p = 0.60f;
-        int minGuven = 10;
-        float priorty = Topics.Where(t => t.Id == topicId).Select(t => t.Priority).FirstOrDefault();
-        float w1 = 0.7f;
-        float w2 = 0.3f;
-        int GuncellikSiniri = 90;
-        float GuncellikPuanı = Math.Min(beforeDays, GuncellikSiniri);
-        float ABY_Ratio = (((float)CorrectCount + minGuven * p) / ((float)TotalSolvedCount + minGuven));
-        float ABY_Percent = ABY_Ratio * 100f;
-        float BasariKayipPuanı = 100f - ABY_Percent;
-        float EksikPuanı = (w1 * BasariKayipPuanı) + (w2 * GuncellikPuanı);
-        return EksikPuanı * priorty;
+        const float expectedSuccessRate = 0.60f; 
+        const float successWeight = 0.7f;        
+        const float recencyWeight = 0.3f;        
+        const int confidenceThreshold = 10;     
+        const int recencyLimitDays = 90;        
+
+        int daysSinceLastAttempt = (DateTime.Now - lastAttemptAt).Days;
+        float recencyScore = Math.Min(daysSinceLastAttempt, recencyLimitDays);
+
+        float adjustedSuccessRatio = ((float)correctCount + (confidenceThreshold * expectedSuccessRate))
+                                    / (totalSolvedCount + confidenceThreshold);
+
+        float successPercentage = adjustedSuccessRatio * 100f;
+        float successLossScore = 100f - successPercentage;
+
+        float deficiencyScore = (successWeight * successLossScore) + (recencyWeight * recencyScore);
+
+        return deficiencyScore * topicPriority;
     }
 }
