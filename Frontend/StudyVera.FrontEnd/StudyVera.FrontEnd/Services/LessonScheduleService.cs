@@ -14,7 +14,7 @@ public class LessonScheduleService :ServiceHelper, ILessonScheduleService
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorage;
 
-    private readonly string _apiUrl = $"{AppConsts.ApiBaseUrl}lesson-schedule";
+    private readonly string _apiUrl = $"{AppConsts.ApiBaseUrl}profile/lesson-schedule";
 
     public LessonScheduleService(HttpClient httpClient, ILocalStorageService localStorage) : base(localStorage,httpClient)
     {
