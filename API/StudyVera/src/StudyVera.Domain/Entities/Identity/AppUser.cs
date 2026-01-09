@@ -23,7 +23,7 @@ public class AppUser : IdentityUser<Guid>
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiryTime { get; set; }
 
-    public UserSettings? UserSettings { get; set; }
+    public UserProfile? UserSettings { get; set; }
     public ICollection<LessonSchedule>? LessonSchedule { get; set; }
 
     [Range(0,5)]

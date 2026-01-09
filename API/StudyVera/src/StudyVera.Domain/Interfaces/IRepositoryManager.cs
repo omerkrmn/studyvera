@@ -11,7 +11,7 @@ public interface IRepositoryManager
     IUserLessonProgressRepository UserLessonProgressRepository { get; }
     IUserQuestionStatRepository UserQuestionStatRepository { get; }
     IProfileStatRepository ProfileStatRepository { get; }
-    IUserSettingsRepository UserSettingsRepository { get; }
+    IUserProfileRepository UserProfileRepository{ get; }
     ILessonScheduleRepository LessonScheduleRepository { get; }
     IQuestionStatDetailRepository QuestionStatDetailRepository { get; }
 

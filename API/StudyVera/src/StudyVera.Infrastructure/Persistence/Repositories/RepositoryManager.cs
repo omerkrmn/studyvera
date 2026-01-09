@@ -14,7 +14,7 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
         private readonly Lazy<IUserLessonProgressRepository> _userLessonProgressRepository;
         private readonly Lazy<IUserQuestionStatRepository> _userQuestionStatRepository;
         private readonly Lazy<IProfileStatRepository> _profileStatRepository;
-        private readonly Lazy<IUserSettingsRepository> _userSettingsRepository;
+        private readonly Lazy<IUserProfileRepository> _userProfileRepository;
         private readonly Lazy<ILessonScheduleRepository> _lessonScheduleRepository;
         private readonly Lazy<IQuestionStatDetailRepository> _questionStatDetailRepository;
         #endregion
@@ -28,7 +28,7 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
             _userLessonProgressRepository = new Lazy<IUserLessonProgressRepository>(() => new UserLessonProgressRepository(_context));
             _userQuestionStatRepository = new Lazy<IUserQuestionStatRepository>(() => new UserQuestionStatRepository(_context));
             _profileStatRepository = new Lazy<IProfileStatRepository>(() => new ProfileStatRepository(_context));
-            _userSettingsRepository = new Lazy<IUserSettingsRepository>(() => new UserSettingsRepository(_context));
+            _userProfileRepository = new Lazy<IUserProfileRepository>(() => new UserProfileRepository(_context));
             _lessonScheduleRepository = new Lazy<ILessonScheduleRepository>(() => new LessonScheduleRepository(_context));
             _questionStatDetailRepository = new Lazy<IQuestionStatDetailRepository>(() => new QuestionStatDetailRepository(_context));
         }
@@ -41,7 +41,7 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
         public IUserLessonProgressRepository UserLessonProgressRepository => _userLessonProgressRepository.Value;
         public IUserQuestionStatRepository UserQuestionStatRepository => _userQuestionStatRepository.Value;
         public IProfileStatRepository ProfileStatRepository => _profileStatRepository.Value;
-        public IUserSettingsRepository UserSettingsRepository => _userSettingsRepository.Value;
+        public IUserProfileRepository UserProfileRepository => _userProfileRepository.Value;
         public ILessonScheduleRepository LessonScheduleRepository => _lessonScheduleRepository.Value;
         public IQuestionStatDetailRepository QuestionStatDetailRepository => _questionStatDetailRepository.Value;
         #endregion

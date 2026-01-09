@@ -3,12 +3,12 @@ using StudyVera.Domain.Interfaces;
 
 namespace StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
 
-public class UserSettingsRepository : RepositoryBase<UserSettings>, IUserSettingsRepository
+public class UserProfileRepository : RepositoryBase<UserProfile>, IUserProfileRepository
 {
-    public UserSettingsRepository(AppDbContext context) : base(context)
+    public UserProfileRepository(AppDbContext context) : base(context)
     {
     }
-    public Task<UserSettings> GetByUserIdAsync(Guid userId, CancellationToken ct)
+    public Task<UserProfile> GetByUserIdAsync(Guid userId, CancellationToken ct)
     {
         throw new NotImplementedException();
     }

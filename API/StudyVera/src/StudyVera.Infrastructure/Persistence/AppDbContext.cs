@@ -18,7 +18,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public DbSet<UserLessonProgress> UserLessonProgresses { get; set; }
     public DbSet<UserQuestionStat> UserQuestionStats { get; set; }
     public DbSet<LessonSchedule> LessonSchedules { get; set; }
-    public DbSet<UserSettings> UserSettings { get; set; }
+    public DbSet<UserProfile> UserSettings { get; set; }
     public DbSet<QuestionStatDetail> QuestionStatDetails { get; set; }
     public DbSet<UserRankResult> RankResults { get; set; }
 
