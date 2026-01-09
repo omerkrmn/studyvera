@@ -22,6 +22,7 @@ namespace StudyVera.WebApi.Middleware
                             BadRequestException=>StatusCodes.Status400BadRequest,
                             NotFoundException => StatusCodes.Status404NotFound,
                             ParameterNullException => StatusCodes.Status400BadRequest,
+                            UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                             _ => StatusCodes.Status500InternalServerError
                         };
 
