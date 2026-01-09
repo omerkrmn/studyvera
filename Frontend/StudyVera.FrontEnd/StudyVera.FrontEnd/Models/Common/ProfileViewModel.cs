@@ -1,5 +1,4 @@
 ﻿namespace StudyVera.FrontEnd.Models.Common;
-
 public class ProfileViewModel
 {
     public string UserName { get; set; } = "StudyVeraKullanicisi";

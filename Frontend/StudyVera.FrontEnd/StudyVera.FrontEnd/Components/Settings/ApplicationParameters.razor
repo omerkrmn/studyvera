@@ -1,102 +1,128 @@
 ﻿@using Blazored.LocalStorage
-@using StudyVera.FrontEnd.Models.Common
+@using StudyVera.FrontEnd.Models.UserProfile
+@using StudyVera.FrontEnd.Services.Concrats
+@inject IUserProfileService ProfileService
 @inject ILocalStorageService LocalStorage
-<h3 class="mb-4">Application Parameters</h3>
 
-
-
-<EditForm Model="@parameters" OnValidSubmit="SaveChanges">
-    <div class="mb-3 input-group" style="max-width: 100%;">
-        <label class="input-group-text">Hedef Sınav</label>
-        <span class="form-control">@parameters.TargetExam</span>
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h4 class="fw-bold"><i class="bi bi-sliders2-vertical me-2 text-primary"></i>Uygulama Parametreleri</h4>
+        <p class="text-muted small">Çalışma deneyiminizi kişiselleştirin.</p>
     </div>
 
-    <div class="mb-3 input-group">
-        <label class="input-group-text">Tamamlanan Ders Programı Rengi</label>
+    <div class="card-body p-4">
+        <EditForm Model="@parameters" OnValidSubmit="SaveChanges">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3 text-uppercase small text-primary">Çalışma Hedefleri</h6>
 
-        <InputSelect class="form-select" @bind-Value="parameters.ColorHex">
+                    <div class="form-floating mb-3">
+                        <InputNumber class="form-control" @bind-Value="parameters.DailyStudyMinuteGoal" id="goalTime" />
+                        <label for="goalTime">Günlük Hedef Süre (Dakika)</label>
+                    </div>
 
-            <option value="#ff0000" style="background-color:#ff0000; color:white;">
-                Kırmızı
-            </option>
+                    <div class="form-floating mb-3">
+                        <InputNumber class="form-control" @bind-Value="parameters.WeeklyQuestionGoal" id="goalCount" />
+                        <label for="goalCount">Haftalık Hedef Soru Sayısı</label>
+                    </div>
 
-            <option value="#ff69b4" style="background-color:#ff69b4; color:white;">
-                Pembe
-            </option>
+                    <div class="form-floating mb-3">
+                        <InputNumber class="form-control" @bind-Value="parameters.DailyReminderHour" id="reminderHour" min="0" max="23" />
+                        <label for="reminderHour">Günlük Hatırlatıcı Saati (0-23)</label>
+                    </div>
+                </div>
 
-            <option value="#28a745" style="background-color:#28a745; color:white;">
-                Yeşil
-            </option>
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3 text-uppercase small text-primary">Tercihler ve Gizlilik</h6>
 
-            <option value="#007bff" style="background-color:#007bff; color:white;">
-                Mavi
-            </option>
+                    <div class="form-floating mb-3">
+                        <InputSelect @bind-Value="parameters.Theme" class="form-select" id="themeSelect">
+                            <option value="Light">Aydınlık Tema</option>
+                            <option value="Dark">Karanlık Tema</option>
+                        </InputSelect>
+                        <label for="themeSelect">Uygulama Teması</label>
+                    </div>
 
-        </InputSelect>
-    </div>
+                    <div class="form-check form-switch mb-2">
+                        <InputCheckbox class="form-check-input" @bind-Value="parameters.IsProfilePublic" id="isPublic" />
+                        <label class="form-check-label" for="isPublic">Profilim Herkese Açık</label>
+                    </div>
 
-    <div class="mb-3 input-group" style="max-width: 100%;">
-        <label class="input-group-text">Haftalık Ders Çalışma Süresi (saat)</label>
-        <InputNumber class="form-control" @bind-Value="parameters.HaftalikHedefCalismaSuresi" />
-    </div>
+                    <div class="form-check form-switch mb-2">
+                        <InputCheckbox class="form-check-input" @bind-Value="parameters.ShowRankInLeaderboard" id="showRank" />
+                        <label class="form-check-label" for="showRank">Sıralamamı Skor Tablosunda Göster</label>
+                    </div>
 
+                    <div class="form-check form-switch mb-3">
+                        <InputCheckbox class="form-check-input" @bind-Value="parameters.AllowFriendRequests" id="allowFriends" />
+                        <label class="form-check-label" for="allowFriends">Arkadaşlık İsteklerine İzin Ver</label>
+                    </div>
 
-
-@*     <div class="mb-3 input-group" style="max-width: 100%;">
-        <label class="input-group-text">Hedef Sınav</label>
-        <InputSelect class="form-select" @bind-Value="parameters.Language">
-            <option value="en">English</option>
-            <option value="tr">Türkçe</option>
-            <option value="de">Deutsch</option>
-        </InputSelect>
-    </div> *@
-
-    @*  <!-- Theme -->
-           <div class="mb-3 input-group" style="max-width: 100%;">
-                <label class="input-group-text">Hedef Sınav</label>
-                <InputSelect class="form-select" @bind-Value="parameters.Theme">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="system">System Default</option>
-                </InputSelect>
+                    <div class="mt-2">
+                        <span class="badge bg-info text-dark">Ünvan: @(string.IsNullOrEmpty(parameters.CurrentTitle) ? "Yeni Üye" : parameters.CurrentTitle)</span>
+                    </div>
+                </div>
             </div>
 
-           
-
-            <!-- Notifications Toggle -->
-            <div class="form-check form-switch mb-3">
-                <InputCheckbox class="form-check-input" @bind-Value="parameters.NotificationsEnabled" />
-                <label class="form-check-label">Enable Notifications</label>
+            <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-between">
+                <div class="text-muted small">
+                    Son güncelleme: @parameters.UpdatedAt.ToLocalTime().ToString("g")
+                </div>
+                <button class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm" type="submit" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        <span>Kaydediliyor...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check2-circle me-2"></i>
+                    
+                        <span>Ayarları Güncelle</span>
+                    }
+                </button>
             </div>
-
-            <!-- Status -->
-            <div class="form-check form-switch mb-4">
-                <InputCheckbox class="form-check-input" @bind-Value="parameters.IsPublicProfile" />
-                <label class="form-check-label">Public Profile</label>
-            </div> *@
-
-    <button class="btn btn-primary w-100" type="submit">
-        Save Changes
-    </button>
-
-</EditForm>
-
-
+        </EditForm>
+    </div>
+</div>
 
 @code {
+    private UserProfileDto parameters = new();
+    private bool isSaving = false;
+    private const string CacheKey = "user_profile_data";
 
-    private UserSettings parameters = new UserSettings();
+    protected override async Task OnInitializedAsync()
+    {
+        // Servisimiz zaten önce LocalStorage'a bakıp yoksa API'ye gidiyor.
+        var result = await ProfileService.GetProfileAsync();
+
+        if (result != null)
+        {
+            parameters = result;
+        }
+    }
 
     private async Task SaveChanges()
     {
-        await LocalStorage.SetItemAsync("UserSettings", parameters);
+        isSaving = true;
+
+        try
+        {
+            // Backend'e PATCH isteği atar
+            await ProfileService.UpdateProfileAsync(parameters);
+
+            // Başarılı olursa LocalStorage'ı günceller (Cache synchronization)
+            await LocalStorage.SetItemAsync(CacheKey, parameters);
+
+            // Burada kullanıcıya başarılı olduğuna dair bir bildirim tetiklenebilir.
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Profil güncelleme sırasında hata: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
-    protected override async Task OnInitializedAsync()
-    {
-        var saved = await LocalStorage.GetItemAsync<UserSettings>("UserSettings");
-
-        parameters = saved ?? new UserSettings();
-    }
-
-
 }

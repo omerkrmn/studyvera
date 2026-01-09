@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using StudyVera.FrontEnd;
-using StudyVera.FrontEnd.Models.Common;
 using StudyVera.FrontEnd.Providers;
 using StudyVera.FrontEnd.Services;
-using StudyVera.FrontEnd.Services.Common;
 using StudyVera.FrontEnd.Services.Concrats;
 using Microsoft.AspNetCore.Http;
 
@@ -31,9 +29,6 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 
-builder.Services.AddScoped<UserSettingsService>();
-
-
 // 🔹 Diğer servisler
 builder.Services.AddScoped<TopicService>();
 builder.Services.AddScoped<IUserHistoryService, UserHistoryService>();
@@ -42,5 +37,7 @@ builder.Services.AddScoped<IUserQuestionStatsService, UserQuestionStatsService>(
 builder.Services.AddScoped<ILessonScheduleService, LessonScheduleService>();    
 builder.Services.AddScoped<IQuestionStatDetailService,QuestionStatDetailService>();
 builder.Services.AddScoped<IProfileSummaryService, ProfileSummaryService>();
+builder.Services.AddScoped<IProfileStatService, ProfileStatService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 
 await builder.Build().RunAsync();

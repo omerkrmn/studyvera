@@ -1,0 +1,149 @@
+﻿@using StudyVera.FrontEnd.Services.Concrats
+@using StudyVera.FrontEnd.Models.ProfileStats
+@inject IProfileStatService ProfileStatService
+
+<div class="scoreboard-card shadow-sm border">
+    <div class="header text-center mb-4">
+        <h3 class="fw-bold mb-1">Liderlik Tablosu</h3>
+        <div class="underline bg-primary mx-auto"></div>
+    </div>
+
+    @if (scoreBoardList == null)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2 text-secondary">Yükleniyor...</p>
+        </div>
+    }
+    else if (!scoreBoardList.Any())
+    {
+        <div class="alert alert-secondary">Henüz skor kaydı bulunamadı.</div>
+    }
+    else
+    {
+        <div class="list-wrapper d-flex flex-column gap-2">
+            @foreach (var (player, index) in scoreBoardList.Select((value, i) => (value, i)))
+            {
+                <div class="player-row border @GetRankClass(index)">
+                    <div class="rank-badge shadow-sm">
+                        @if (index < 3)
+                        {
+                            <i class="bi bi-trophy-fill"></i> @* Bootstrap Icons yüklü değilse 'oi oi-star' kullanabilirsin *@
+                        }
+                        else
+                        {
+                            <span>@(index + 1)</span>
+                        }
+                    </div>
+
+                    <div class="name-section ms-3">
+                        <span class="nickname fw-semibold">@player.NickName</span>
+                    </div>
+
+                    <div class="score-section text-end">
+                        <span class="score-value d-block fw-bold text-primary">@player.Score.ToString("N0")</span>
+                        <small class="score-label fw-bold text-muted">PUAN</small>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<ScoreBoardDto>? scoreBoardList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var results = await ProfileStatService.GetScoreBoardAsync();
+        scoreBoardList = results.OrderByDescending(x => x.Score).ToList();
+    }
+
+    private string GetRankClass(int index) => index switch
+    {
+        0 => "rank-gold",
+        1 => "rank-silver",
+        2 => "rank-bronze",
+        _ => "rank-normal"
+    };
+}
+
+<style>
+    /* Bootstrap Tema Değişkenlerini Kullanıyoruz */
+    .scoreboard-card {
+        background-color: var(--bs-body-bg); /* Temaya göre beyaz veya koyu gri olur */
+        color: var(--bs-body-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        max-width: 500px;
+        margin: auto;
+    }
+
+    .underline {
+        height: 4px;
+        width: 40px;
+        border-radius: 2px;
+    }
+
+    .player-row {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        background-color: var(--bs-tertiary-bg); /* Bootstrap 5.3+ Dark/Light uyumlu arka plan */
+        transition: transform 0.2s ease;
+    }
+
+        .player-row:hover {
+            transform: scale(1.02);
+        }
+
+    .rank-badge {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 0.9rem;
+        background-color: var(--bs-secondary-bg);
+    }
+
+    /* Madalya Renkleri - Opaklık kullanarak hem gece hem gündüz şık görünmesini sağlıyoruz */
+    .rank-gold {
+        border-color: rgba(241, 196, 15, 0.5) !important;
+        background-image: linear-gradient(to right, rgba(241, 196, 15, 0.1), transparent);
+    }
+
+        .rank-gold .rank-badge {
+            background-color: #f1c40f;
+            color: #000;
+        }
+
+    .rank-silver {
+        border-color: rgba(149, 165, 166, 0.5) !important;
+        background-image: linear-gradient(to right, rgba(149, 165, 166, 0.1), transparent);
+    }
+
+        .rank-silver .rank-badge {
+            background-color: #bdc3c7;
+            color: #000;
+        }
+
+    .rank-bronze {
+        border-color: rgba(230, 126, 34, 0.5) !important;
+        background-image: linear-gradient(to right, rgba(230, 126, 34, 0.1), transparent);
+    }
+
+        .rank-bronze .rank-badge {
+            background-color: #e67e22;
+            color: #fff;
+        }
+
+    .score-value {
+        font-size: 1.1rem;
+        color: var(--bs-primary) !important;
+    }
+</style>
