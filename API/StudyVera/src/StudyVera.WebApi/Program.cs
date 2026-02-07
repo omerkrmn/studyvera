@@ -1,17 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Carter;
 using Microsoft.OpenApi.Models;
-using StudyVera.Domain.Entities.Identity;
-using StudyVera.Infrastructure.Persistence;
 using StudyVera.WebApi.Extensions;
 using StudyVera.WebApi.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddCarter();
 builder.Services.AddOpenApi();
+builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -41,7 +38,7 @@ builder.Services.AddSwaggerGen(c =>
             new string[]{}
         }
     });
-});
+}); 
 
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureUnitOfWork(); 
@@ -59,7 +56,8 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .SetPreflightMaxAge(TimeSpan.FromHours(24));
     });
 });
 
@@ -70,11 +68,10 @@ app.ConfigureExceptionHandler();
 
 
 //if (app.Environment.IsDevelopment())
-//{
 app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-//}
+
 app.UseHttpsRedirection();
 
 app.UseCors("allow-all");
@@ -82,6 +79,6 @@ app.UseCors("allow-all");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapCarter();
 
 app.Run();

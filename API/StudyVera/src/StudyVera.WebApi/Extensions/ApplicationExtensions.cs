@@ -22,10 +22,14 @@ public static class ApplicationExtensions
         services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(
             configuration.GetConnectionString("sqlConnection"),
-                 sqlOptions =>
-                    {
-                        sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
-                    }));
+            sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,          
+                    maxRetryDelay: TimeSpan.FromSeconds(10), 
+                    errorNumbersToAdd: null
+                );
+            }));
     }
     public static void ConfigureIdentity(this IServiceCollection services)
     {
