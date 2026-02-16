@@ -6,10 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace StudyVera.Application.Features.UserQuestionStats.Queries
 {
-    public class GetAllUserQuestionStatsByUserQuery :RequestParameters, IRequest<PagedList<UserQuestionStatDto>>
+    public class GetAllUserQuestionStatsByUserQuery :IRequest<List<UserQuestionStatDto>>
     {
         [JsonIgnore]
-        [BindNever]
         public Guid UserId { get; set; }
 
     }
