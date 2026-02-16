@@ -1,45 +1,91 @@
 ﻿@page "/profile"
 @using Microsoft.AspNetCore.Components.Authorization
 @using StudyVera.FrontEnd.Components
+@using StudyVera.FrontEnd.Enums
 @using StudyVera.FrontEnd.Models.Common
+@using StudyVera.FrontEnd.Models.UserWeeklyGoals
 @using StudyVera.FrontEnd.Services.Concrats
-@using static StudyVera.FrontEnd.Components.ScoreBoard
-@using static StudyVera.FrontEnd.Pages.Auth.Register
+
 <PageTitle>StudyVera - Profil ve Performans Analizi</PageTitle>
+
 @inject IProfileSummaryService ProfileSummaryService
 @inject IUserProfileService UserProfileService
+@inject IUserWeeklyGoalService UserWeeklyGoalService
 
-@* ... (Mevcut using ve inject direktiflerin) ... *@
+<style>
+    .fw-extrabold { font-weight: 800; }
+    
+    .pulse-animation {
+        display: inline-block;
+        animation: pulse-fire 2s infinite;
+    }
+
+    @@keyframes pulse-fire {
+        0% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(220, 53, 69, 0)); }
+        50% { transform: scale(1.15); filter: drop-shadow(0 0 5px rgba(220, 53, 69, 0.5)); }
+        100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(220, 53, 69, 0)); }
+    }
+
+    .streak-icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 
 <div class="container my-5">
-    @* Sayfa Başlığı ve Sınav Rozeti *@
     <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
         <div>
             <h2 class="text-info fw-bold mb-0">StudyVera Profilin</h2>
-            <p class="text-muted mb-0 small">Performans verilerin yapay zeka ile analiz edildi.</p>
+            <p class="text-muted mb-0 small">Performans verilerin yapay zeka ve matematiksel modellerle analiz edildi.</p>
         </div>
-        <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm rounded-pill">
-            <i class="bi bi-mortarboard-fill me-2"></i>@profileData?.TargetExam Sınavı
-        </span>
+        @if (profileData != null)
+        {
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center bg-warning bg-opacity-10 px-3 py-2 rounded-pill shadow-sm border border-warning border-opacity-25 animate__animated animate__bounceIn">
+                    <div class="streak-icon-container me-2">
+                        <i class="bi bi-fire text-danger fs-4 pulse-animation"></i>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <span class="fw-extrabold lh-1" style="font-size: 1.1rem;">@profileData.CurrentStreak GÜN</span>
+                        <span class="text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">KESİNTİSİZ SERİ</span>
+                    </div>
+                </div>
+
+                <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm rounded-pill animate__animated animate__fadeIn d-flex align-items-center" style="height: fit-content;">
+                    <i class="bi bi-mortarboard-fill me-2"></i>@profileData.TargetExam Sınavı
+                </span>
+            </div>
+        }
     </div>
 
-    @if (profileData == null && !isDataLoaded)
+    @if (isLoading)
     {
-        @* ... (Mevcut Loading Spinner) ... *@
+        <div class="text-center py-5">
+            <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
     }
     else if (errorMessage != null)
     {
-        @* ... (Mevcut Error Alert) ... *@
+        <div class="alert alert-danger d-flex align-items-center rounded-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">Veri Yükleme Hatası</h6>
+                <span>@errorMessage</span>
+                <button class="btn btn-sm btn-outline-danger ms-3 rounded-pill" @onclick="OnInitializedAsync">Tekrar Dene</button>
+            </div>
+        </div>
     }
-    else
+    else if (isDataLoaded && profileData != null)
     {
         <div class="row g-4">
-            @* SOL SÜTUN: Liderlik Tablosu (Sidebar) *@
+            @* SOL SÜTUN: Liderlik Tablosu ve Rozetler *@
             <div class="col-xl-4 col-lg-5">
-                <div class="sticky-top" style="top: 20px; z-index: 100;">
+                <div class="sticky-top">
                     <ScoreBoard />
 
-                    @* Rozetler Kartı - Sidebar'da Skorun Altına *@
                     <div class="card shadow-sm mt-4 rounded-4 bg-info text-white border-0 overflow-hidden">
                         <div class="card-body p-4 position-relative">
                             <h5 class="fw-bold mb-3"><i class="bi bi-gem me-2"></i>Kazanılan Rozetler</h5>
@@ -51,7 +97,7 @@
                 </div>
             </div>
 
-            @* SAĞ SÜTUN: Ana İstatistikler ve Grafikler *@
+            @* SAĞ SÜTUN: Ana İstatistikler ve Hedef *@
             <div class="col-xl-8 col-lg-7">
                 @* Üst 3'lü İstatistik Kartları *@
                 <div class="row g-3 mb-4">
@@ -59,15 +105,15 @@
                         <div class="card shadow-sm border-0 border-top border-primary border-4 h-100">
                             <div class="card-body text-center p-3">
                                 <small class="text-uppercase text-muted fw-bold d-block mb-1">Sorular</small>
-                                <h4 class="fw-bold mb-0">@profileData?.TotalQuestions.ToString("N0")</h4>
+                                <h4 class="fw-bold mb-0">@profileData.TotalQuestions.ToString("N0")</h4>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card shadow-sm border-0 border-top border-success border-4 h-100">
                             <div class="card-body text-center p-3">
-                                <small class="text-uppercase text-muted fw-bold d-block mb-1">Score</small>
-                                <h4 class="fw-bold mb-0">@profileData?.UserScore.ToString("N0")</h4>
+                                <small class="text-uppercase text-muted fw-bold d-block mb-1">Puan</small>
+                                <h4 class="fw-bold mb-0">@profileData.UserScore.ToString("N0")</h4>
                             </div>
                         </div>
                     </div>
@@ -75,55 +121,73 @@
                         <div class="card shadow-sm border-0 border-top border-warning border-4 h-100">
                             <div class="card-body text-center p-3">
                                 <small class="text-uppercase text-muted fw-bold d-block mb-1">Sıralama</small>
-                                <h4 class="fw-bold mb-0">#@profileData?.GlobalRank.ToString("N0")</h4>
+                                <h4 class="fw-bold mb-0">#@profileData.GlobalRank.ToString("N0")</h4>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                @* Haftalık Hedef *@
+                @* Haftalık Hedef - Yeni Servis Verisiyle *@
                 <div class="card shadow-sm mb-4 border-0 rounded-4">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-bullseye text-success me-2"></i>Haftalık Hedef Durumu</h5>
-                        <div class="progress rounded-pill mb-2" style="height: 20px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                                 style="width: @profileData.GoalCompletionPercentage%">
-                                %@profileData.GoalCompletionPercentage
-                            </div>
-                        </div>
-                        <small class="text-muted">Hedefe ulaşmak için <strong>@profileData.GoalRemainingQuestions</strong> soru daha çözmelisin.</small>
-                    </div>
-                </div>
-
-                @* Eksik Konular *@
-                <div class="card shadow-sm mb-4 border-0 rounded-4">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Öncelikli Eksik Konular</h5>
-                        <div class="list-group list-group-flush">
-                            @foreach (var topic in profileData.DeficiencyTopics.Where(x => x.Value > 100))
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0"><i class="bi bi-bullseye text-success me-2"></i>Haftalık Hedef Durumu</h5>
+                            @if (weeklyGoal != null)
                             {
-                                <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0">
-                                    <span class="fw-medium">@topic.Key</span>
-                                    <span class="badge bg-@(topic.Value > 200 ? "danger" : "warning") rounded-pill">
-                                        @topic.Value Puan
-                                    </span>
-                                </div>
+                                <span class="badge bg-success-subtle text-success rounded-pill px-3">
+                                    %@weeklyGoal.CompletionPercentage.ToString("N1")
+                                </span>
                             }
                         </div>
+
+                        <div class="progress rounded-pill mb-2" style="height: 20px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                 role="progressbar"
+                                 style="width: @(weeklyGoal?.CompletionPercentage ?? 0)%">
+                            </div>
+                        </div>
+
+                        <small class="text-muted">
+                            @if (weeklyGoal?.IsGoalAchieved == true)
+                            {
+                                <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Tebrikler! Haftalık soru hedefine ulaştın.</span>
+                            }
+                            else
+                            {
+                                <span>Hedefe ulaşmak için <strong>@(weeklyGoal?.RemainingQuestions ?? 0)</strong> soru daha çözmelisin.</span>
+                            }
+                        </small>
                     </div>
                 </div>
 
-                @* Grafik ve Heatmap Alt Alta *@
+                @if (profileData.DeficiencyTopics.Where(x => x.Value > 100).Any())
+                {
+
+                    <div class="card shadow-sm mb-4 border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Öncelikli Eksik Konular</h5>
+                            <div class="list-group list-group-flush">
+                                @foreach (var topic in profileData.DeficiencyTopics.Where(x => x.Value > 100))
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0">
+                                        <span class="fw-medium">@topic.Key</span>
+                                        <span class="badge bg-@(topic.Value > 200 ? "danger" : "warning") rounded-pill shadow-sm">
+                                            @topic.Value Puan
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @* Performans Analizi *@
                 <div class="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden">
                     <div class="card-header bg-transparent border-0 pt-4 px-4">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-graph-up text-info me-2"></i>Performans Analizi</h5>
+                        <h5 class="fw-bold mb-0"><i class="bi bi-graph-up text-info me-2"></i>Çalışma Sürekliliği</h5>
                     </div>
                     <div class="card-body p-4">
-                        @* <div class="bg-light p-4 rounded-3 text-center border mb-4">
-                            <small class="text-muted">Net Artış Grafiği</small>
-                        </div> *@
-                        <h6 class="fw-bold mb-3 small text-uppercase text-muted">Çalışma Sürekliliği (Yıllık)</h6>
-                        <div class="heatmap-scroll-container border p-2 rounded overflow-auto">
+                        <div class="heatmap-scroll-container border p-2 rounded overflow-auto bg-body-tertiary">
                             <Heatmap />
                         </div>
                     </div>
@@ -133,88 +197,43 @@
     }
 </div>
 
-
 @code {
-    private string targetExamFromJwt = string.Empty;
-    private TargetExam parsedTargetExam = TargetExam.TYT; 
     private bool isLoading = true;
     private bool isDataLoaded = false;
     private string? errorMessage;
     private ProfileViewModel? profileData;
-
-    [CascadingParameter]
-    private Task<AuthenticationState>? authenticationState { get; set; }
-
+    private UserWeeklyGoalDto? weeklyGoal;
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(500);
-        var profile = await UserProfileService.GetProfileAsync();
+        await LoadProfileData();
+    }
 
+    private async Task LoadProfileData()
+    {
         try
         {
-            
+            isLoading = true;
+            errorMessage = null;
 
-            profileData = await ProfileSummaryService.GetProfileSummaryAsync();
-            profileData.GoalRemainingQuestions = profile.DailyStudyMinuteGoal;
-            profileData.GoalCompletionPercentage = 50;
+            var profileTask = ProfileSummaryService.GetProfileSummaryAsync();
+            var weeklyGoalTask = UserWeeklyGoalService.GetUserWeeklyGoal();
+
+            await Task.WhenAll(profileTask, weeklyGoalTask);
+
+            profileData = profileTask.Result;
+            weeklyGoal = weeklyGoalTask.Result;
+
             isDataLoaded = true;
         }
         catch (Exception ex)
         {
-            errorMessage = "Profil verileri yüklenirken bir sorun oluştu: " + ex.Message;
+            errorMessage = ex.Message;
         }
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
-    }
-
-
-    public enum TargetExam
-    {
-        TYT = 1,
-        AYT = 2,
-        DGS = 3,
-        ALES = 4,
-        KPSS = 5
-    }
-
-    private Dictionary<DateTime, int> GenerateMockActivityData()
-    {
-        var data = new Dictionary<DateTime, int>();
-        var today = DateTime.Today;
-        for (int i = 0; i < 365; i++)
-        {
-            var date = today.AddDays(-i);
-            var activityLevel = new Random().Next(0, 5);
-            data.Add(date, activityLevel);
-        }
-        return data;
     }
 }
-<style>
-    /* Sticky Scoreboard Ayarı */
-    @@media (min-width: 992px) {
-        .sticky-top {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 2rem;
-        }
-    }
-
-    .card {
-        background-color: var(--bs-body-bg);
-        transition: transform 0.2s ease-in-out;
-    }
-
-    .heatmap-scroll-container {
-        min-height: 150px;
-    }
-
-    /* Bootstrap Dark Mode uyumu için list-group item renk düzeltmesi */
-    .list-group-item {
-        border-color: var(--bs-border-color);
-        color: var(--bs-body-color);
-    }
-</style>

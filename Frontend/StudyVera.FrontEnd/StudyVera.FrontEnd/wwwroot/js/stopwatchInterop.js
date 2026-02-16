@@ -1,11 +1,17 @@
 ﻿window.stopwatchInterop = {
     initializeKeyboardControl: function (dotNetHelper) {
+        if (window.stopwatchListenerAdded) return;
+
         document.addEventListener('keydown', function (event) {
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+
             switch (event.key) {
                 case 'a':
+                case 'A':
                     dotNetHelper.invokeMethodAsync('StartTimer');
                     break;
                 case 's':
+                case 'S':
                     dotNetHelper.invokeMethodAsync('StopTimer');
                     break;
                 case 'Backspace':
@@ -19,9 +25,8 @@
                     }
                     event.preventDefault();
                     break;
-                default:
-                    break;
             }
         });
+        window.stopwatchListenerAdded = true;
     }
 };

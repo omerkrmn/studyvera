@@ -1,214 +1,205 @@
 ﻿@page "/profile/user-lesson-progresses"
-@using StudyVera.FrontEnd.Components
 @using StudyVera.FrontEnd.Enums
+@using StudyVera.FrontEnd.Models.Lessons
 @using StudyVera.FrontEnd.Models.Topics
 @using StudyVera.FrontEnd.Models.UserLessonProgress
 @using StudyVera.FrontEnd.Services
 @using StudyVera.FrontEnd.Services.Concrats
 @inject IUserLessonProgressService UserLessonProgressService
-@inject TopicService     TopicService
+@inject TopicService TopicService
+@inject ILessonService LessonService
 
-<PageTitle>Kullanıcı Ders İlerlemeleri</PageTitle>
-<StudyWorkProgram />
-<div class="container mt-5">
-    <h2 class="text-center mb-4 text-primary fw-bold">📘 Kullanıcı Ders İlerlemeleri</h2>
-     
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="card-title text-primary">➕ Yeni İlerleme Ekle</h5>
+<PageTitle>Konu İlerleme Takibi</PageTitle>
 
-            <EditForm Model="@newProgress" OnValidSubmit="AddProgressAsync">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-
-                <div class="row g-3">
-                    <div class="col-md-6 position-relative">
-                        <input type="text"
-                               class="form-control"
-                               placeholder="Konu ara..."
-                               @bind="searchTerm"
-                               @bind:event="oninput"
-                               @onfocus="() => showDropdown = true"
-                               @onblur="HideDropdownDelayed" />
-
-                        @if (showDropdown && FilteredTopics.Any())
-                        {
-                            <ul class="list-group position-absolute w-100 shadow-sm mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
-                                @foreach (var topic in FilteredTopics)
-                                {
-                                    <li class="list-group-item list-group-item-action"
-                                        @onclick="() => SelectTopic(topic)">
-                                        @topic.Name
-                                    </li>
-                                }
-                            </ul>
-                        }
-
-                        <ValidationMessage For="@(() => newProgress.TopicId)" />
-                    </div>
-
-                    <div class="col-md-6">
-                        <InputSelect TValue="ProgressStatus"
-                                     @bind-Value="newProgress.ProgressStatus"
-                                     class="form-select">
-                            @foreach (var status in Enum.GetValues<ProgressStatus>())
-                            {
-                                <option value="@status">@status</option>
-                            }
-                        </InputSelect>
-                    </div>
-                </div>
-
-                <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-success px-4">Kaydet</button>
-                </div>
-            </EditForm>
-        </div>
+<div class="container mt-4">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <h2 class="text-primary fw-bold m-0"><i class="bi bi-journal-check me-2"></i>Konu İlerleme Takibi</h2>
+        <div class="badge bg-primary rounded-pill px-3 py-2">Konu Takip Çizelgesi</div>
     </div>
 
     @if (isLoading)
     {
-        <div class="text-center">
-            <div class="spinner-border text-info" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
-            <p class="mt-2 text-secondary">Veriler yükleniyor...</p>
+        <div class="d-flex justify-content-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
         </div>
-    }
-    else if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger text-center">@errorMessage</div>
-    }
-    else if (progresses is not null && progresses.Any())
-    {
-        <table class="table table-striped table-hover shadow-sm">
-            <thead class="table-info">
-                <tr>
-                    <th>#</th>
-                    <th>Konu Adı</th>
-                    <th>Konu ID</th>
-                    <th>Durum</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in progresses)
-                {
-                    <tr>
-                        <td>@p.Id</td>
-                        <td>@p.Topic?.Name</td>
-                        <td>@p.TopicId</td>
-                        <td>
-                            @switch ((int)p.ProgressStatus)
-                            {
-                                case 0:
-                                    <span class="badge bg-secondary">Başladı</span>
-                                    <button class="badge btn btn-sm btn-primary ms-2"
-                                            @onclick="() => MarkAsCompleted(p.Id)">
-                                        Bitti Olarak Güncelle
-                                    </button>
-                                    break;
-                                case 1:
-                                    <span class="badge bg-success text-light">Bitti</span>
-                                    break;
-                                default:
-                                    <span class="badge bg-light text-dark">Bilinmiyor</span>
-                                    break;
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
     }
     else
     {
-        <div class="alert alert-info text-center mt-4">Henüz ilerleme kaydı bulunamadı.</div>
+        @foreach (var lessonGroup in AllTopicsGroupedByLesson)
+        {
+            var lessonId = lessonGroup.Key;
+            var lessonName = Lessons.FirstOrDefault(l => l.Id == lessonId)?.Name ?? "Ders";
+            var totalInLesson = lessonGroup.Count();
+            var completedInLesson = lessonGroup.Count(t => IsCompleted(t.Id));
+            var percent = totalInLesson == 0 ? 0 : (int)((float)completedInLesson / totalInLesson * 100);
+            var isExpanded = activeLessonId == lessonId;
+
+            <div class="card progress-card mb-3 rounded-4 overflow-hidden shadow-sm">
+                <div class="lesson-header py-3 px-4 d-flex justify-content-between align-items-center"
+                     @onclick="() => ToggleLesson(lessonId)">
+
+                    <div class="d-flex align-items-center">
+                        <i class="bi @(isExpanded ? "bi-chevron-down" : "bi-chevron-right") me-3 text-primary fw-bold"></i>
+                        <div>
+                            <h5 class="m-0 fw-bold text-emphasis">@lessonName</h5>
+                            <small class="text-secondary">@totalInLesson Konu | @completedInLesson Tamamlandı</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3" style="min-width: 150px; width: 30%;">
+                        <div class="progress progress-custom flex-grow-1" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: @percent%"></div>
+                        </div>
+                        <span class="fw-bold text-emphasis small">%@percent</span>
+                    </div>
+                </div>
+
+                @if (isExpanded)
+                {
+                    <div class="list-group list-group-flush border-top">
+                        @foreach (var topic in lessonGroup.OrderBy(t => t.Priority))
+                        {
+                            var progress = GetProgress(topic.Id);
+                            var isTopicCompleted = progress?.ProgressStatus == ProgressStatus.Completed;
+
+                            <div class="list-group-item topic-item d-flex justify-content-between align-items-center py-3 px-4 @(isTopicCompleted ? "topic-completed" : "")">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        @if (isTopicCompleted)
+                                        {
+                                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                        }
+                                        else if (progress?.ProgressStatus == ProgressStatus.InProgress)
+                                        {
+                                            <i class="bi bi-play-circle-fill text-warning fs-5"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-circle text-secondary opacity-50 fs-5"></i>
+                                        }
+                                    </div>
+                                    <span class="fw-medium @(progress == null ? "text-secondary" : "text-emphasis")">
+                                        @topic.Name
+                                    </span>
+                                </div>
+
+                                <div class="actions">
+                                    @if (progress == null)
+                                    {
+                                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                                                @onclick="() => StartTopic(topic.Id)">
+                                            <i class="bi bi-plus-lg me-1"></i> Başla
+                                        </button>
+                                    }
+                                    else if (progress.ProgressStatus == ProgressStatus.InProgress)
+                                    {
+                                        <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"
+                                                @onclick="() => MarkAsCompleted(progress.Id)">
+                                            <i class="bi bi-check-lg me-1"></i> Bitirdim
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-success-emphasis bg-success-subtle rounded-pill border border-success-subtle px-3 py-2">
+                                            <i class="bi bi-calendar-check me-1"></i> Tamamlandı
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
     }
 </div>
+<style>
+    /* Ana kart yapısı */
+    .progress-card {
+        background-color: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        transition: transform 0.2s ease;
+    }
+
+    /* Header: Koyu modda daha koyu, açık modda daha açık gri */
+    .lesson-header {
+        background-color: rgba(var(--bs-tertiary-bg-rgb), 1);
+        border-bottom: 1px solid var(--bs-border-color);
+        cursor: pointer;
+    }
+
+        .lesson-header:hover {
+            background-color: rgba(var(--bs-secondary-bg-rgb), 1);
+        }
+
+    /* Liste öğeleri */
+    .topic-item {
+        background-color: transparent;
+        border-bottom: 1px solid var(--bs-border-color-translucent);
+        transition: background-color 0.2s;
+    }
+
+    /* Tamamlanan konular için yumuşak yeşil vurgu (Gece moduna uygun) */
+    .topic-completed {
+        background-color: rgba(var(--bs-success-rgb), 0.1) !important;
+    }
+
+    /* Yazı renkleri */
+    .text-emphasis {
+        color: var(--bs-emphasis-color) !important;
+    }
+
+    /* Progress bar arka planı */
+    .progress-custom {
+        background-color: rgba(var(--bs-secondary-rgb), 0.2);
+    }
+</style>
 
 @code {
     private List<UserLessonProgressDto>? progresses;
-    private bool isLoading = true;
-    private string? errorMessage;
     private List<TopicDto>? Topics;
-    private string searchTerm = "";
-    private bool showDropdown;
-    private AddUserLessonProgressDto newProgress = new();
+    private List<LessonDto> Lessons = new();
+    private bool isLoading = true;
 
-    private IEnumerable<TopicDto> FilteredTopics =>
-        string.IsNullOrWhiteSpace(searchTerm)
-            ? new List<TopicDto>()
-            : Topics!.Where(t => t.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+    private int activeLessonId = -1;
 
-    protected override async Task OnInitializedAsync()
+    private IEnumerable<IGrouping<int, TopicDto>> AllTopicsGroupedByLesson =>
+        Topics?.GroupBy(t => t.LessonId).OrderBy(g => g.Key) ?? Enumerable.Empty<IGrouping<int, TopicDto>>();
+
+    protected override async Task OnInitializedAsync() => await LoadData();
+
+    private async Task LoadData()
     {
-        try
-        {
-            isLoading = true;
-            Topics = await TopicService.GetTopics();
-            progresses = await UserLessonProgressService.GetAll();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Veri alınırken hata oluştu: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        isLoading = true;
+        Topics = await TopicService.GetTopics();
+        Lessons = await LessonService.GetAll();
+        progresses = await UserLessonProgressService.GetAll();
+        isLoading = false;
     }
 
-    private void SelectTopic(TopicDto topic)
+    private void ToggleLesson(int lessonId)
     {
-        newProgress.TopicId = topic.Id;
-        searchTerm = topic.Name;
-        showDropdown = false;
+        if (activeLessonId == lessonId)
+            activeLessonId = -1;
+        else
+            activeLessonId = lessonId;
     }
 
-    private async Task AddProgressAsync()
+    private UserLessonProgressDto? GetProgress(int topicId) => progresses?.FirstOrDefault(p => p.TopicId == topicId);
+
+    private bool IsCompleted(int topicId) => progresses?.Any(p => p.TopicId == topicId && p.ProgressStatus == ProgressStatus.Completed) ?? false;
+
+    private async Task StartTopic(int topicId)
     {
-        try
-        {
-            isLoading = true;
-            await UserLessonProgressService.Add(newProgress);
-            progresses = await UserLessonProgressService.GetAll();
-            newProgress = new();
-            searchTerm = "";
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"İlerleme eklenirken hata oluştu: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        await UserLessonProgressService.Add(new AddUserLessonProgressDto { TopicId = topicId, ProgressStatus = ProgressStatus.InProgress });
+        progresses = await UserLessonProgressService.GetAll();
     }
 
-    private async Task MarkAsCompleted(int id)
+    private async Task MarkAsCompleted(int progressId)
     {
-        try
-        {
-            isLoading = true;
-            await UserLessonProgressService.Update(id);
-
-            var updatedItem = progresses?.FirstOrDefault(p => p.Id == id);
-                if (updatedItem != null)
-                    updatedItem.ProgressStatus = Enums.ProgressStatus.Completed;
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Veri güncellenirken hata oluştu: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
-
-    private void HideDropdownDelayed()
-    {
-        _ = Task.Delay(150).ContinueWith(_ => showDropdown = false);
+        await UserLessonProgressService.Update(progressId);
+        var item = progresses?.FirstOrDefault(p => p.Id == progressId);
+        if (item != null) item.ProgressStatus = ProgressStatus.Completed;
+        StateHasChanged();
     }
 }

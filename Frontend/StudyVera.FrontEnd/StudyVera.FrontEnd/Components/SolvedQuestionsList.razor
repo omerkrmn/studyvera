@@ -1,118 +1,256 @@
-﻿@using StudyVera.FrontEnd.Models.Topics
+﻿@using StudyVera.FrontEnd.Models.Lessons
+@using StudyVera.FrontEnd.Models.Topics
 @using StudyVera.FrontEnd.Models.UserQuestionStat
 @using StudyVera.FrontEnd.Services.Concrats
+@using StudyVera.FrontEnd.Utilities
 @inject IUserQuestionStatsService UserQuestionStatsService
 @inject IQuestionStatDetailService QuestionStatDetailService
+@inject ILessonService LessonService
 
 <div class="table-responsive">
-    <table class="table table-hover caption-top">
-        <thead class="table-dark">
+    <table class="table table-hover caption-top align-middle">
+        <thead class="border-bottom">
             <tr>
-                <th scope="col" style="width: 30%;" class="fw-bold">Konu Adı</th>
-                <th scope="col" class="text-center">Çözülen (Adet)</th>
-                <th scope="col" class="text-center">Doğru (Adet)</th>
-                <th scope="col" class="text-center">Yanlış (Adet)</th>
-                <th scope="col" class="text-center">Doğruluk Oranı</th>
-                <th scope="col" class="text-center" style="width: 15%;">Son Güncelleme</th>
+                <th scope="col" style="width: 30%;">Ders / Konu Adı</th>
+                <th scope="col" class="text-center">Çözülen</th>
+                <th scope="col" class="text-center">Doğru</th>
+                <th scope="col" class="text-center">Yanlış</th>
+                <th scope="col" class="text-center">
+                    Başarı
+                    <span class="ms-1 text-muted opacity-75"
+                          style="cursor: help; font-size: 0.85rem;"
+                          title=@AppConsts.BasariAciklama>
+                        <i class="bi bi-info-circle-fill" style="color: forestgreen"></i>
+                    </span>
+                </th>
+                <th scope="col" class="text-center" style="width: 15%;">Tarih</th>
             </tr>
         </thead>
-        <tbody>
-            @if (Questions == null || !Questions.Any())
-            {
+
+        @if (_groupedQuestions == null || !_groupedQuestions.Any())
+        {
+            <tbody>
                 <tr>
                     <td colspan="6" class="text-center text-muted p-4">Henüz çözülmüş soru kaydı bulunmamaktadır.</td>
                 </tr>
-            }
-            else
-            {
-                @foreach (var question in Questions)
-                {
-                    float eksik = CalculateDeficiencyScore(question.TotalSolvedCount, question.TotalCorrectCount, question.LastAttemptAt, question.TopicId);
-                    var isExpanded = expandedId == question.Id;
-                    <tr class="align-middle"
-                        title="konu eksik skoru : @eksik"
-                        style="cursor: pointer;"
-                        @ondblclick="@(() => ToggleExpand(question))">
-
-                        <th scope="row" class="fw-bold">@question.Topic.Name</th>
-                        <td class="text-center">@question.TotalSolvedCount</td>
-                        <td class="text-center text-success fw-bold">@question.TotalCorrectCount</td>
-                        <td class="text-center text-danger">@question.TotalWrongCount</td>
-                        <td class="text-center">
-                            <span class="badge @(question.AccuracyRate >= 0.75 ? "bg-success" : question.AccuracyRate >= 0.50 ? "bg-warning text-dark" : "bg-danger")">
-                                @question.AccuracyRate%
-                            </span>
-                        </td>
-                        <td class="text-center small">@question.LastAttemptAt.ToShortDateString()</td>
-                    </tr>
-
-                    @if (isExpanded)
-                    {
-                        @if (question.QuestionStatDetail != null && question.QuestionStatDetail.Any())
-                        {
-                            @foreach (var item in question.QuestionStatDetail)
-                            {
-
-
-                                <tr class="table-secondary">
-                                    <td></td>
-                                    <td class="text-center">@item.SolvedCount</td>
-                                    <td class="text-center text-success fw-bold">@item.CorrectCount</td>
-                                    <td class="text-center text-danger">@item.WrongCount</td>
-                                    <td class="text-center">
-                                        <span class="badge @((float)item.CorrectCount / item.SolvedCount >= 0.75 ? "bg-success" : ((float)item.CorrectCount / item.SolvedCount) >= 0.50 ? "bg-warning text-dark" : "bg-danger")">
-                                            @((float)item.CorrectCount / item.SolvedCount)%
-                                        </span>
-                                    </td>
-                                    <td class="text-center small">@item.AttemptedAt.ToShortDateString()</td>
-                                </tr>
-                            }
-                        }
-                    }
-                }
-
-            }
-        </tbody>
-    </table>
-</div>
-@code {
-    [Parameter] public List<UserQuestionStatDto> Questions { get; set; } = new();
-    [Parameter] public List<TopicDto> Topics { get; set; } = new();
-
-    private int? expandedId;
-
-    private async Task ToggleExpand(UserQuestionStatDto question)
-    {
-        if (expandedId == question.Id)
-        {
-            expandedId = null;
+            </tbody>
         }
         else
         {
-            expandedId = question.Id;
-
-            if (question.QuestionStatDetail == null || !question.QuestionStatDetail.Any())
+            @foreach (var group in _groupedQuestions)
             {
-                var details = await QuestionStatDetailService.GetAll(question.Id);
-                question.QuestionStatDetail = details.ToList();
+                var isLessonExpanded = _expandedLessonIds.Contains(group.Key);
+                var lessonTotalSolved = group.Sum(x => x.TotalSolvedCount);
+                var lessonTotalCorrect = group.Sum(x => x.TotalCorrectCount);
+                var lessonTotalWrong = group.Sum(x => x.TotalWrongCount);
+                var lessonAccuracy = lessonTotalSolved == 0 ? 0 : (float)lessonTotalCorrect / lessonTotalSolved;
+                var lessonName = GetLessonName(group.Key);
+
+                <tbody class="border-bottom">
+                    <tr class="table-active" style="cursor: pointer;" @onclick="() => ToggleLesson(group.Key)">
+                        <th scope="row">
+                            <i class="bi @(isLessonExpanded ? "bi-caret-down-fill" : "bi-caret-right-fill") me-2"></i>
+                            @lessonName
+                            <span class="badge text-bg-secondary ms-2 rounded-pill">@group.Count() Konu</span>
+                        </th>
+                        <td class="text-center fw-bold">@lessonTotalSolved</td>
+                        <td class="text-center text-success fw-bold">@lessonTotalCorrect</td>
+                        <td class="text-center text-danger fw-bold">@lessonTotalWrong</td>
+                        <td class="text-center">
+                            @{
+                                // Arka plan rengini belirle (Bootstrap 5 için text-bg-... kullanımı daha iyidir)
+                                var badgeClass = lessonAccuracy >= 0.75f ? "text-bg-success" :
+                                lessonAccuracy >= 0.50f ? "text-bg-warning" : "text-bg-danger";
+                            }
+                            <span class="badge rounded-pill @badgeClass px-3 py-2">
+                                %@(Math.Round(lessonAccuracy * 100, 0))
+                            </span>
+                        </td>
+                        <td class="text-center text-muted small fw-bold">
+                            <small>Son: @group.Max(x => x.LastAttemptAt).ToShortDateString()</small>
+                        </td>
+                    </tr>
+
+                    @if (isLessonExpanded)
+                    {
+                        @foreach (var question in group)
+                        {
+                            float eksik = CalculateDeficiencyScore(question.TotalSolvedCount, question.TotalCorrectCount, question.LastAttemptAt, question.TopicId);
+                            var isTopicExpanded = _expandedTopicId == question.Id;
+
+                            <tr class=""
+                                title="Konu eksik skoru : @eksik"
+                                style="cursor: pointer;"
+                                @ondblclick="@(() => ToggleTopicExpand(question))">
+
+                                <td class="ps-5">
+                                    <span class="fw-medium fw-bold">@question.Topic.Name</span>
+                                    @if (isTopicExpanded)
+                                    {
+                                        <i class="bi bi-info-circle-fill ms-2 text-info small"></i>
+                                    }
+                                </td>
+                                <td class="text-center fw-bold">@question.TotalSolvedCount</td>
+                                <td class="text-center text-success fw-bold">@question.TotalCorrectCount</td>
+                                <td class="text-center text-danger fw-bold">@question.TotalWrongCount</td>
+                                <td class="text-center">
+                                    <span class="badge @GetColorByRate(question.AccuracyRate)">
+                                        %@Math.Round(question.AccuracyRate * 100, 1)
+                                    </span>
+                                </td>
+                                <td class="text-center small text-muted fw-bold">@question.LastAttemptAt.ToShortDateString()</td>
+                            </tr>
+
+                            @if (isTopicExpanded)
+                            {
+                                @if (question.QuestionStatDetail != null && question.QuestionStatDetail.Any())
+                                {
+                                    @foreach (var item in question.QuestionStatDetail)
+                                    {
+                                        <tr class="bg-body-tertiary small">
+                                            <td class="text-end pe-4 fst-italic text-muted">Detay ></td>
+                                            <td class="text-center text-muted">@item.SolvedCount</td>
+                                            <td class="text-center text-success">@item.CorrectCount</td>
+                                            <td class="text-center text-danger">@item.WrongCount</td>
+                                            <td class="text-center">
+                                                @{
+                                                    var detailRate = (float)item.CorrectCount / item.SolvedCount;
+                                                }
+                                                <span class="badge @GetColorByRate(detailRate)">
+                                                    %@Math.Round(detailRate * 100, 0)
+                                                </span>
+                                            </td>
+                                            <td class="text-center text-muted">@item.AttemptedAt.ToShortDateString()</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr class="bg-body-tertiary">
+                                        <td colspan="6" class="text-center py-2 text-muted">
+                                            <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                                            <span class="ms-2">Detaylar yükleniyor...</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                </tbody>
             }
         }
+    </table>
+</div>
+
+@code {
+    #region Parameters
+    [Parameter] public List<UserQuestionStatDto> Questions { get; set; } = new();
+    [Parameter] public List<TopicDto> Topics { get; set; } = new();
+    [Parameter] public List<LessonDto> Lessons { get; set; } = new();
+    #endregion
+
+    private IEnumerable<IGrouping<int, UserQuestionStatDto>>? _groupedQuestions;
+
+    private Dictionary<int, string> _lessonNameLookup = new();
+    private Dictionary<int, byte> _topicPriorityLookup = new();
+
+    private HashSet<int> _expandedLessonIds = new();
+    private int? _expandedTopicId;
+
+    protected override void OnParametersSet()
+    {
+        if (Questions != null && Questions.Any())
+        {
+            _groupedQuestions = Questions
+                .GroupBy(q => q.Topic.LessonId)
+                .OrderBy(g => g.Key);
+        }
+        else
+        {
+            _groupedQuestions = null;
+        }
+
+        if (Lessons != null)
+        {
+            _lessonNameLookup = Lessons.ToDictionary(k => k.Id, v => v.Name);
+        }
+
+        if (Topics != null)
+        {
+            _topicPriorityLookup = Topics.ToDictionary(k => k.Id, v => v.Priority);
+        }
+    }
+    
+    private void ToggleLesson(int lessonId)
+    {
+        if (_expandedLessonIds.Contains(lessonId))
+            _expandedLessonIds.Remove(lessonId);
+        else
+            _expandedLessonIds.Add(lessonId);
 
         StateHasChanged();
     }
-    public float CalculateDeficiencyScore(int totalSolvedCount, int correctCount, DateTime lastAttemptAt, float topicPriority)
+
+    private async Task ToggleTopicExpand(UserQuestionStatDto question)
     {
-        const float expectedSuccessRate = 0.60f; 
-        const float successWeight = 0.7f;        
-        const float recencyWeight = 0.3f;        
-        const int confidenceThreshold = 10;     
-        const int recencyLimitDays = 90;        
+        if (_expandedTopicId == question.Id)
+        {
+            _expandedTopicId = null;
+        }
+        else
+        {
+            _expandedTopicId = question.Id;
+
+            if (question.QuestionStatDetail == null || !question.QuestionStatDetail.Any())
+            {
+                try
+                {
+                    var details = await QuestionStatDetailService.GetAll(question.Id);
+                    question.QuestionStatDetail = details.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Detaylar yüklenirken hata: {ex.Message}");
+                }
+                finally
+                {
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+    private string GetLessonName(int lessonId)
+    {
+        return _lessonNameLookup.TryGetValue(lessonId, out var name)
+    ? name
+    : $"Ders #{lessonId}";
+    }
+
+    private string GetColorByRate(float rate)
+    {
+        return rate switch
+        {
+            >= 0.75f => "bg-success",
+            >= 0.50f => "bg-warning text-dark",
+            _ => "bg-danger"
+        };
+    }
+
+    public float CalculateDeficiencyScore(int totalSolvedCount, int correctCount, DateTime lastAttemptAt, int topicId)
+    {
+        var topicPriority = _topicPriorityLookup.TryGetValue(topicId, out byte p) ? p : (byte)1;
+
+        const float expectedSuccessRate = 0.60f;
+        const float successWeight = 0.7f;
+        const float recencyWeight = 0.3f;
+        const int confidenceThreshold = 10;
+        const int recencyLimitDays = 90;
 
         int daysSinceLastAttempt = (DateTime.Now - lastAttemptAt).Days;
         float recencyScore = Math.Min(daysSinceLastAttempt, recencyLimitDays);
 
         float adjustedSuccessRatio = ((float)correctCount + (confidenceThreshold * expectedSuccessRate))
-                                    / (totalSolvedCount + confidenceThreshold);
+                           / (totalSolvedCount + confidenceThreshold);
 
         float successPercentage = adjustedSuccessRatio * 100f;
         float successLossScore = 100f - successPercentage;

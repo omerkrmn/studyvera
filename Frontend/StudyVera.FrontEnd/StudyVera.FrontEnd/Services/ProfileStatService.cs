@@ -37,7 +37,7 @@ public class ProfileStatService : ServiceHelper, IProfileStatService
         await AddAuthorizationHeader();
         try
         {
-            var response = await _httpClient.GetAsync(_apiUrl);
+            var response = await _httpClient.GetAsync($"{_apiUrl}?PageNumber=1&PageSize=5");
             if (response.IsSuccessStatusCode)
             {
                 var scoreBoardResult = await response.Content.ReadFromJsonAsync<List<ScoreBoardDto>>();

@@ -5,139 +5,338 @@
 @using StudyVera.FrontEnd.Services.Concrats
 @inject ILocalStorageService LocalStorage
 @inject ILessonScheduleService LessonScheduleService
+@inject IJSRuntime JS
 
-<h3 class="mt-3 mb-3">📘 Haftalık Çalışma Programı</h3>
+<div class="schedule-container p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold m-0"><i class="bi bi-calendar3 me-2"></i>Haftalık Çalışma Programı</h3>
+        <span class="badge text-bg-info">Sürükleyerek Yer Değiştir</span>
+    </div>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-striped text-center align-middle">
-        <thead class="table-primary">
-            <tr>
-                @foreach (var day in WeeklyProgram)
-                {
-                    <th>@day.DayName</th>
-                }
-            </tr>
-        </thead>
+    @if (!string.IsNullOrEmpty(HataMesaji))
+    {
+        <div class="alert alert-danger shadow-sm">@HataMesaji</div>
+    }
 
-        <tbody>
-            <tr class="align-text-top">
-                @foreach (var day in WeeklyProgram)
-                {
-                    <td style="min-width:150px; height: 100%;"
-                        @ondragover:preventDefault
-                        @ondragover="HandleDragEnter"
-                        @ondrop="() => HandleDayDrop(day)">
+    <div class="schedule-grid">
+        @foreach (var day in WeeklyProgram)
+        {
+            <div class="day-column @(GetTodayClass(day.DayOfWeek))"
+                 @ondragover:preventDefault
+                 @ondragover="HandleDragEnter"
+                 @ondrop="() => HandleDayDrop(day)">
 
-                        @if (day.Schedules.Count == 0)
+                <div class="day-header d-flex justify-content-between align-items-center w-100 px-3 py-2">
+                    <span class="day-name">@day.DayName</span>
+                    <button class="btn btn-sm btn-outline-primary border-0 rounded-circle shadow-none"
+                            @onclick="() => OpenAddModal(day.DayOfWeek)"
+                            title="Ders Ekle">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+
+                <div class="sessions-container">
+                    @if (day.Schedules.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-plus-circle opacity-50"></i>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var schedule in day.Schedules.OrderBy(s => s.StartTime))
                         {
-                            <div class="text-muted" style="min-height:70px;">—</div>
-                        }
-                        else
-                        {
-                            @foreach (var schedule in day.Schedules.OrderBy(s => s.StartTime))
-                            {
-                                string dropClass = "";
-                                if (schedule == targetScheduleForDrop)
-                                {
-                                    dropClass = dropIndicatorClass;
-                                }
+                            var isTarget = schedule == targetScheduleForDrop;
 
-                                <div class="p-1 mb-1 border rounded shadow-sm @dropClass"
-                                     draggable="true"
-                                     @ondragstart="() => HandleDragStart(schedule, day)"
-                                     @ondragover:preventDefault
-                                     @ondragover="(args) => HandleDragOverSession(schedule, args)"
-                                     @ondragleave="() => HandleDragLeave(schedule)"
-                                     @ondrop:stopPropagation
-                                     @ondrop="() => HandleSessionDrop(day, schedule)"
-                                     style="cursor: move; /* Topic rengi DTO'da olmadığı için varsayılan bırakıldı */">
+                            <div class="session-card @(isTarget ? "drop-target" : "")"
+                                 draggable="true"
+                                 @ondragstart="() => HandleDragStart(schedule, day)"
+                                 @ondragover:preventDefault
+                                 @ondragover="(args) => HandleDragOverSession(schedule, args)"
+                                 @ondragleave="() => HandleDragLeave(schedule)"
+                                 @ondrop:stopPropagation
+                                 @ondrop="() => HandleSessionDrop(day, schedule)">
 
-                                    <strong>Topic ID: @schedule.TopicId</strong> <br />
-
-                                    <small class="text-secondary">
-                                        @schedule.StartTime.Hours:@schedule.StartTime.Minutes:00 -
-                                        @schedule.EndTime.Hours:@schedule.EndTime.Minutes:00
-                                    </small>
-                                    <br />
-
-                                    <small class="text-dark">Lesson ID: @schedule.LessonId</small>
+                                <div class="session-time">
+                                    <i class="bi bi-clock me-1"></i>
+                                    @FormatTime(schedule.StartTime) - @FormatTime(schedule.EndTime)
                                 </div>
-                            }
-                        }
-                    </td>
-                }
-            </tr>
-        </tbody>
-    </table>
-</div>
 
+                                <div class="session-body">
+                                    <div class="lesson-tag">Ders #@schedule.LessonId</div>
+                                    <div class="topic-title">Konu #@schedule.TopicId</div>
+                                </div>
+
+                                <div class="drag-handle">
+                                    <i class="bi bi-grip-vertical"></i>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@if (isAddModalOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(3px);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-journal-plus me-2"></i>Programa Ders Ekle</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => isAddModalOpen = false"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <EditForm Model="@newSchedule" OnValidSubmit="AddNewSchedule">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Gün</label>
+                                <select class="form-select" @bind="newSchedule.DayOfWeek">
+                                    <option value="1">Pazartesi</option>
+                                    <option value="2">Salı</option>
+                                    <option value="3">Çarşamba</option>
+                                    <option value="4">Perşembe</option>
+                                    <option value="5">Cuma</option>
+                                    <option value="6">Cumartesi</option>
+                                    <option value="7">Pazar</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ders ID</label>
+                                <input type="number" class="form-control" @bind="newSchedule.LessonId" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Konu ID</label>
+                                <input type="number" class="form-control" @bind="newSchedule.TopicId" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Başlangıç</label>
+                                <input type="time" class="form-control" @onchange="@(e => newSchedule.StartTime = TimeSpan.Parse(e.Value.ToString()))" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Bitiş</label>
+                                <input type="time" class="form-control" @onchange="@(e => newSchedule.EndTime = TimeSpan.Parse(e.Value.ToString()))" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light" @onclick="() => isAddModalOpen = false">İptal</button>
+                            <button type="submit" class="btn btn-primary px-4">Programa Ekle</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        align-items: start;
+    }
+
+    .day-column {
+        /* Temaya göre değişen ikincil arka plan rengi */
+        background: rgba(var(--bs-tertiary-bg-rgb), 1);
+        border-radius: 12px;
+        border: 1px solid var(--bs-border-color);
+        min-height: 450px;
+        transition: all 0.2s;
+    }
+
+    .day-header {
+        padding: 12px;
+        /* Temaya göre değişen ana arka plan */
+        background: var(--bs-body-bg);
+        border-radius: 12px 12px 0 0;
+        border-bottom: 2px solid var(--bs-border-color);
+    }
+
+    .day-name {
+        font-weight: 700;
+        color: var(--bs-body-color);
+    }
+
+    .session-count {
+        font-size: 0.75rem;
+        color: var(--bs-secondary-color);
+    }
+
+    .sessions-container {
+        padding: 8px;
+        min-height: 400px;
+    }
+
+    .session-card {
+        background: var(--bs-body-bg);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid var(--bs-border-color);
+        border-left: 4px solid var(--bs-primary);
+        position: relative;
+        cursor: grab;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+        .session-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+    .session-time {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--bs-primary);
+        margin-bottom: 4px;
+    }
+
+    .lesson-tag {
+        font-size: 0.65rem;
+        color: var(--bs-secondary-color);
+        text-transform: uppercase;
+    }
+
+    .topic-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--bs-emphasis-color);
+    }
+
+    .empty-state {
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed var(--bs-border-color);
+        border-radius: 8px;
+        margin-top: 10px;
+        color: var(--bs-secondary-color);
+    }
+
+    .drop-target {
+        border-top: 4px solid var(--bs-warning) !important;
+        transform: scale(1.02);
+    }
+
+    /* Bugünün sütunu vurgusu */
+    .today-column {
+        border: 2px solid var(--bs-primary) !important;
+        background: rgba(var(--bs-primary-rgb), 0.05) !important;
+    }
+
+    .drag-handle {
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--bs-secondary-color);
+        opacity: 0.5;
+    }
+</style>
 
 @code {
-   
+
+    private bool isAddModalOpen = false;
+    private LessonScheduleDto newSchedule = new();
+
+    private void OpenAddModal(int dayId)
+    {
+        newSchedule = new LessonScheduleDto
+        {
+            DayOfWeek = dayId,
+            StartTime = new TimeSpan(9, 0, 0), // Varsayılan sabah 09:00
+            EndTime = new TimeSpan(10, 0, 0)   // Varsayılan bitiş 10:00
+        };
+        isAddModalOpen = true;
+    }
+    private async Task AddNewSchedule()
+    {
+        // 1. Yeni dersi ilgili güne ekle
+        var targetDay = WeeklyProgram.FirstOrDefault(d => d.DayOfWeek == newSchedule.DayOfWeek);
+        if (targetDay != null)
+        {
+            targetDay.Schedules.Add(newSchedule);
+            // Saat sırasına göre tekrar sırala
+            targetDay.Schedules = targetDay.Schedules.OrderBy(s => s.StartTime).ToList();
+        }
+
+        // 2. LocalStorage ve Veritabanı Kaydı (Eğer servisin destekliyorsa)
+        await SaveAndCleanup();
+
+        // 3. Modalı Kapat
+        isAddModalOpen = false;
+
+        // Başarı mesajı (Opsiyonel)
+        await JS.InvokeVoidAsync("alert", "Yeni ders başarıyla eklendi! 📚");
+    }
+
+
     private LessonScheduleDto? draggedSchedule;
     private DayProgramView? sourceDay;
-    private List<DayProgramView> WeeklyProgram { get; set; } = new List<DayProgramView>();
+    private List<DayProgramView> WeeklyProgram { get; set; } = new();
     private LessonScheduleDto? targetScheduleForDrop;
-    private string? dropIndicatorClass;
     private string HataMesaji { get; set; } = string.Empty;
-
 
     protected override async Task OnInitializedAsync()
     {
-        List<LessonScheduleDto> schedules;
-        HataMesaji = string.Empty;
+        await LoadData();
+    }
 
-        var storedSchedules = await LocalStorage.GetItemAsync<List<LessonScheduleDto>>("lessonSchedules");
-
-        if (storedSchedules != null && storedSchedules.Any())
+    private async Task LoadData()
+    {
+        var stored = await LocalStorage.GetItemAsync<List<LessonScheduleDto>>("lessonSchedules");
+        if (stored != null && stored.Any())
         {
-            schedules = storedSchedules;
+            WeeklyProgram = GroupSchedulesByDay(stored);
         }
         else
         {
             try
             {
-                schedules = await LessonScheduleService.GetAll();
+                var apiSchedules = await LessonScheduleService.GetAll();
+                WeeklyProgram = GroupSchedulesByDay(apiSchedules);
             }
             catch (Exception ex)
             {
-                schedules = new List<LessonScheduleDto>();
-                HataMesaji = $"Program yüklenirken bir sorun oluştu: {ex.Message}";
-                Console.WriteLine(HataMesaji);
+                HataMesaji = "Program yüklenemedi.";
             }
         }
-        WeeklyProgram = GroupSchedulesByDay(schedules);
+    }
+
+    private string FormatTime(TimeSpan time) => time.ToString(@"hh\:mm");
+
+    private string GetTodayClass(int dayOfWeek)
+    {
+        int currentDay = (int)DateTime.Now.DayOfWeek;
+        if (currentDay == 0) currentDay = 7;
+        return dayOfWeek == currentDay ? "today-column" : "";
     }
 
     private void HandleDragStart(LessonScheduleDto schedule, DayProgramView day)
     {
         draggedSchedule = schedule;
         sourceDay = day;
-        targetScheduleForDrop = null;
-        dropIndicatorClass = null;
     }
 
-    private void HandleDragEnter(DragEventArgs args)
-    {
-        args.DataTransfer.DropEffect = "move";
-    }
+    private void HandleDragEnter(DragEventArgs args) => args.DataTransfer.DropEffect = "move";
 
     private void HandleDragOverSession(LessonScheduleDto targetSchedule, DragEventArgs args)
     {
-        if (draggedSchedule == null || draggedSchedule.LessonId == targetSchedule.LessonId) return;
-
+        if (draggedSchedule == null || draggedSchedule == targetSchedule) return;
         targetScheduleForDrop = targetSchedule;
-        dropIndicatorClass = "drop-zone-top";
-        args.DataTransfer.DropEffect = "move";
     }
 
     private void HandleDragLeave(LessonScheduleDto targetSchedule)
     {
-        if (targetScheduleForDrop == targetSchedule)
-        {
-            targetScheduleForDrop = null;
-            dropIndicatorClass = null;
-        }
+        if (targetScheduleForDrop == targetSchedule) targetScheduleForDrop = null;
     }
 
     private async Task HandleSessionDrop(DayProgramView targetDay, LessonScheduleDto targetSchedule)
@@ -145,73 +344,51 @@
         if (draggedSchedule == null || sourceDay == null) return;
 
         sourceDay.Schedules.Remove(draggedSchedule);
-
-        int insertIndex = targetDay.Schedules.IndexOf(targetSchedule);
+        int index = targetDay.Schedules.IndexOf(targetSchedule);
 
         draggedSchedule.DayOfWeek = targetDay.DayOfWeek;
-
-        targetDay.Schedules.Insert(insertIndex, draggedSchedule);
+        targetDay.Schedules.Insert(index, draggedSchedule);
 
         await SaveAndCleanup();
     }
 
     private async Task HandleDayDrop(DayProgramView targetDay)
     {
-        if (draggedSchedule == null || sourceDay == null) return;
-        if (sourceDay == targetDay) return;
+        if (draggedSchedule == null || sourceDay == targetDay) return;
 
         sourceDay.Schedules.Remove(draggedSchedule);
-
         draggedSchedule.DayOfWeek = targetDay.DayOfWeek;
         targetDay.Schedules.Add(draggedSchedule);
 
         await SaveAndCleanup();
     }
 
-
     private async Task SaveAndCleanup()
     {
-        var allSchedules = WeeklyProgram.SelectMany(d => d.Schedules).ToList();
-
-        await LocalStorage.SetItemAsync("WeeklySchedulesData", allSchedules);
-
-
-        StateHasChanged();
+        var all = WeeklyProgram.SelectMany(d => d.Schedules).ToList();
+        await LocalStorage.SetItemAsync("lessonSchedules", all);
 
         draggedSchedule = null;
         sourceDay = null;
         targetScheduleForDrop = null;
-        dropIndicatorClass = null;
+        StateHasChanged();
     }
 
     private List<DayProgramView> GroupSchedulesByDay(List<LessonScheduleDto> schedules)
     {
-        var days = new List<DayProgramView>();
         var dayNames = new[] { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar" };
-
-        for (int i = 0; i < 7; i++)
+        return Enumerable.Range(1, 7).Select(i => new DayProgramView
         {
-            int dayIndex = i + 1;
-
-            days.Add(new DayProgramView
-            {
-                DayOfWeek = dayIndex,
-                DayName = dayNames[i],
-                Schedules = schedules
-                    .Where(s => s.DayOfWeek == dayIndex)
-                    .OrderBy(s => s.StartTime)
-                    .ToList()
-            });
-        }
-        return days;
+            DayOfWeek = i,
+            DayName = dayNames[i - 1],
+            Schedules = schedules.Where(s => s.DayOfWeek == i).OrderBy(s => s.StartTime).ToList()
+        }).ToList();
     }
 
     public class DayProgramView
     {
         public int DayOfWeek { get; set; }
-        public string DayName { get; set; } = string.Empty;
-        public List<LessonScheduleDto> Schedules { get; set; } = new List<LessonScheduleDto>();
+        public string DayName { get; set; } = "";
+        public List<LessonScheduleDto> Schedules { get; set; } = new();
     }
-
- 
 }

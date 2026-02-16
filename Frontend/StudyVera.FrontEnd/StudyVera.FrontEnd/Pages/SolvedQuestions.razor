@@ -1,5 +1,6 @@
 ﻿@page "/profile/solved-questions"
 @using StudyVera.FrontEnd.Components
+@using StudyVera.FrontEnd.Models.Lessons
 @using StudyVera.FrontEnd.Models.Topics
 @using StudyVera.FrontEnd.Models.UserQuestionStat
 @using StudyVera.FrontEnd.Services
@@ -8,152 +9,227 @@
 @inject TopicService TopicService
 @inject IJSRuntime JS
 @inject HttpClient Http
+@inject ILessonService LessonService
 
 <PageTitle>Soru Çözme İstatistikleri</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <button class="btn btn-primary btn-lg" @onclick="OpenModalForNew">
-        <span class="me-1">➕</span> Yeni
-    </button>
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-2 p-md-3">
+        <div class="row g-2 g-md-3 align-items-center">
+
+            <div class="col-6 col-md-3 border-end-sm">
+                <div class="d-flex align-items-center justify-content-center justify-content-md-start ps-md-3">
+                    <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-2 text-primary d-none d-sm-block">
+                        <i class="bi bi-ui-checks-grid fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-bold" style="font-size: 0.6rem;">Toplam Çözülen</div>
+                        <div class="fs-6 fw-bold">@questions.Sum(ques => ques.TotalSolvedCount)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3 border-end-md">
+                <div class="d-flex align-items-center justify-content-center justify-content-md-start ps-md-3">
+                    <div class="bg-success bg-opacity-10 p-2 rounded-3 me-2 text-success d-none d-sm-block">
+                        <i class="bi bi-graph-up-arrow fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-bold" style="font-size: 0.6rem;">Total Başarı</div>
+                        <div class="fs-6 fw-bold">
+                            @((questions.Sum(q => q.TotalSolvedCount) == 0 ? 0 :
+                                                        ((float)questions.Sum(q => q.TotalCorrectCount) / questions.Sum(q => q.TotalSolvedCount) * 100)).ToString("F1"))%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3 border-end-md mt-2 mt-md-0 border-top-md-0 pt-2 pt-md-0">
+                <div class="d-flex align-items-center justify-content-center justify-content-md-start ps-md-3">
+                    <div class="bg-info bg-opacity-10 p-2 rounded-3 me-2 text-info d-none d-sm-block">
+                        <i class="bi bi-star-fill fs-5"></i>
+                    </div>
+                    <div class="text-center text-md-start">
+                        <div class="text-muted small text-uppercase fw-bold" style="font-size: 0.6rem;">Favori Ders</div>
+                        <div class="fs-6 fw-bold text-truncate" style="max-width: 120px;">@FavoriteLessonName</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3 text-center text-md-end mt-2 mt-md-0">
+                <button class="btn btn-primary btn-sm w-100 w-md-auto px-4 rounded-pill shadow-sm py-2" @onclick="OpenModalForNew">
+                    <i class="bi bi-plus-lg me-1"></i> Sonuç Ekle
+                </button>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 @if (isModalOpen)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,.5);">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">@modalTitle</h5>
+                <div class="modal-header bg-light border-bottom-0">
+                    <h5 class="modal-title fw-bold text-primary">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Yeni İlerleme Ekle
+                    </h5>
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
                 </div>
 
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <EditForm Model="@newQuestion" OnValidSubmit="AddQuestionAsync">
                         <DataAnnotationsValidator />
-                        <ValidationSummary class="alert alert-danger p-2" />
 
-                        <div class="row g-3 align-items-end">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger d-flex align-items-center p-2 small mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> @errorMessage
+                            </div>
+                        }
 
-                            @* 1. Konu Arama ve Seçme *@
-                            <div class="col-md-5 position-relative">
-                                <label class="form-label fw-bold">Konu Seçimi</label>
-                                <input type="text"
-                                       class="form-control form-control-lg"
-                                       placeholder="Konu ara veya seç..."
-                                       @bind="searchTerm"
-                                       @bind:event="oninput"
-                                       @onfocus="() => showDropdown = true"
-                                       @onblur="HideDropdownDelayed" />
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" value="@selectedLessonId" @onchange="OnLessonChanged">
+                                        <option value="0">Seçiniz...</option> @foreach (var lesson in Lessons)
+                                        {
+                                            <option value="@lesson.Id">@lesson.Name</option>
+                                        }
+                                    </select>
+                                    <label>Ders</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 position-relative">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" placeholder="Konu ara..."
+                                           @bind="searchTerm" @bind:event="oninput"
+                                           @onfocus="() => showDropdown = true"
+                                           disabled="@(!IsLessonSelected)" /> <label>Konu</label>
+                                </div>
+                                <ValidationMessage For="@(() => newQuestion.TopicId)" class="text-danger small" />
 
                                 @if (showDropdown && FilteredTopics.Any())
                                 {
-                                    <ul class="list-group position-absolute w-100 shadow-lg mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                    <ul class="list-group position-absolute w-100 shadow mt-1 overflow-auto" style="z-index: 1050; max-height: 200px;">
                                         @foreach (var topic in FilteredTopics)
                                         {
-                                            <li class="list-group-item list-group-item-action @(newQuestion.TopicId == topic.Id ? "active" : "")"
+                                            <li class="list-group-item list-group-item-action cursor-pointer"
                                                 @onclick="() => SelectTopic(topic)">
                                                 @topic.Name
                                             </li>
                                         }
                                     </ul>
                                 }
-                                <ValidationMessage For="@(() => newQuestion.TopicId)" class="text-danger small" />
                             </div>
+                        </div>
 
-                            @* 2. Çözülen Soru Sayısı *@
-                            <div class="col-md-2">
-                                <label class="form-label fw-bold">Çözülen (Toplam)</label>
-                                <InputNumber TValue="int"
-                                             @bind-Value="newQuestion.SolvedCount"
-                                             class="form-control form-control-lg"
-                                             placeholder="Adet" />
-                                <ValidationMessage For="@(() => newQuestion.SolvedCount)" class="text-danger small" />
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <InputNumber @bind-Value="newQuestion.SolvedCount" class="form-control fw-bold" placeholder="0" />
+                                    <label>Toplam Soru</label>
+                                </div>
                             </div>
-
-                            @* 3. Doğru Soru Sayısı *@
-                            <div class="col-md-2">
-                                <label class="form-label fw-bold">Doğru Sayısı</label>
-                                <InputNumber TValue="int"
-                                             @bind-Value="newQuestion.CorrectCount"
-                                             class="form-control form-control-lg"
-                                             placeholder="Adet" />
-                                <ValidationMessage For="@(() => newQuestion.CorrectCount)" class="text-danger small" />
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <InputNumber @bind-Value="newQuestion.CorrectCount" class="form-control text-success fw-bold" placeholder="0" />
+                                    <label>Doğru</label>
+                                </div>
                             </div>
-
-                            @* 4. Kaydet Butonu *@
-                            <div class="col-md-3 d-grid">
-                                <button type="submit" class="btn btn-success btn-lg">💾 İlerleme Kaydet</button>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input value="@(newQuestion.SolvedCount - newQuestion.CorrectCount)"
+                                           class="form-control text-danger fw-bold" readonly />
+                                    <label>Yanlış / Boş</label>
+                                </div>
                             </div>
+                        </div>
 
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <button type="button" class="btn btn-light rounded-pill" @onclick="CloseModal">İptal</button>
+
+                            <button type="button" class="btn btn-outline-primary rounded-pill" @onclick="SaveAndNew">
+                                <i class="bi bi-arrow-repeat me-1"></i> Kaydet & Yeni
+                            </button>
+
+                            <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                                <i class="bi bi-save me-1"></i> Kaydet
+                            </button>
                         </div>
 
                     </EditForm>
                 </div>
-
             </div>
         </div>
     </div>
 }
-<SolvedQuestionsList Questions="questions" Topics="Topics" />
-
-
+<SolvedQuestionsList Lessons="Lessons" Questions="questions" Topics="Topics"></SolvedQuestionsList>
 @code {
 
+    private string FavoriteLessonName
+    {
+        get
+        {
+            if (questions == null || !questions.Any())
+                return "-";
+            var topLessonStats = questions
+                .GroupBy(q => q.Topic.LessonId)
+                .Select(g => new
+                {
+                    LessonId = g.Key,
+                    TotalSolved = g.Sum(x => x.TotalSolvedCount)
+                })
+                .OrderByDescending(x => x.TotalSolved)
+                .FirstOrDefault();
+            if (topLessonStats == null || topLessonStats.TotalSolved == 0)
+                return "-";
+            var lessonName = Lessons.FirstOrDefault(l => l.Id == topLessonStats.LessonId)?.Name;
+            return lessonName ?? "Bilinmiyor";
+        }
+    }
     private List<UserQuestionStatDto> questions = new();
-    AddUserQuestionStatDto newQuestion = new();
     private List<TopicDto>? Topics;
-    private string searchTerm = string.Empty;
-    private bool showDropdown;
+    private List<LessonDto> Lessons = new();
+
+    // --- Modal State ---
+    private AddUserQuestionStatDto newQuestion = new();
     private bool isModalOpen = false;
     private string modalTitle = "Yeni İlerleme Ekle";
+    private string errorMessage = "";
 
+    // --- Filtreleme State ---
+    private string searchTerm = string.Empty;
+    private bool showDropdown;
+    private int selectedLessonId = 0; // EKSİK OLAN BU DEĞİŞKENDİ
 
+    bool IsLessonSelected => selectedLessonId > 0;
 
-    private float konuEksiklikOlcegi = 0.0f;
-
-
-
+    // Filtrelenmiş Konular: Hem DERSE hem ARAMAYA göre filtreler
     private IEnumerable<TopicDto> FilteredTopics =>
-        string.IsNullOrWhiteSpace(searchTerm)
-            ? new List<TopicDto>()
-            : Topics!.Where(t => t.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-
-    public async Task AddQuestionAsync()
-    {
-        try
-        {
-            await UserQuestionStatsService.Add(newQuestion);
-            newQuestion = new AddUserQuestionStatDto();
-            searchTerm = string.Empty;
-            questions = await UserQuestionStatsService.GetAll();
-            await ShowSuccessToast("İlerleme başarıyla kaydedildi! 🎉");
-            isModalOpen = false;
-        }
-        catch (HttpRequestException httpEx) when (httpEx.StatusCode.HasValue)
-        {
-            var code = ((int)httpEx.StatusCode.Value);
-            await ShowErrorToast($"Kayıt sırasında bir hata oluştu. Status Code {code}");
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorToast($"Kayıt sırasında beklenmeyen bir hata oluştu. {ex.Message}");
-        }
-    }
-    private void SelectTopic(TopicDto topic)
-    {
-        newQuestion.TopicId = topic.Id;
-        searchTerm = topic.Name;
-        showDropdown = false;
-    }
+        Topics is null
+            ? Enumerable.Empty<TopicDto>()
+            : Topics
+                .Where(t => selectedLessonId == 0 || t.LessonId == selectedLessonId) // Ders Filtresi
+                .Where(t => string.IsNullOrWhiteSpace(searchTerm) || t.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)); // Arama Filtresi
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            Topics = await TopicService.GetTopics();
-            questions = await UserQuestionStatsService.GetAll();
+            // Task.WhenAll ile paralel çekmek performansı artırır
+            var tasks = new Task[]
+            {
+                Task.Run(async () => Topics = await TopicService.GetTopics()),
+                Task.Run(async () => questions = await UserQuestionStatsService.GetAll()),
+                Task.Run(async () => Lessons = await LessonService.GetAll())
+            };
+            await Task.WhenAll(tasks);
         }
         catch (Exception ex)
         {
@@ -161,57 +237,88 @@
         }
     }
 
-    private CancellationTokenSource cts = new CancellationTokenSource();
-
-    private void HideDropdownDelayed()
+    public async Task ProcessAddQuestion(bool shouldCloseModal)
     {
-        cts.Cancel();
-        cts = new CancellationTokenSource();
-        _ = Task.Delay(200, cts.Token)
-                .ContinueWith(t =>
-                {
-                    if (!t.IsCanceled)
-                    {
-                        showDropdown = false;
-                        InvokeAsync(StateHasChanged);
-                    }
-                });
+        try
+        {
+            // Temel doğrulamalar
+            if (newQuestion.TopicId == 0)
+            {
+                errorMessage = "Lütfen bir konu seçiniz.";
+                await ShowToast("error", errorMessage);
+                return;
+            }
+
+            if (newQuestion.SolvedCount < newQuestion.CorrectCount)
+            {
+                errorMessage = "Doğru sayısı toplam sorudan fazla olamaz!";
+                await ShowToast("error", errorMessage);
+                return;
+            }
+
+            // API Kaydı
+            await UserQuestionStatsService.Add(newQuestion);
+
+            // Listeyi tazele
+            questions = await UserQuestionStatsService.GetAll();
+
+            // Başarı mesajı (Toast)
+            await ShowToast("success", "İlerleme başarıyla kaydedildi! 🎉");
+
+            errorMessage = "";
+
+            if (shouldCloseModal)
+            {
+                isModalOpen = false;
+            }
+            else
+            {
+                // Kaydet & Yeni için formu temizle ama modalı kapatma
+                newQuestion = new AddUserQuestionStatDto();
+                searchTerm = string.Empty;
+                selectedLessonId = 0; // İstersen ders kalsın dersen bunu silebilirsin
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("error", $"Hata oluştu: {ex.Message}");
+        }
+    }
+    private async Task ShowToast(string type, string message)
+    => await JS.InvokeVoidAsync("showToast", type, message);
+
+    // Buton tetikleyicileri
+    public async Task AddQuestionAsync() => await ProcessAddQuestion(shouldCloseModal: true);
+    public async Task SaveAndNew() => await ProcessAddQuestion(shouldCloseModal: false);
+
+
+    void OnLessonChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int id))
+        {
+            selectedLessonId = id;
+            searchTerm = "";
+            newQuestion.TopicId = 0;
+        }
     }
 
-    private async Task ShowSuccessToast(string message)
+    private void SelectTopic(TopicDto topic)
     {
-        await JS.InvokeVoidAsync("alert", message);
+        newQuestion.TopicId = topic.Id;
+        searchTerm = topic.Name;
+        showDropdown = false;
     }
 
-    private async Task ShowErrorToast(string message)
-    {
-        await JS.InvokeVoidAsync("alert", message);
-    }
-
-    // ----- Modal aç/kapa metotları -----
 
     private void OpenModalForNew()
     {
         newQuestion = new AddUserQuestionStatDto();
         searchTerm = string.Empty;
+        selectedLessonId = 0;
+        errorMessage = "";
         showDropdown = false;
-
         modalTitle = "Yeni İlerleme Ekle";
-        isModalOpen = true;
-    }
-
-    private void OpenModalForTopic(UserQuestionStatDto question)
-    {
-        // Konu otomatik gelsin
-        newQuestion = new AddUserQuestionStatDto
-        {
-            TopicId = question.Topic.Id
-        };
-
-        searchTerm = question.Topic.Name;
-        showDropdown = false;
-
-        modalTitle = $"{question.Topic.Name} için yeni ilerleme ekle";
         isModalOpen = true;
     }
 
@@ -220,6 +327,17 @@
         isModalOpen = false;
     }
 
-   
+    private async Task ShowSuccessToast(string message) => await JS.InvokeVoidAsync("alert", message);
+    private async Task ShowErrorToast(string message) => await JS.InvokeVoidAsync("alert", message);
 
+    private CancellationTokenSource cts = new();
+    private void HideDropdownDelayed()
+    {
+        cts.Cancel();
+        cts = new CancellationTokenSource();
+        _ = Task.Delay(200, cts.Token).ContinueWith(t =>
+        {
+            if (!t.IsCanceled) { showDropdown = false; InvokeAsync(StateHasChanged); }
+        });
+    }
 }
