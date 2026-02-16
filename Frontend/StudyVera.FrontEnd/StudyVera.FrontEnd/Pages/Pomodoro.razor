@@ -1,0 +1,308 @@
+﻿@page "/pomodoro"
+@using System.Timers
+@using Blazored.LocalStorage
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+@inject ILocalStorageService LocalStorage
+
+<PageTitle>@PageTitleText</PageTitle>
+
+<HeadContent>
+    <meta name="description" content="Verimliliğinizi artıracak en sade Pomodoro sayacı. Odaklanma sürelerinizi ve molalarınızı profesyonelce yönetin.studyvera - dijital sınava hazırlık koçu">
+    <meta name="keywords" content="pomodoro, zaman yönetimi, verimlilik aracı, online sayaç, ders çalışma teknikleri, studyvera dijital sınava hazırlık koçu">
+</HeadContent>
+
+<style>
+    .timer-card {
+        background: var(--bs-body-bg);
+        border: 2px solid var(--bs-border-color);
+        transition: all 0.4s ease;
+    }
+
+        .timer-card.break-over {
+            border-color: #dc3545;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.2) !important;
+        }
+
+    .display-time {
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: 800;
+        font-size: 5rem;
+        transition: color 0.3s ease;
+    }
+
+    .text-overdue {
+        color: #dc3545 !important;
+    }
+
+    .text-study {
+        color: var(--bs-emphasis-color);
+    }
+
+    .text-break {
+        color: #198754;
+    }
+
+    .mode-btn {
+        min-width: 100px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
+
+            <div class="mb-4">
+                <h2 class="fw-bold text-primary">
+                    <i class="bi @(IsBreakMode ? "bi-cup-hot" : "bi-clock-history") me-2"></i>
+                    @(IsBreakMode ? "Mola Zamanı" : "Odaklanma Modu")
+                </h2>
+                @if (IsBreakMode)
+                {
+                    <p class="text-muted italic"><i class="bi bi-chat-left-dots me-2"></i>@settings.PersonalMessage</p>
+                }
+            </div>
+
+            @if (!IsBreakMode)
+            {
+                <div class="d-flex justify-content-center gap-2 mb-4">
+                    @foreach (StudyMode mode in Enum.GetValues(typeof(StudyMode)))
+                    {
+                        <button @onclick="() => SetMode(mode)"
+                                class="btn mode-btn @(CurrentMode == mode ? "btn-primary" : "btn-outline-primary") rounded-pill">
+                            @GetModeName(mode) (@((int)mode)')
+                        </button>
+                    }
+                </div>
+            }
+
+            <div class="card timer-card shadow-lg rounded-5 p-5 mb-4 @(IsOverdue ? "break-over" : "")">
+                <div class="display-time @(IsOverdue ? "text-overdue" : (IsBreakMode ? "text-break" : "text-study"))">
+                    @TimeDisplay
+                </div>
+
+                <div class="mt-5 d-flex justify-content-center gap-3">
+                    @if (!IsBreakMode)
+                    {
+                        if (!_isRunning)
+                        {
+                            <button @onclick="StartTimer" class="btn btn-lg btn-success rounded-pill px-5">Başlat</button>
+                        }
+                        else
+                        {
+
+                            <button @onclick="StopTimer" class="btn btn-lg btn-warning rounded-pill px-5">Durdur</button>
+                        }
+                    }
+                    else
+                    {
+                        if (!_isRunning)
+                        {
+
+                            <button @onclick="StartBreak" class="btn btn-lg btn-outline-success rounded-pill px-5">Molayı Başlat</button>
+                        }
+                        else
+                        {
+
+                            <button @onclick="EndBreak" class="btn btn-lg btn-primary rounded-pill px-5">Çalışmaya Dön</button>
+                        }
+                    }
+
+                    <button @onclick="ResetTimer" class="btn btn-lg btn-outline-danger rounded-pill px-4">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="alert @(IsOverdue ? "alert-danger" : "alert-info") border-0 shadow-sm rounded-4">
+                @if (IsOverdue)
+                {
+                    <span><i class="bi bi-exclamation-triangle me-2"></i>Mola süresini aşıyorsun, zihnini topladıysan dönme vakti!</span>
+                }
+                else if (IsBreakMode)
+                {
+                    <span><i class="bi bi-info-circle me-2"></i>Mola başladı. Önerilen süre: <strong>@MolaSuresiDakika</strong> dk.</span>
+                }
+                else
+                {
+                    <span><i class="bi bi-lightning-charge me-2"></i>Derin çalışma modundasın, bölünme!</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<section class="mt-5 pt-5 ">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <article class="pomodoro-info text-start p-4  rounded-5 shadow-sm border">
+                <h2 class=" fw-bold mb-3">Pomodoro Tekniği ile Verimliliğinizi Katlayın</h2>
+                <p class="lead text-muted">
+                    Zamanı yönetmek yerine odaklanmayı yönetmeye ne dersiniz? <strong>Study Vera</strong> ile entegre çalışan bu sayaç, 
+                    zihninizi en verimli haliyle kullanmanız için tasarlandı.
+                </p>
+                
+                
+
+                <div class="row mt-3">
+    <div class="col-md-6 mb-3">
+        <div class="p-3 border-start border-warning border-4">
+            <h5 class="fw-bold">Odak Süresini Kademeli Artırın</h5>
+            <p class="small mb-0">
+                Başlangıçta 25 dakika olan süreyi, zamanla <strong>50 ve ardından 90 dakikaya</strong> çıkarmak, beyninizin tek bir işe uzun süre kilitlenmesini sağlar. Bu, sınav günü 135-165 dakika boyunca dikkatinizin dağılmasını önleyen bir "zihinsel antrenman"dır.
+            </p>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="p-3 border-start border-info border-4 ">
+            <h5 class="fw-bold">Sınav Günü Kondisyonu</h5>
+            <p class="small mb-0">
+                Gerçek sınavlar mola vermez. Haftada birkaç gün uygulayacağınız <strong>90 dakikalık derin çalışma (Deep Work)</strong> seansları, sınavın son yarım saatinde yaşanan "zihinsel yorgunluk" kaynaklı basit hataları en aza indirir.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-12 mb-3">
+        <div class="p-4 rounded-4 shadow-sm" style="border: 1px dashed #dee2e6;">
+            <h5 class="fw-bold"><i class="bi bi-trophy me-2"></i>Study Vera ile Sınav Maratonuna Hazırlanın</h5>
+            <p class="mb-0 text-muted">
+                Pomodoro sadece bir başlangıçtır. <strong>Study Vera</strong> ile hedefinizi önce 25 dakikalık "odak parçalarıyla" inşa edin, ardından bu parçaları birleştirerek 90 dakikalık kesintisiz güç bloklarına dönüştürün. Unutmayın; sınavı sadece en çok bilen değil, en uzun süre masada "diri" kalabilen kazanır.
+            </p>
+        </div>
+    </div>
+</div>
+            </article>
+        </div>
+    </div>
+</section>
+
+@code {
+    public enum StudyMode { Quick = 25, Deep = 50, Developer = 90 }
+    private StudyMode CurrentMode { get; set; } = StudyMode.Quick;
+
+    private TimeSpan _remainingTime = TimeSpan.FromMinutes((int)StudyMode.Quick);
+    private System.Timers.Timer? _timer;
+    private bool _isRunning = false;
+    private bool IsBreakMode = false;
+    private bool IsOverdue = false;
+
+    private const string CacheKey = "pomodoro_settings";
+    private PomodoroSettingsDto settings = new();
+
+    public class PomodoroSettingsDto
+    {
+        public string PersonalMessage { get; set; } = "Mola bitti, odaklanma zamanı!";
+        public bool IsAudioAlertEnabled { get; set; } = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var savedSettings = await LocalStorage.GetItemAsync<PomodoroSettingsDto>(CacheKey);
+        if (savedSettings != null)
+        {
+            settings = savedSettings;
+        }
+    }
+
+    private string TimeDisplay
+    {
+        get
+        {
+            var absoluteTime = _remainingTime.Duration();
+            string sign = _remainingTime.TotalSeconds < 0 ? "-" : "";
+            return $"{sign}{(int)absoluteTime.TotalMinutes:D2}:{absoluteTime.Seconds:D2}";
+        }
+    }
+
+    private int MolaSuresiDakika => CurrentMode == StudyMode.Quick ? 5 : CurrentMode == StudyMode.Deep ? 10 : 20;
+
+    private void SetMode(StudyMode mode)
+    {
+        StopTimer();
+        IsBreakMode = false;
+        IsOverdue = false;
+        CurrentMode = mode;
+        _remainingTime = TimeSpan.FromMinutes((int)mode);
+    }
+
+    public void StartTimer()
+    {
+        if (_isRunning) return;
+        _timer = new Timer(1000);
+        _timer.Elapsed += OnStudyElapsed;
+        _timer.Start();
+        _isRunning = true;
+    }
+
+    private void OnStudyElapsed(object? sender, ElapsedEventArgs e)
+    {
+        if (_remainingTime.TotalSeconds > 0)
+        {
+            _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
+        }
+        else
+        {
+            StopTimer();
+            IsBreakMode = true;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void StartBreak()
+    {
+        StopTimer();
+        _remainingTime = TimeSpan.FromMinutes(MolaSuresiDakika);
+        _timer = new Timer(1000);
+        _timer.Elapsed += OnBreakElapsed;
+        _timer.Start();
+        _isRunning = true;
+    }
+
+    private async void OnBreakElapsed(object? sender, ElapsedEventArgs e)
+    {
+        _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
+
+        if (_remainingTime.TotalSeconds == 0 && settings.IsAudioAlertEnabled)
+        {
+            await JSRuntime.InvokeVoidAsync("playNotificationSound", settings.PersonalMessage);
+        }
+
+        if (_remainingTime.TotalSeconds < 0)
+        {
+            IsOverdue = true;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void EndBreak()
+    {
+        StopTimer();
+        IsBreakMode = false;
+        IsOverdue = false;
+        _remainingTime = TimeSpan.FromMinutes((int)CurrentMode);
+    }
+
+    public void StopTimer()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+        _timer = null;
+        _isRunning = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void ResetTimer() => EndBreak();
+    public void Dispose() => StopTimer();
+
+    private string GetModeName(StudyMode mode) => mode switch
+    {
+        StudyMode.Quick => "Hızlı",
+        StudyMode.Deep => "Derin",
+        StudyMode.Developer => "Geliştirici",
+        _ => "Bilinmeyen"
+    };
+
+    private string PageTitleText => IsBreakMode ? "Mola Zamanı | StudyVera" : "Pomodoro | StudyVera";
+}
