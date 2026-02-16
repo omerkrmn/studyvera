@@ -71,4 +71,10 @@ public class ProfileStatRepository : RepositoryBase<ProfileStat>, IProfileStatRe
         Create(new ProfileStat { UserId = userId, Score = 10 });
         await _context.SaveChangesAsync(ct);
     }
+
+    public Task<ProfileStat?> GetByUserAsync(Guid userId, CancellationToken ct)
+    {
+        return FindByCondition(ps => ps.UserId == userId, true)
+               .FirstOrDefaultAsync(ct);
+    }
 }

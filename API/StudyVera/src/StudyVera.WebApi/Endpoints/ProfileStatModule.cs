@@ -24,7 +24,7 @@ public class ProfileStatModule : ICarterModule
                        .WithTags("Profile Stats")
                        .RequireAuthorization();
 
-        group.MapGet("me", async (HttpContext context, ISender mediator, CancellationToken ct) =>
+        group.MapGet("/me", async (HttpContext context, ISender mediator, CancellationToken ct) =>
         {
             var query = new GetProfileStatByUserIdQuery
             {
@@ -38,7 +38,7 @@ public class ProfileStatModule : ICarterModule
         .Produces<ProfileStatDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapGet("/", async ([AsParameters] GetScoreBoardQuery query, HttpResponse response, ISender mediator, CancellationToken ct) =>
+        group.MapGet("/", async ([AsParameters]GetScoreBoardQuery query, HttpResponse response, ISender mediator, CancellationToken ct) =>
         {
 
             var result = await mediator.Send(query, ct);
