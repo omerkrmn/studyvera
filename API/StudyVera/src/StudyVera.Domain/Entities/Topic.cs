@@ -13,6 +13,9 @@ public class Topic
     public string Name { get; set; } = string.Empty;
     [Range(1, 5)]
     public byte Priority { get; set; } // 1-5 
+
+    public int OrderIndex { get; set; }
+
     public int LessonId { get; set; }
     public Lesson Lesson { get; set; } = null!;
 }

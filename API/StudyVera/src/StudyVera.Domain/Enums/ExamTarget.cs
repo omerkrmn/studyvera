@@ -8,9 +8,6 @@ namespace StudyVera.Domain.Enums;
 
 public enum TargetExam
 {
-    TYT = 1,
-    AYT = 2,
-    DGS = 3,
-    KPSS = 5,
-    ALES = 4
+    KPSS = 1,
+    // şuanlık sadece kpss diğer sınavlar sonra eklenecek.
 }

@@ -10,9 +10,12 @@ namespace StudyVera.Domain.Entities;
 public class ProfileStat
 {
     public int Id { get; set; }
-    // buradaki amaç kullanıcıların genel performansını izlemek.
-    public int Score { get; set; }
 
     public Guid UserId { get; set; }
     public AppUser User { get; set; } = null!;
+
+    public int Score { get; set; }
+    public int CurrentStreak { get; set; }
+    public int BestStreak { get; set; }
+    public DateTime? LastActivityDate { get; set; }
 }

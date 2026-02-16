@@ -17,9 +17,7 @@ public class AppUser : IdentityUser<Guid>
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-
     public ProfileStat? ProfileStat { get; set; }
-    // kullanıcıya ders programı eklenebilir program haftalık olacak şekilde
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiryTime { get; set; }
 
@@ -28,6 +26,7 @@ public class AppUser : IdentityUser<Guid>
 
     [Range(0,5)]
     public TargetExam TargetExam { get; set; } 
+    public ICollection<UserWeeklyGoal> UserWeeklyGoals { get; set; } = new List<UserWeeklyGoal>();
     public ICollection<UserActivityHistory> UserActivityHistories { get; set; } = new List<UserActivityHistory>();
     public ICollection<UserLessonProgress> LessonProgresses { get; set; } = new List<UserLessonProgress>();
     public ICollection<UserQuestionStat> QuestionStats { get; set; } = new List<UserQuestionStat>();
