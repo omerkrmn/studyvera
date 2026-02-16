@@ -38,6 +38,13 @@ public class RegisterHandler : IRequestHandler<RegisterCommand, AppUser>
             Language = "tr-TR",
             Theme = "Dark"
         };
+        user.ProfileStat = new ProfileStat
+        {
+            UserId = user.Id,
+            CurrentStreak = 0,
+            BestStreak = 0,
+            LastActivityDate = null
+        };
 
         var result = await _userManager.CreateAsync(user, request.Password);
 
@@ -46,6 +53,6 @@ public class RegisterHandler : IRequestHandler<RegisterCommand, AppUser>
             return user;
         }
         var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-        throw new Exception($"User registration failed: {errors}");
+        throw new Exception(errors);
     }
 }

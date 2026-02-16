@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Mapster;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Dtos;
 using StudyVera.Application.Features.Topics.Queries;
@@ -19,24 +20,17 @@ namespace StudyVera.Application.Handlers.Topics
         public async Task<List<TopicDto>> Handle(GetAllTopicsQuery request, CancellationToken ct)
         {
             var query = _manager.TopicRepository
-                                .FindByCondition(t => t.Lesson.ExamId == (int)request.TargetExam, false)
-                                .Select(t => new TopicDto
-                                {
-                                    Id = t.Id,
-                                    Name = t.Name,
-                                    LessonId = t.LessonId,
-                                    Priority=t.Priority
-                                });
+                                .FindByCondition(t => t.Lesson.ExamId == (int)request.TargetExam, false);
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var term = request.SearchTerm.Trim();
-                query = query.Where(t => EF.Functions.Like(t.Name, $"%{term}%"));
+                query = query.Where(t => t.Name.Contains(term));
             }
-
-            return await query.ToListAsync(ct);
+            return await query
+                .OrderBy(t => t.Priority)
+                .ProjectToType<TopicDto>()
+                .ToListAsync(ct);
         }
-
     }
-
 }

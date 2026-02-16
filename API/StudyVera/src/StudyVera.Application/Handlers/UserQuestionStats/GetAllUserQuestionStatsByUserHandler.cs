@@ -11,7 +11,7 @@ using StudyVera.Domain.Interfaces;
 
 namespace StudyVera.Application.Handlers.UserQuestionStats
 {
-    public class GetAllUserQuestionStatsByUserHandler : IRequestHandler<GetAllUserQuestionStatsByUserQuery, PagedList<UserQuestionStatDto>>
+    public class GetAllUserQuestionStatsByUserHandler : IRequestHandler<GetAllUserQuestionStatsByUserQuery, List<UserQuestionStatDto>>
     {
         private readonly IRepositoryManager _manager;
 
@@ -20,38 +20,27 @@ namespace StudyVera.Application.Handlers.UserQuestionStats
             _manager = manager;
         }
 
-        public async Task<PagedList<UserQuestionStatDto>> Handle(
-        GetAllUserQuestionStatsByUserQuery request,
-        CancellationToken cancellationToken)
+        public async Task<List<UserQuestionStatDto>> Handle(GetAllUserQuestionStatsByUserQuery request, CancellationToken cancellationToken)
         {
-            var baseQuery = _manager.UserQuestionStatRepository
-                                    .FindByCondition(uqs => uqs.UserId == request.UserId, trackChanges: false)
-                                    .AsQueryable();
-
-            var totalCount = await baseQuery.CountAsync(cancellationToken);
-
-            var pagedAndProjectedQuery = baseQuery
-                                         .Include(a => a.QuestionStatDetails)
-                                         .Skip(request.PageSize * (request.PageNumber - 1))
-                                         .Take(request.PageSize)
-                                         .Select(uqs => new UserQuestionStatDto
-                                         {
-                                             Id = uqs.Id,
-                                             TopicId = uqs.TopicId,
-                                             Topic = new TopicWithoutIdColumnDto
-                                             {
-                                                 LessonId = uqs.Topic.LessonId,
-                                                 Name = uqs.Topic.Name,
-                                                 Priority = uqs.Topic.Priority
-                                             },
-                                             TotalSolvedCount = uqs.TotalSolvedCount,
-                                             TotalCorrectCount = uqs.TotalCorrectCount,
-                                             LastAttemptAt = uqs.LastAttemptAt,
-                                         });
-
-            var items = await pagedAndProjectedQuery.ToListAsync(cancellationToken);
-            return new PagedList<UserQuestionStatDto>(items, totalCount, request.PageNumber, request.PageSize);
+            return await _manager.UserQuestionStatRepository
+                .FindByCondition(uqs => uqs.UserId == request.UserId, trackChanges: false)
+                .Select(uqs => new UserQuestionStatDto
+                {
+                    Id = uqs.Id,
+                    TopicId = uqs.TopicId,
+                    Topic = new TopicWithoutIdColumnDto
+                    {
+                        LessonId = uqs.Topic.LessonId,
+                        Name = uqs.Topic.Name,
+                        Priority = uqs.Topic.Priority
+                    },
+                    TotalSolvedCount = uqs.TotalSolvedCount,
+                    TotalCorrectCount = uqs.TotalCorrectCount,
+                    LastAttemptAt = uqs.LastAttemptAt
+                })
+                .ToListAsync(cancellationToken);
         }
     }
+
 
 }

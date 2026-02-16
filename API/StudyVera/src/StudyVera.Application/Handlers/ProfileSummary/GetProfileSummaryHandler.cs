@@ -29,8 +29,13 @@ public class GetProfileSummaryHandler : IRequestHandler<GetProfileSummaryQuery, 
         (int TotalSolvedCount, int TotalCorrectCount) sumResult = await _manager.UserQuestionStatRepository.GetSumAsync(request.UserId, cancellationToken);
 
         _model.TotalQuestions = sumResult.TotalSolvedCount;
-        _model.UserScore = await _manager.ProfileStatRepository.GetScoreByUserAsync(request.UserId, cancellationToken);
         _model.GlobalRank = await _manager.ProfileStatRepository.GetGlobalRankAsync(request.UserId, cancellationToken);
+
+        var profileStat = await _manager.ProfileStatRepository
+                        .GetByUserAsync(request.UserId, cancellationToken);
+
+        _model.UserScore = profileStat?.Score ?? 0;
+        _model.CurrentStreak = profileStat?.CurrentStreak ?? 0;
 
         var statsFromDb = await _manager.UserQuestionStatRepository
             .FindByCondition(uqs => uqs.UserId == request.UserId, false)

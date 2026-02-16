@@ -30,6 +30,28 @@ namespace StudyVera.Application.Handlers.UserLessonProgresses
             entity.LastUpdated = DateTime.UtcNow;
             _manager.UserLessonProgressRepository.Create(entity);
 
+            var profileStat = await _manager.ProfileStatRepository.GetByUserAsync(request.UserId, cancellationToken);
+            if (profileStat != null)
+            {
+                var today = DateTime.UtcNow.Date;
+                var lastActivity = profileStat.LastActivityDate?.Date;
+
+                if (lastActivity == today.AddDays(-1))
+                {
+                    profileStat.CurrentStreak += 1;
+                    profileStat.LastActivityDate = DateTime.UtcNow;
+                }
+                else
+                {
+                    profileStat.CurrentStreak = 1;
+                    profileStat.LastActivityDate = DateTime.UtcNow;
+                }
+
+                if (profileStat.CurrentStreak > profileStat.BestStreak)
+                    profileStat.BestStreak = profileStat.CurrentStreak;
+            }
+
+
             _manager.UserActivityHistoryRepository.Create(new()
             {
                 UserId = request.UserId,

@@ -20,57 +20,100 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
 
     public async Task<Unit> Handle(AddUserQuestionStatCommand request, CancellationToken ct)
     {
+        var now = DateTime.UtcNow;
+        var today = now.Date;
+        var weekStart = UserWeeklyGoal.GetCurrentWeekStartDate();
+
         var uqs = await _manager.UserQuestionStatRepository.FindByCondition(
-            uqs => uqs.UserId == request.UserId && uqs.TopicId == request.TopicId,
-            true
-        ).FirstOrDefaultAsync(ct);
+            uqs => uqs.UserId == request.UserId && uqs.TopicId == request.TopicId, true)
+            .FirstOrDefaultAsync(ct);
+
+        var topic = await _manager.TopicRepository
+            .FindByCondition(t => t.Id == request.TopicId, false)
+            .SingleOrDefaultAsync(ct);
+
+        
+
+        int topicPriority = topic?.Priority ?? 3;
+
+        var weeklyGoal = await _manager.UserWeeklyGoalRepository.GetCurrentGoalAsync(request.UserId, weekStart, ct);
+        if (weeklyGoal == null)
+        {
+            var profile = await _manager.UserProfileRepository
+                .FindByCondition(us => us.UserId == request.UserId, false)
+                .FirstOrDefaultAsync(ct);
+
+            _manager.UserWeeklyGoalRepository.Create(new UserWeeklyGoal
+            {
+                UserId = request.UserId,
+                WeekStartDate = weekStart,
+                TargetQuestionCount = profile?.WeeklyQuestionGoal ?? 500,
+                TargetStudyMinutes = (profile?.DailyStudyMinuteGoal ?? 60) * 7,
+                CurrentQuestionCount = request.SolvedCount // İlk değerle başlat
+            });
+        }
+        else
+        {
+            weeklyGoal.CurrentQuestionCount += request.SolvedCount;
+            _manager.UserWeeklyGoalRepository.Update(weeklyGoal);
+        }
 
         var newDetail = new QuestionStatDetail
         {
             CorrectCount = request.CorrectCount,
             SolvedCount = request.SolvedCount,
-            AttemptedAt = DateTime.UtcNow,
+            AttemptedAt = now
         };
 
-        if (uqs is not null)
+        if (uqs != null)
         {
             uqs.TotalSolvedCount += request.SolvedCount;
             uqs.TotalCorrectCount += request.CorrectCount;
-            uqs.LastAttemptAt = DateTime.UtcNow;
+            uqs.LastAttemptAt = now;
             newDetail.UserQuestionStatId = uqs.Id;
             _manager.QuestionStatDetailRepository.Create(newDetail);
         }
         else
         {
-            var newStat = new UserQuestionStat
+            _manager.UserQuestionStatRepository.Create(new UserQuestionStat
             {
                 UserId = request.UserId,
                 TopicId = request.TopicId,
                 TotalCorrectCount = request.CorrectCount,
                 TotalSolvedCount = request.SolvedCount,
-                LastAttemptAt = DateTime.UtcNow,
-
+                LastAttemptAt = now,
                 QuestionStatDetails = new List<QuestionStatDetail> { newDetail }
-            };
-
-            _manager.UserQuestionStatRepository.Create(newStat);
+            });
         }
-        var topic = await _manager.TopicRepository.FindByCondition(t => t.Id == request.TopicId, false).SingleOrDefaultAsync(ct);
 
-        int topicPriority = topic?.Priority is byte p ? p : 5;
+        var profileStat = await _manager.ProfileStatRepository.GetByUserAsync(request.UserId, ct);
+        if (profileStat != null)
+        {
+            profileStat.Score += (request.CorrectCount * topicPriority);
 
-        await _manager.ProfileStatRepository.UpdateScoreByCorrectQuestionCountAsync(request.UserId, request.CorrectCount, ct, topicPriority);
+            var lastDate = profileStat.LastActivityDate?.Date ?? DateTime.MinValue.Date;
 
-        _manager.UserActivityHistoryRepository.Create(new()
+            if (lastDate != today)
+            {
+                profileStat.CurrentStreak = (lastDate == today.AddDays(-1)) ? profileStat.CurrentStreak + 1 : 1;
+
+                if (profileStat.CurrentStreak > profileStat.BestStreak)
+                    profileStat.BestStreak = profileStat.CurrentStreak;
+            }
+
+            profileStat.LastActivityDate = now;
+            _manager.ProfileStatRepository.Update(profileStat);
+        }
+
+        _manager.UserActivityHistoryRepository.Create(new UserActivityHistory
         {
             UserId = request.UserId,
             ActivityType = ActivityType.SolvedAQuestion,
-            Description = $"Kullanıcı {request.TopicId} numaralı konuda {request.SolvedCount} soru çözdü.",
-            ActivityDate = DateTime.UtcNow,
+            Description = $"{request.SolvedCount} adet {topic?.Name ?? "Bilinmeyen Konu"} sorusu çözüldü.",
+            ActivityDate = now
         });
 
         await _manager.SaveChangesAsync(ct);
-
         return Unit.Value;
     }
 }
