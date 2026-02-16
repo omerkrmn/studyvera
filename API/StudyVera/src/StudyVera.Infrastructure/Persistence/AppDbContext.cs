@@ -21,6 +21,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public DbSet<UserProfile> UserSettings { get; set; }
     public DbSet<QuestionStatDetail> QuestionStatDetails { get; set; }
     public DbSet<UserRankResult> RankResults { get; set; }
+    public DbSet<UserWeeklyGoal> UserWeeklyGoals { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

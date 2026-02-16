@@ -13,7 +13,6 @@
   <ItemGroup>
     <Folder Include="Features\Exams\Commands\" />
     <Folder Include="Features\Exams\Queries\" />
-    <Folder Include="Features\Lessons\Queries\" />
     <Folder Include="Features\Topics\Commands\" />
     <Folder Include="Features\UserActivities\Commands\" />
     <Folder Include="Handlers\Exams\" />
