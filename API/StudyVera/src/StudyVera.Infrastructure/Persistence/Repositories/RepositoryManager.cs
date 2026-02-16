@@ -17,6 +17,7 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
         private readonly Lazy<IUserProfileRepository> _userProfileRepository;
         private readonly Lazy<ILessonScheduleRepository> _lessonScheduleRepository;
         private readonly Lazy<IQuestionStatDetailRepository> _questionStatDetailRepository;
+        private readonly Lazy<IUserWeeklyGoalRepository> _userWeeklyGoalRepository;
         #endregion
         public RepositoryManager(AppDbContext context)
         {
@@ -31,6 +32,7 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
             _userProfileRepository = new Lazy<IUserProfileRepository>(() => new UserProfileRepository(_context));
             _lessonScheduleRepository = new Lazy<ILessonScheduleRepository>(() => new LessonScheduleRepository(_context));
             _questionStatDetailRepository = new Lazy<IQuestionStatDetailRepository>(() => new QuestionStatDetailRepository(_context));
+            _userWeeklyGoalRepository = new Lazy<IUserWeeklyGoalRepository>(() => new UserWeeklyGoalRepository(_context));
         }
 
         #region Repositories
@@ -44,6 +46,7 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
         public IUserProfileRepository UserProfileRepository => _userProfileRepository.Value;
         public ILessonScheduleRepository LessonScheduleRepository => _lessonScheduleRepository.Value;
         public IQuestionStatDetailRepository QuestionStatDetailRepository => _questionStatDetailRepository.Value;
+        public IUserWeeklyGoalRepository UserWeeklyGoalRepository => _userWeeklyGoalRepository.Value;
         #endregion
         #region SaveChanges
         public Task SaveChangesAsync(CancellationToken ct = default) => _context.SaveChangesAsync(ct);
