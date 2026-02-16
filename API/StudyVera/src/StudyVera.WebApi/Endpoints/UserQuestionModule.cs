@@ -26,8 +26,9 @@ public class UserQuestionModule : ICarterModule
         })
         .WithName("SolveQuestion");
 
-        group.MapGet("/", async ([AsParameters] GetAllUserQuestionStatsByUserQuery query, HttpContext context, ISender mediator, CancellationToken ct) =>
+        group.MapGet("/", async (HttpContext context, ISender mediator, CancellationToken ct) =>
         {
+            GetAllUserQuestionStatsByUserQuery query = new();
             query.UserId = context.GetUserId();
             var result = await mediator.Send(query, ct);
 
