@@ -10,7 +10,6 @@ namespace StudyVera.Application.Dtos;
 public class UserForRegistrationDto
 {
 
-    // auth 
     [Required(ErrorMessage = "Firstname cannot be null!")]
     public string FirstName { get; set; } = string.Empty;
 
