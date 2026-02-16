@@ -15,40 +15,14 @@ namespace StudyVera.Infrastructure.Persistence.Configurations
         {
             List<Exam> exams = new List<Exam>
             {
-                new Exam
+               new Exam
                 {
                     Id=1,
-                    Name = "TYT",
-                    Description = "Yükseköğretim Kurumları Sınavı",
-                    ExamDate = new DateTime(2026,6,20)
-                },
-                new Exam
-                {
-                    Id=2,
-                    Name = "AYT",
-                    Description = "Yükseköğretim Kurumları Sınavı",
-                    ExamDate = new DateTime(2026,6,21)
-                },
-                new Exam
-                {
-                    Id=3,
-                    Name = "DGS",
-                    Description = "Dikey Geçiş Sınavı",
-                    ExamDate = new DateTime(2026 ,7,19)
-                }
-                ,new Exam
-                {
-                    Id=4,
                     Name = "KPSS",
                     Description = "Kamu Personeli Seçme Sınavı",
-                    ExamDate = new DateTime(2026,6,16)
-                },new Exam
-                {
-                    Id=5,
-                    Name = "ALES",
-                    Description = "Akademik Personel ve Lisansüstü Eğitimi Giriş Sınavı",
-                    ExamDate = new DateTime(2026,5,10)
+                    ExamDate = new DateTime(2026,9,6)
                 }
+                
             };
             builder.HasData(exams);
         }
