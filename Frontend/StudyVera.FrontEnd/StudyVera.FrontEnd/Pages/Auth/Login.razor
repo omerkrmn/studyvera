@@ -1,52 +1,60 @@
 ﻿@page "/auth/login"
-@using Blazored.LocalStorage
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.JSInterop
-@using System.IdentityModel.Tokens.Jwt
-@using System.Text.Json
 @using StudyVera.FrontEnd.Models.Auth
-@using StudyVera.FrontEnd.Providers
-@using StudyVera.FrontEnd.Utilities
-@inject HttpClient Http
+@using StudyVera.FrontEnd.Services.Concrats
+@inject IAuthService AuthService
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
-@inject ILocalStorageService LocalStorage
-@inject CustomAuthStateProvider CustomAuthStateProvider
 
-<PageTitle>Login</PageTitle>
+<PageTitle>Giriş Yap</PageTitle>
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4 text-primary">Login</h2>
-
-    <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <InputText @bind-Value="loginModel.Email" class="form-control" placeholder="Enter email" />
-            <ValidationMessage For="@(() => loginModel.Email)" />
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0 rounded-4 p-4" style="width: 100%; max-width: 400px; background-color: var(--bs-body-bg);">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">Hoş Geldiniz</h2>
+            <p class="text-secondary small">Lütfen hesabınıza giriş yapın</p>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <InputText @bind-Value="loginModel.Password" class="form-control" placeholder="Enter password" />
-            <ValidationMessage For="@(() => loginModel.Password)" />
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="loginModel.Email" class="form-control" id="emailInput" placeholder="name@example.com" />
+                <label for="emailInput">Email Adresi</label>
+                <ValidationMessage For="@(() => loginModel.Email)" class="text-danger small" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="loginModel.Password" type="password" class="form-control" id="passInput" placeholder="Şifre" />
+                <label for="passInput">Şifre</label>
+                <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span> <span>Giriş Yapılıyor...</span>
+                }
+                else
+                {
+                    <span>Giriş Yap</span>
+                }
+            </button>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3 small py-2 rounded-3 border-0 shadow-sm text-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @errorMessage
+                </div>
+            }
+        </EditForm>
+        
+        <div class="text-center mt-4">
+            <p class="small text-secondary">Hesabınız yok mu? <a href="/auth/register" class="text-primary text-decoration-none fw-bold">Kayıt Ol</a></p>
         </div>
-
-        <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
-            @(isLoading ? "Logging in..." : "Login")
-        </button>
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger mt-3">@errorMessage</div>
-        }
-    </EditForm>
+    </div>
 </div>
 
 @code {
-    private LoginModel loginModel = new();
+    private LoginRequest loginModel = new();
     private bool isLoading = false;
     private string? errorMessage;
 
@@ -55,35 +63,12 @@
         isLoading = true;
         errorMessage = null;
 
-        try
-        {
-            var response = await Http.PostAsJsonAsync($"{AppConsts.ApiBaseUrl}auth", loginModel);
+        var success = await AuthService.Login(loginModel);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-                var token = json.GetProperty("accessToken").GetString();
-
-                if (string.IsNullOrEmpty(token))
-                {
-                    errorMessage = "Access token missing from response.";
-                    return;
-                }
-
-                await LocalStorage.SetItemAsync("accessToken", token);
-                CustomAuthStateProvider.NotifyUserAuthentication(token);
-                Navigation.NavigateTo("/", true);
-            }
-            else
-            {
-                errorMessage = "Invalid email or password.";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"An error occurred: {ex.Message}";
-        }
-
+        if (success)
+            Navigation.NavigateTo("/profile");
+        else
+            errorMessage = "E-posta adresi veya şifre hatalı.";
         isLoading = false;
     }
 }
