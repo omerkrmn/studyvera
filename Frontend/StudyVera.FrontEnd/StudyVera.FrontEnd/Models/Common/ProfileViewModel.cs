@@ -2,8 +2,8 @@
 public class ProfileViewModel
 {
     public string UserName { get; set; } = "StudyVeraKullanicisi";
-    public string Email { get; set; } = "user@studyvera.com";
-    public string TargetExam { get; set; } = "TYT & AYT";
+    public string Email { get; set; } = "vecu@gmail.com";
+    public string TargetExam { get; set; } = "KPSS";
     public int TotalQuestions { get; set; } = 78945;
     public int UserScore { get; set; } = 2105;
     public int GlobalRank { get; set; } = 123;

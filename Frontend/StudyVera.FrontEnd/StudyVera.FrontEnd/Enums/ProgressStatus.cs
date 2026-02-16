@@ -2,6 +2,7 @@
 
 public enum ProgressStatus
 {
+
     InProgress = 0,
     Completed = 1
 }

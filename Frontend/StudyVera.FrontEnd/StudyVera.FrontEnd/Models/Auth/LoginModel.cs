@@ -2,7 +2,7 @@
 
 namespace StudyVera.FrontEnd.Models.Auth;
 
-public class LoginModel
+public class LoginRequest
 {
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
