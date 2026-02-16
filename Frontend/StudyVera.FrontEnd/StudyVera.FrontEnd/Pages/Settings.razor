@@ -9,24 +9,17 @@
 
             <button class="nav-link text-start w-100 @(activeTab == TabSelects.ApplicationParameters ? "active" : "")"
                     @onclick="() => ChangeTab(TabSelects.ApplicationParameters)">
-                <i class="bi bi-gear-fill me-2"></i> ApplicationParameters
+                <i class="bi bi-gear-fill me-2"></i> Uygulama Parametreleri 
             </button>
 
-            <button class="nav-link text-start w-100 @(activeTab == TabSelects.appearance ? "active" : "")"
-                    @onclick="() => ChangeTab(TabSelects.appearance)">
-                <i class="bi bi-palette-fill me-2"></i> Appearance
+            <button class="nav-link text-start w-100 @(activeTab == TabSelects.PomodoroSettings ? "active" : "")"
+                    @onclick="() => ChangeTab(TabSelects.PomodoroSettings)">
+                <i class="bi bi-palette-fill me-2"></i> Pomodoro Ayarları
             </button>
-
-            <button class="nav-link text-start w-100 @(activeTab == TabSelects.notifications ? "active" : "")"
-                    @onclick="() => ChangeTab(TabSelects.notifications)">
-                <i class="bi bi-bell-fill me-2"></i> Notifications
-            </button>
-
         </div>
     </div>
 
 
-    <!-- İçerik -->
     <div class="col-9 p-4">
         <div class="alert alert-primary" role="alert">
             Buradaki içeriği cache al eğer cache de yoksa o zaman db den talep et. sürekli sürekli meşgul etmesin.
@@ -35,13 +28,9 @@
         {
             <ApplicationParameters />
         }
-        else if (activeTab == TabSelects.appearance)
+        else if (activeTab == TabSelects.PomodoroSettings)
         {
-            <p>appearance</p>
-        }
-        else if (activeTab == TabSelects.notifications)
-        {
-            <p>notifications</p>
+            <PomodoroSettings />
         }
     </div>
 
@@ -51,7 +40,7 @@
 @code {
     enum TabSelects
     {
-        ApplicationParameters, appearance, notifications
+        ApplicationParameters, PomodoroSettings
     }
     private TabSelects activeTab = TabSelects.ApplicationParameters;
 

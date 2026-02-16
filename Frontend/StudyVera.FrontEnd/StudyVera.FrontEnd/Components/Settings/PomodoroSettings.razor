@@ -1,0 +1,81 @@
+﻿@using Blazored.LocalStorage
+@using StudyVera.FrontEnd.Models.Other
+@inject ILocalStorageService LocalStorage
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h4 class="fw-bold"><i class="bi bi-sliders2-vertical me-2 text-primary"></i>Pomodoro Ayarları</h4>
+        <p class="text-muted small">Pomodoro Ayarlarınızı kişiselleştirin.</p>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="mb-4">
+            <label class="form-label fw-semibold"><i class="bi bi-chat-quote me-2"></i>Kişisel Motivasyon Mesajı</label>
+            <input type="text" @bind="settings.PersonalMessage"
+                   class="form-control form-control-lg rounded-3 border-light-subtle shadow-sm"
+                   placeholder="Örn: Durma, devam et!">
+            <div class="form-text mt-2">Bu mesaj Pomodoro sayacı çalışırken ekranda görünecektir.</div>
+        </div>
+
+        <div class="form-check form-switch mb-4 p-0 d-flex align-items-center justify-content-between">
+            <label class="form-check-label fw-semibold cursor-pointer" for="audioSwitch">
+                <i class="bi @(settings.IsAudioAlertEnabled ? "bi-volume-up" : "bi-volume-mute") me-2 text-primary"></i>
+                Mola bittiğinde sesli uyar
+            </label>
+            <input class="form-check-input ms-3 custom-switch" type="checkbox" role="switch" id="audioSwitch"
+                   @bind="settings.IsAudioAlertEnabled">
+        </div>
+
+        <div class="d-grid mt-4">
+            <button class="btn btn-primary btn-lg rounded-3 fw-bold shadow-sm"
+                    @onclick="SaveSettings"
+                    disabled="@isSaving">
+                @if (isSaving)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span>Kaydediliyor...</span>
+                }
+                else
+                {
+                    <i class="bi bi-check2-circle me-2"></i>
+                    <span>Ayarları Uygula</span>
+                }
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-switch {
+        width: 3em !important;
+        height: 1.5em !important;
+        cursor: pointer;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
+
+@code {
+    private bool isSaving = false;
+    private const string CacheKey = "pomodoro_settings";
+    private PomodoroSettingsDto settings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var cachedData = await LocalStorage.GetItemAsync<PomodoroSettingsDto>(CacheKey);
+        if (cachedData != null)
+        {
+            settings = cachedData;
+        }
+    }
+
+    private async Task SaveSettings()
+    {
+        isSaving = true;
+        await Task.Delay(500);
+        await LocalStorage.SetItemAsync(CacheKey, settings);
+        isSaving = false;
+    }
+}
