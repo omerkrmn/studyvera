@@ -22,6 +22,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public DbSet<QuestionStatDetail> QuestionStatDetails { get; set; }
     public DbSet<UserRankResult> RankResults { get; set; }
     public DbSet<UserWeeklyGoal> UserWeeklyGoals { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

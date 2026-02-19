@@ -16,5 +16,9 @@ public interface IRepositoryManager
     IQuestionStatDetailRepository QuestionStatDetailRepository { get; }
     IUserWeeklyGoalRepository UserWeeklyGoalRepository { get; }
 
+    IFriendshipRepository FriendshipRepository { get; }
+    
+
+
     Task SaveChangesAsync(CancellationToken ct = default);
 }
