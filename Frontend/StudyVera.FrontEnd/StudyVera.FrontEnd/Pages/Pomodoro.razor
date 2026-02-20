@@ -27,8 +27,19 @@
     .display-time {
         font-family: 'Courier New', Courier, monospace;
         font-weight: 800;
-        font-size: 5rem;
+        font-size: 2rem;
         transition: color 0.3s ease;
+    }
+    @@media (min-width: 768px) {
+    .display-time {
+        font-size: 4rem;
+    }
+}
+
+    @@media (min-width: 992px) {
+        .display-time {
+            font-size: 6rem;
+        }
     }
 
     .text-overdue {
@@ -78,7 +89,7 @@
             }
 
             <div class="card timer-card shadow-lg rounded-5 p-5 mb-4 @(IsOverdue ? "break-over" : "")">
-                <div class="display-time @(IsOverdue ? "text-overdue" : (IsBreakMode ? "text-break" : "text-study"))">
+                <div class="display-time display-1 @(IsOverdue ? "text-overdue" : (IsBreakMode ? "text-break" : "text-study"))">
                     @TimeDisplay
                 </div>
 
