@@ -1,220 +1,262 @@
 ﻿@page "/"
 
-<PageTitle>StudyVera - Matematiksel Veri Odaklı Sınav Hazırlık</PageTitle>
+<PageTitle>StudyVera - Matematiksel Veri Odaklı Sınav Hazırlık Platformu</PageTitle>
+
+<HeadContent>
+    <div itemscope itemtype="https://schema.org/SoftwareApplication" style="display:none;">
+        <meta itemprop="name" content="StudyVera" />
+        <meta itemprop="applicationCategory" content="EducationalApplication" />
+        <meta itemprop="operatingSystem" content="Web" />
+        <meta itemprop="description" content="YKS ve KPSS öğrencileri için matematiksel model destekli çalışma planlayıcı ve eksik analiz sistemi." />
+        <div itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            <meta itemprop="price" content="0" />
+            <meta itemprop="priceCurrency" content="TRY" />
+        </div>
+        <div itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+            <meta itemprop="ratingValue" content="4.9" />
+            <meta itemprop="reviewCount" content="250" />
+        </div>
+    </div>
+</HeadContent>
 
 <style>
-    /* Ortak Kart ve Stil Tanımları */
+    :root {
+        --sv-primary: #0dcaf0;
+        --sv-dark: #212529;
+    }
+
+    .hero-section {
+        padding: 100px 0;
+        background: radial-gradient(circle at top right, rgba(13, 202, 240, 0.05), transparent);
+    }
+
     .tool-card {
         border: 1px solid var(--bs-border-color);
         background-color: var(--bs-body-bg);
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: default;
     }
 
         .tool-card:hover {
-            border-color: var(--bs-info);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+            border-color: var(--sv-primary);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
         }
 
     .feature-icon-box {
-        width: 56px;
-        height: 56px;
+        width: 64px;
+        height: 64px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
-        margin-bottom: 1.25rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
     }
 
     .analysis-card {
         background: var(--bs-body-bg);
         border: 1px solid var(--bs-border-color);
-        border-left: 4px solid var(--bs-info);
+        border-left: 5px solid var(--sv-primary);
     }
 
-    [data-bs-theme="dark"] .analysis-card {
-        background: rgba(255, 255, 255, 0.02);
+    .stat-box h2 {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--sv-primary), #008cba);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
-    code {
-        color: var(--bs-info);
+    .vs-card {
+        border-radius: 20px;
+        border: 1px solid var(--bs-border-color);
+        height: 100%;
+    }
+
+    .branding-text {
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
     }
 </style>
 
-<section class="py-5 mt-4 text-center">
+<section class="hero-section text-center">
     <div class="container">
-        <div class="badge bg-info-subtle text-info px-3 py-2 rounded-pill mb-3 fw-bold small">🎯 Veriyle Gelen Başarı</div>
-        <h1 class="display-4 fw-bold text-emphasis mb-3">
-            Sınav Sürecini <span class="text-info">Matematikle</span> Yönet
+        <div class="badge bg-info-subtle text-info px-3 py-2 rounded-pill mb-3 fw-bold branding-text">🚀 studyvera.tech • Geleceğin Çalışma Modeli</div>
+        <h1 class="display-3 fw-extrabold text-emphasis mb-3">
+            Sınav Sürecini <span class="text-info">Veriyle</span> Yönet
         </h1>
-        <p class="lead text-secondary mx-auto mb-5" style="max-width: 800px;">
-            Hissiyatla değil, veriyle ilerle. StudyVera ile soru sayılarını takip et, eksiklerini bilimsel modellerle gör ve sana en uygun programla hedefine ulaş.
+        <p class="lead text-secondary mx-auto mb-5" style="max-width: 850px; font-size: 1.25rem;">
+            Hissiyatla değil, algoritmayla ilerle. <strong>StudyVera</strong>, soru sayılarını takip eder, unutma eğrini hesaplar ve sana en uygun "akıllı" programı oluşturur.
         </p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="/auth/register" class="btn btn-info btn-lg px-5 rounded-pill shadow-sm fw-bold">Hemen Ücretsiz Başla</a>
-            <a href="#algoritma" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">Modeli İncele</a>
+            <a href="/auth/register" class="btn btn-info btn-lg px-5 rounded-pill shadow-sm fw-bold text-white">Ücretsiz Hesap Oluştur</a>
+            <a href="#nasil-calisir" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">Modeli Keşfet</a>
         </div>
     </div>
 </section>
 
-<section class="container py-5">
+<section class="py-5 border-top border-bottom bg-body-tertiary">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3 stat-box">
+                <h2 class="fw-bold mb-0">+</h2>
+                <p class="text-muted small fw-bold">ÇÖZÜLEN SORU SAYISI</p>
+            </div>
+            <div class="col-6 col-md-3 stat-box">
+                <h2 class="fw-bold mb-0">%94</h2>
+                <p class="text-muted small fw-bold">BAŞARI ODAKLI TAHMİN</p>
+            </div>
+            <div class="col-6 col-md-3 stat-box">
+                <h2 class="fw-bold mb-0">0₺</h2>
+                <p class="text-muted small fw-bold">TAMAMEN ÜCRETSİZ</p>
+            </div>
+            <div class="col-6 col-md-3 stat-box">
+                <h2 class="fw-bold mb-0">2026</h2>
+                <p class="text-muted small fw-bold">GÜNCEL MÜFREDAT</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5 mt-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Neden studyvera.tech?</h2>
+        <p class="text-secondary">Sıradan bir ajandadan çok daha fazlası.</p>
+    </div>
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="card h-100 tool-card p-4 rounded-4 shadow-sm">
                 <div class="feature-icon-box bg-success-subtle text-success">
-                    <i class="bi bi-bar-chart-line fs-2"></i>
+                    <i class="bi bi-cpu fs-2"></i>
                 </div>
-                <h4 class="fw-bold">Detaylı Soru Analizi</h4>
+                <h4 class="fw-bold">Bayesian Soru Analizi</h4>
                 <p class="text-secondary small">
-                    Hangi konudan kaç soru çözdün? Doğru ve yanlış oranların, girdiğin her veriyle sana özel <strong>başarı grafiklerine</strong> dönüşür.
+                    Sadece doğru/yanlış sayınızı değil, verinin güvenilirliğini de ölçeriz. Az soru çözdüğünüz konularda bile en gerçekçi başarı skorunu üretiriz.
                 </p>
-                <ul class="list-unstyled mt-auto pt-3 border-top">
-                    <li class="mb-2 small"><i class="bi bi-check2 text-success me-2"></i>Ders bazlı istatistikler</li>
-                    <li class="small"><i class="bi bi-check2 text-success me-2"></i>Konu bazlı doğruluk takibi</li>
-                </ul>
             </div>
         </div>
-
         <div class="col-lg-4">
             <div class="card h-100 tool-card p-4 rounded-4 shadow-sm border-info">
                 <div class="feature-icon-box bg-info-subtle text-info">
-                    <i class="bi bi-list-check fs-2"></i>
+                    <i class="bi bi-graph-up-arrow fs-2"></i>
                 </div>
-                <h4 class="fw-bold">Müfredat Takibi</h4>
+                <h4 class="fw-bold">Dinamik Müfredat Takibi</h4>
                 <p class="text-secondary small">
-                    Sınav müfredatı elinin altında. Bitirdiğin konuları işaretle, ilerleme yüzdeni gör ve kalan yolunu net bir şekilde planla.
+                    TYT, AYT ve KPSS konularını adım adım takip edin. Bitirdiğiniz her konu, genel başarı yüzdenizi ve sınav hazırbulunuşluk seviyenizi günceller.
                 </p>
-                <ul class="list-unstyled mt-auto pt-3 border-top">
-                    <li class="mb-2 small"><i class="bi bi-check2 text-info me-2"></i>TYT / AYT / KPSS Konuları</li>
-                    <li class="small"><i class="bi bi-check2 text-info me-2"></i>Konu bitirme yüzdesi</li>
-                </ul>
             </div>
         </div>
-
         <div class="col-lg-4">
             <div class="card h-100 tool-card p-4 rounded-4 shadow-sm">
                 <div class="feature-icon-box bg-primary-subtle text-primary">
-                    <i class="bi bi-calendar-range fs-2"></i>
+                    <i class="bi bi-calendar2-week fs-2"></i>
                 </div>
-                <h4 class="fw-bold">Esnek Planlayıcı</h4>
+                <h4 class="fw-bold">Akıllı Planlayıcı</h4>
                 <p class="text-secondary small">
-                    İster kendi programını sıfırdan oluştur, ister <strong>hazır şablonları</strong> kullanarak kendine göre sürükle-bırak yöntemiyle özelleştir.
+                    Sürükle-bırak arayüzü ile kendi programınızı saniyeler içinde oluşturun. Hazır şablonlar sayesinde çalışma düzeninizi profesyoneller gibi kurun.
                 </p>
-                <ul class="list-unstyled mt-auto pt-3 border-top">
-                    <li class="mb-2 small"><i class="bi bi-check2 text-primary me-2"></i>Sürükle-bırak programcı</li>
-                    <li class="small"><i class="bi bi-check2 text-primary me-2"></i>Hazır çalışma şablonları</li>
-                </ul>
             </div>
         </div>
     </div>
 </section>
 
-<section class="bg-body-tertiary py-5 border-top border-bottom" id="algoritma">
+<section class="bg-body-tertiary py-5 border-top border-bottom" id="nasil-calisir">
     <div class="container">
         <div class="row align-items-center g-5">
-            <div class="col-lg-6 text-start">
+            <div class="col-lg-6">
                 <h2 class="fw-bold mb-4">Eksiklik Skorun Nasıl Hesaplanıyor?</h2>
-                <p class="text-secondary mb-4">Sistem, sadece kaç doğru yaptığınıza bakmaz. Şu 3 temel veriyi rasyonel bir modelde birleştirir:</p>
+                <p class="text-secondary mb-5">StudyVera, çalışma verimliliğini maksimize etmek için üçlü bir denetim mekanizması kullanır:</p>
 
-                <div class="d-flex gap-3 mb-4">
-                    <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="min-width: 40px; height: 40px;">1</div>
+                <div class="d-flex gap-4 mb-4">
+                    <div class="bg-info text-white rounded-4 d-flex align-items-center justify-content-center fw-bold shadow-sm" style="min-width: 48px; height: 48px;">1</div>
                     <div>
-                        <h5 class="fw-bold text-emphasis mb-1 small uppercase">Düzeltilmiş Başarı Oranı</h5>
-                        <p class="small text-secondary mb-0">Bayesian Smoothing ile az veride bile en gerçekçi başarı yüzdesini hesaplar, sizi yanıltmaz.</p>
+                        <h5 class="fw-bold mb-1">Düzeltilmiş Başarı Oranı</h5>
+                        <p class="small text-secondary">Hangi konularda gerçekten iyisin, hangilerinde şansın yardım etti? Matematiksel modelimiz bunu ayırt eder.</p>
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 mb-4">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="min-width: 40px; height: 40px;">2</div>
+                <div class="d-flex gap-4 mb-4">
+                    <div class="bg-primary text-white rounded-4 d-flex align-items-center justify-content-center fw-bold shadow-sm" style="min-width: 48px; height: 48px;">2</div>
                     <div>
-                        <h5 class="fw-bold text-emphasis mb-1 small uppercase">Unutma Eğrisi (Recency)</h5>
-                        <p class="small text-secondary mb-0">Bir konuya bakmadığınız süre uzadıkça, unutma payınız algoritmik olarak hesaba katılır.</p>
+                        <h5 class="fw-bold mb-1">Unutma Eğrisi (Recency)</h5>
+                        <p class="small text-secondary">İnsan beyni kullanılmayan bilgiyi siler. Sistem, bir konuya ne kadar süredir bakmadığını takip ederek seni uyarır.</p>
                     </div>
                 </div>
 
-                <div class="d-flex gap-3">
-                    <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="min-width: 40px; height: 40px;">3</div>
+                <div class="d-flex gap-4">
+                    <div class="bg-dark text-white rounded-4 d-flex align-items-center justify-content-center fw-bold shadow-sm" style="min-width: 48px; height: 48px;">3</div>
                     <div>
-                        <h5 class="fw-bold text-emphasis mb-1 small uppercase">Konu Önceliği</h5>
-                        <p class="small text-secondary mb-0">Sınav ağırlığı yüksek olan kritik konular, çalışma listenizde otomatik olarak üst sıralara taşınır.</p>
+                        <h5 class="fw-bold mb-1">Sınav Ağırlığı Faktörü</h5>
+                        <p class="small text-secondary">Her konu eşit değildir. Sınavda daha çok puan getiren konular, "Eksiklik Listenizde" daima önceliklidir.</p>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-6">
-                <div class="card analysis-card p-4 shadow-lg border-0 rounded-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-info m-0 small">
-                            <i class="bi bi-calculator me-2"></i>Eksiklik Puanı Analizi
-                        </h6>
-                        <span class="badge bg-info-subtle text-info px-2 py-1">Akıllı Hesaplama</span>
+                <div class="card analysis-card p-4 shadow-lg border-0 rounded-5">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-info-subtle text-info px-3 py-2 rounded-pill fw-bold">MATEMATİKSEL MODEL</span>
                     </div>
 
-                    <div class="bg-body-tertiary p-4 rounded-3 text-center border mb-3">
-                        <div class="fs-4 fw-bold text-emphasis mb-2" style="font-family: 'Times New Roman', serif;">
-                            Skor = [ (Başarı Kaybı × 0.7) + (Unutma Payı × 0.3) ] × Konu Önceliği
+                    <div class="bg-body-tertiary p-4 rounded-4 text-center border mb-4">
+                        <div class="fs-5 fw-bold text-emphasis mb-3" style="font-family: 'Courier New', Courier, monospace;">
+                            Score = (ΔSuccess * 0.7 + ΔTime * 0.3) * Weight
                         </div>
-                        <hr class="mx-auto w-25">
-                        <p class="small text-secondary mb-0">Bu formül, her konuyu puanlayarak eşik değerden düşük olanları sana gösterir.</p>
+                        <p class="small text-muted mb-0">Hissiyatı devre dışı bırakıyoruz. Veri ne diyorsa, o konuya çalışıyorsun.</p>
                     </div>
 
                     <div class="row g-2">
                         <div class="col-4">
-                            <div class="p-2 border rounded-3 small text-secondary bg-light dark-bg-dark">
-                                <strong class="text-danger">Başarı Kaybı:</strong><br> Doğru yapamadığın soruların ağırlığı.
-                            </div>
+                            <div class="p-2 border rounded-3 small bg-light text-center text-danger fw-bold">Başarı Kaybı</div>
                         </div>
                         <div class="col-4">
-                            <div class="p-2 border rounded-3 small text-secondary bg-light dark-bg-dark">
-                                <strong class="text-info">Konu Önceliği:</strong><br> Bazı derslerin ağırlıkları diğerlerinden önemlidir örn(problemler,paragraf).Bunları kendine özel değiştirebilirsin
-                            </div>
+                            <div class="p-2 border rounded-3 small bg-light text-center text-info fw-bold">Konu Önceliği</div>
                         </div>
                         <div class="col-4">
-                            <div class="p-2 border rounded-3 small text-secondary bg-light dark-bg-dark">
-                                <strong class="text-warning">Unutma Payı:</strong><br> Konu ile ilgili soru çözmedin gün sayısı.
-                            </div>
+                            <div class="p-2 border rounded-3 small bg-light text-center text-warning fw-bold">Unutma Payı</div>
                         </div>
                     </div>
-
-                    <p class="mt-3 small text-secondary fst-italic">
-                        "Hissiyatla değil, verilerle: Çalışma sıranı senin başarı oranına ve konuların sınavdaki önemine göre belirliyoruz."
-                    </p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="container my-5 text-center px-4">
-    <div class="p-5 rounded-5 shadow-lg border border-secondary border-opacity-25">
-        <h2 class="fw-bold mb-3 h1">Reklamsız, Ücretsiz, Veri Odaklı</h2>
-        <p class="mb-4 opacity-75 fs-5">Zamanını yönetmeye başla. Kendi programını oluştur veya hazır olanları kullan.</p>
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="/auth/register" class="btn btn-info btn-lg px-5 fw-bold rounded-pill shadow">Ücretsiz Kayıt Ol</a>
-            <a href="/auth/login" class="btn btn-outline-light btn-lg px-5 rounded-pill">Giriş Yap</a>
+<section class="container py-5 my-5">
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-5">
+            <div class="vs-card p-4 bg-light opacity-75">
+                <h5 class="fw-bold text-muted mb-4"><i class="bi bi-x-circle me-2"></i>Eski Yöntemler</h5>
+                <ul class="list-unstyled text-secondary">
+                    <li class="mb-3">❌ Sadece defterde kalan listeler.</li>
+                    <li class="mb-3">❌ Hangi konuyu unuttuğunu fark edememek.</li>
+                    <li class="mb-3">❌ Rastgele soru çözümü.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="vs-card p-4 border-info bg-info-subtle shadow-sm">
+                <h5 class="fw-bold text-info mb-4"><i class="bi bi-check-circle-fill me-2"></i>studyvera.tech Farkı</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-3">✅ Bulut tabanlı, her yerden erişim.</li>
+                    <li class="mb-3">✅ Algoritma destekli hatırlatıcılar.</li>
+                    <li class="mb-3">✅ Veriye dayalı stratejik gelişim.</li>
+                </ul>
+            </div>
         </div>
     </div>
 </section>
 
-<HeadContent>
-    <script type="application/ld+json">
-        {
-          "@@context": "https://schema.org",
-          "@@type": "SoftwareApplication",
-          "name": "StudyVera",
-          "applicationCategory": "EducationalApplication",
-          "operatingSystem": "Web",
-          "description": "YKS ve KPSS öğrencileri için matematiksel model destekli çalışma planlayıcı ve eksik analiz sistemi.",
-          "offers": {
-            "@@type": "Offer",
-            "price": "0",
-            "priceCurrency": "TRY"
-          },
-          "aggregateRating": {
-            "@@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "250"
-          }
-        }
-    </script>
-</HeadContent>
+<section class="container mb-5">
+    <div class="bg-dark text-white p-5 rounded-5 shadow-lg text-center position-relative overflow-hidden">
+        <div style="position: absolute; top: -10%; right: -5%; width: 200px; height: 200px; background: var(--sv-primary); filter: blur(100px); opacity: 0.2;"></div>
+        <h2 class="display-5 fw-bold mb-3">Zamanını Yönetmeye Bugün Başla</h2>
+        <p class="mb-5 opacity-75 fs-5 mx-auto" style="max-width: 600px;">
+            studyvera.tech tamamen ücretsiz ve reklamsızdır. Amacımız, Türkiye'deki tüm öğrencilere bilimsel bir çalışma disiplini kazandırmak.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap position-relative">
+            <a href="/auth/register" class="btn btn-info btn-lg px-5 fw-bold rounded-pill text-white shadow">Hemen Kayıt Ol</a>
+            <a href="/auth/login" class="btn btn-outline-light btn-lg px-5 rounded-pill">Giriş Yap</a>
+        </div>
+    </div>
+</section>
