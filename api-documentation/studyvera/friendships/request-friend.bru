@@ -1,0 +1,15 @@
+meta {
+  name: request-friend
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{API_URL}}friendship/request/:userName
+  body: none
+  auth: inherit
+}
+
+params:path {
+  userName: 
+}
