@@ -30,7 +30,7 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
         _user.RefreshToken = refreshToken;
 
         if (populateExp)
-            _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+            _user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
         await _userManager.UpdateAsync(_user);
 
@@ -49,11 +49,11 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
 
         if (user is null ||
             user.RefreshToken != tokenDto.RefreshToken ||
-            user.RefreshTokenExpiryTime <= DateTime.Now)
+            user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             throw new Exception("Token error");
 
         _user = user;
-        return await CreateToken(populateExp: false);
+        return await CreateToken(populateExp: true);
     }
 
     public async Task<IdentityResult> RegisterUser(UserForRegistrationDto userForRegistrationDto)
@@ -108,7 +108,7 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
                 issuer: jwtSettings.ValidIssuer,
                 audience: jwtSettings.ValidAudience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings.Expires)),
+                expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings.Expires)),
                 signingCredentials: signinCredentials);
 
         return tokenOptions;
