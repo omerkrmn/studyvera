@@ -11,6 +11,7 @@
 @inject IProfileSummaryService ProfileSummaryService
 @inject IUserProfileService UserProfileService
 @inject IUserWeeklyGoalService UserWeeklyGoalService
+@inject IFriendshipService FriendshipService
 
 <style>
     .fw-extrabold { font-weight: 800; }
@@ -203,6 +204,7 @@
     private string? errorMessage;
     private ProfileViewModel? profileData;
     private UserWeeklyGoalDto? weeklyGoal;
+    
 
     protected override async Task OnInitializedAsync()
     {

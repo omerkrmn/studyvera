@@ -1,6 +1,8 @@
 ﻿@using StudyVera.FrontEnd.Services.Concrats
+@using StudyVera.FrontEnd.Models.Friendships
 @using StudyVera.FrontEnd.Models.ProfileStats
 @inject IProfileStatService ProfileStatService
+@inject IFriendshipService FriendshipService
 
 <div class="scoreboard-card shadow-sm border">
     <div class="header text-center mb-4">
@@ -8,18 +10,47 @@
         <div class="underline bg-primary mx-auto"></div>
     </div>
 
+    <div class="input-group mb-4 shadow-sm">
+        <input type="text" @bind="targetFriendName" class="form-control" placeholder="Kullanıcı adı ile arkadaş ekle..." />
+        <button class="btn btn-primary" @onclick="SendFriendRequest" disabled="@isRequestSending">
+            @if (isRequestSending)
+            {
+                <span class="spinner-border spinner-border-sm"></span>
+            }
+            else
+            {
+                <i class="bi bi-person-plus-fill"></i> 
+                @(" Ekle")
+            }
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="alert alert-info py-2 small">@statusMessage</div>
+    }
+
+    <div class="d-flex justify-content-center mb-4">
+        <div class="leaderboard-switch">
+            <input type="checkbox" id="friendSwitch" @onchange="ToggleLeaderboard">
+            <label for="friendSwitch" class="switch-label">
+                <span class="switch-option">Global</span>
+                <span class="switch-option">Arkadaşlar</span>
+                <div class="switch-slider"></div>
+            </label>
+        </div>
+    </div>
+
     @if (scoreBoardList == null)
     {
         <div class="text-center p-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
-            <p class="mt-2 text-secondary">Yükleniyor...</p>
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-secondary">Veriler getiriliyor...</p>
         </div>
     }
     else if (!scoreBoardList.Any())
     {
-        <div class="alert alert-secondary">Henüz skor kaydı bulunamadı.</div>
+        <div class="alert alert-secondary">Görüntülenecek veri bulunamadı.</div>
     }
     else
     {
@@ -30,7 +61,7 @@
                     <div class="rank-badge shadow-sm">
                         @if (index < 3)
                         {
-                            <i class="bi bi-trophy-fill"></i> @* Bootstrap Icons yüklü değilse 'oi oi-star' kullanabilirsin *@
+                            <i class="bi bi-trophy-fill"></i>
                         }
                         else
                         {
@@ -42,7 +73,7 @@
                         <span class="nickname fw-semibold">@player.NickName</span>
                     </div>
 
-                    <div class="score-section text-end">
+                    <div class="score-section text-end ms-auto">
                         <span class="score-value d-block fw-bold text-primary">@player.Score.ToString("N0")</span>
                         <small class="score-label fw-bold text-muted">PUAN</small>
                     </div>
@@ -50,16 +81,109 @@
             }
         </div>
     }
+
+    @if (pendingRequests != null && pendingRequests.Any())
+    {
+        <div class="pending-section mt-4 pt-3 border-top border-secondary">
+            <h6 class="text-muted fw-bold mb-3 small text-uppercase">Bekleyen İstekler</h6>
+            <div class="d-flex flex-column gap-2">
+                @foreach (var req in pendingRequests)
+                {
+                    <div class="pending-row d-flex align-items-center justify-content-between p-2 rounded">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm me-2 bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <span class="fw-semibold small">@req.UserName</span>
+                        </div>
+                        <div class="action-buttons d-flex gap-1">
+                            <button class="btn btn-sm btn-success rounded-pill px-3" @onclick="() => AcceptRequest(req.UserName)">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private List<ScoreBoardDto>? scoreBoardList;
+    private List<PendingUserDto>? pendingRequests;
+    private bool showOnlyFriends = false;
+    private string targetFriendName = "";
+    private bool isRequestSending = false;
+    private string statusMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
-        var results = await ProfileStatService.GetScoreBoardAsync();
-        scoreBoardList = results.OrderByDescending(x => x.Score).ToList();
+        await LoadData();
+        await LoadPendingRequests();
     }
+
+    private async Task LoadData()
+    {
+        scoreBoardList = null;
+        if (showOnlyFriends)
+        {
+            var friends = await FriendshipService.GetAllFriends();
+            scoreBoardList = friends.Select(f => new ScoreBoardDto { NickName = f.UserName, Score = f.Score }).OrderByDescending(x => x.Score).ToList();
+        }
+        else
+        {
+            var results = await ProfileStatService.GetScoreBoardAsync();
+            scoreBoardList = results.OrderByDescending(x => x.Score).ToList();
+        }
+    }
+
+    private async Task LoadPendingRequests()
+    {
+        pendingRequests = await FriendshipService.GetReceivedRequests();
+    }
+
+    private async Task ToggleLeaderboard(ChangeEventArgs e)
+    {
+        showOnlyFriends = (bool)e.Value!;
+        await LoadData();
+    }
+
+    private async Task SendFriendRequest()
+    {
+        if (string.IsNullOrWhiteSpace(targetFriendName)) return;
+        isRequestSending = true;
+        try
+        {
+            await FriendshipService.AddFriend(targetFriendName);
+            statusMessage = "İstek gönderildi!";
+            targetFriendName = "";
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Hata: {ex.Message}";
+        }
+        finally
+        {
+            isRequestSending = false;
+            _ = Task.Delay(3000).ContinueWith(_ => { statusMessage = ""; InvokeAsync(StateHasChanged); });
+        }
+    }
+
+    private async Task AcceptRequest(string userName)
+    {
+        try
+        {
+            await FriendshipService.AcceptFriend(userName);
+            await LoadData();
+            await LoadPendingRequests();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = ex.Message;
+        }
+    }
+
+    
 
     private string GetRankClass(int index) => index switch
     {
@@ -71,50 +195,142 @@
 }
 
 <style>
-    /* Bootstrap Tema Değişkenlerini Kullanıyoruz */
     .scoreboard-card {
-        background-color: var(--bs-body-bg); /* Temaya göre beyaz veya koyu gri olur */
-        color: var(--bs-body-color);
-        border-radius: 1rem;
-        padding: 1.5rem;
+        background-color: #1e2125;
+        color: #ffffff;
+        border-radius: 1.5rem;
+        padding: 2rem;
         max-width: 500px;
-        margin: auto;
+        margin: 2rem auto;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
     .underline {
         height: 4px;
         width: 40px;
+        background-color: #0d6efd;
         border-radius: 2px;
+        margin: 0.5rem auto 0;
+    }
+
+    .input-group {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #2b3035;
+        border: 1px solid #3d4246;
+    }
+
+        .input-group .form-control {
+            background: transparent;
+            border: none;
+            color: #adb5bd;
+            padding: 0.75rem 1rem;
+        }
+
+            .input-group .form-control::placeholder {
+                color: #6c757d;
+            }
+
+        .input-group .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+            padding: 0 1.5rem;
+            font-weight: bold;
+        }
+
+    .leaderboard-switch {
+        position: relative;
+        background: #343a40;
+        border-radius: 50px;
+        padding: 4px;
+        width: 280px;
+        display: flex;
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+    }
+
+        .leaderboard-switch input {
+            display: none;
+        }
+
+    .switch-label {
+        display: flex;
+        width: 100%;
+        position: relative;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .switch-option {
+        flex: 1;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #adb5bd;
+        z-index: 2;
+        transition: color 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .switch-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        height: 100%;
+        background: #0d6efd;
+        border-radius: 40px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 1;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    }
+
+    #friendSwitch:checked + .switch-label .switch-slider {
+        left: 50%;
+    }
+
+    #friendSwitch:not(:checked) + .switch-label .switch-option:first-child {
+        color: #ffffff;
+    }
+
+    #friendSwitch:checked + .switch-label .switch-option:last-child {
+        color: #ffffff;
     }
 
     .player-row {
         display: flex;
         align-items: center;
-        padding: 0.75rem 1rem;
-        border-radius: 0.75rem;
-        background-color: var(--bs-tertiary-bg); /* Bootstrap 5.3+ Dark/Light uyumlu arka plan */
+        padding: 1rem 1.25rem;
+        border-radius: 1.25rem;
+        background-color: #343a40;
+        margin-bottom: 0.75rem;
+        border: 1px solid transparent;
         transition: transform 0.2s ease;
     }
 
         .player-row:hover {
             transform: scale(1.02);
+            background-color: #3d4246;
         }
 
     .rank-badge {
-        width: 32px;
-        height: 32px;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        font-size: 0.9rem;
-        background-color: var(--bs-secondary-bg);
+        font-weight: bold;
+        background-color: #495057;
+        color: #ffffff;
+        flex-shrink: 0;
     }
 
-    /* Madalya Renkleri - Opaklık kullanarak hem gece hem gündüz şık görünmesini sağlıyoruz */
     .rank-gold {
-        border-color: rgba(241, 196, 15, 0.5) !important;
-        background-image: linear-gradient(to right, rgba(241, 196, 15, 0.1), transparent);
+        border-left: 4px solid #f1c40f !important;
     }
 
         .rank-gold .rank-badge {
@@ -123,18 +339,16 @@
         }
 
     .rank-silver {
-        border-color: rgba(149, 165, 166, 0.5) !important;
-        background-image: linear-gradient(to right, rgba(149, 165, 166, 0.1), transparent);
+        border-left: 4px solid #adb5bd !important;
     }
 
         .rank-silver .rank-badge {
-            background-color: #bdc3c7;
+            background-color: #adb5bd;
             color: #000;
         }
 
     .rank-bronze {
-        border-color: rgba(230, 126, 34, 0.5) !important;
-        background-image: linear-gradient(to right, rgba(230, 126, 34, 0.1), transparent);
+        border-left: 4px solid #e67e22 !important;
     }
 
         .rank-bronze .rank-badge {
@@ -142,8 +356,45 @@
             color: #fff;
         }
 
-    .score-value {
+    .nickname {
         font-size: 1.1rem;
-        color: var(--bs-primary) !important;
+        color: #f8f9fa;
+    }
+
+    .score-value {
+        font-size: 1.25rem;
+        color: #0d6efd;
+    }
+
+    .score-label {
+        font-size: 0.6rem;
+        color: #6c757d;
+        letter-spacing: 1px;
+    }
+
+    .pending-section h6 {
+        letter-spacing: 1.5px;
+        font-size: 0.7rem !important;
+    }
+
+    .pending-row {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.2s;
+    }
+
+        .pending-row:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+    .avatar-sm {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .action-buttons .btn-sm {
+        font-size: 0.75rem;
+        padding: 2px 10px;
     }
 </style>
