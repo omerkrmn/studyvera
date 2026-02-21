@@ -10,9 +10,7 @@ namespace StudyVera.Domain.Interfaces;
 
 public interface IFriendshipRepository : IRepository<Friendship>
 {
-    IQueryable<AppUser> GetFriendsWithScores(Guid userId);
-
-    IQueryable<AppUser> GetReceivedRequests(Guid userId);
-
-    IQueryable<AppUser> GetSentRequests(Guid userId);
+    Task<Friendship?> GetFriendshipBetweenUsersAsync(Guid user1Id, Guid user2Id,CancellationToken ct);
+    Task<List<Friendship>> GetPendingRequestsAsync(Guid userId,CancellationToken ct);
+    Task<List<AppUser>> GetAllFriendsAsync(Guid userId,CancellationToken ct);
 }

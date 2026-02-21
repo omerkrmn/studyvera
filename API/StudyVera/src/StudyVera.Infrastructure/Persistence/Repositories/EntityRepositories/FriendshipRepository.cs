@@ -16,29 +16,33 @@ public class FriendshipRepository : RepositoryBase<Friendship>, IFriendshipRepos
     public FriendshipRepository(AppDbContext context) : base(context)
     {
     }
-    //Todo : Buradaki kodları refactor et. gereksiz select var gözüme kötü geliyor.
-    public IQueryable<AppUser> GetFriendsWithScores(Guid userId)
+
+    public async Task<List<AppUser>> GetAllFriendsAsync(Guid userId, CancellationToken ct)
     {
-        return _context.Friendships
-            .AsNoTracking()
-            .Where(f => f.Status == FriendshipStatus.Accepted && (f.RequestorId == userId || f.ReceiverId == userId))
+        return await _context.Friendships
+            .Include(f => f.Requestor).
+                ThenInclude(u => u.ProfileStat)
+            .Include(f => f.Receiver).
+                ThenInclude(u => u.ProfileStat)
+            .Where(f => (f.RequestorId == userId || f.ReceiverId == userId) && f.Status == FriendshipStatus.Accepted)
             .Select(f => f.RequestorId == userId ? f.Receiver : f.Requestor)
-            .Include(u => u.ProfileStat); 
+            .AsNoTracking()
+            .ToListAsync(ct);
     }
 
-    public IQueryable<AppUser> GetReceivedRequests(Guid userId)
+    public async Task<Friendship?> GetFriendshipBetweenUsersAsync(Guid user1Id, Guid user2Id, CancellationToken ct)
     {
-        return _context.Friendships
-            .AsNoTracking()
+        return await _context.Friendships
+             .FirstOrDefaultAsync(f =>
+                (f.RequestorId == user1Id && f.ReceiverId == user2Id) ||
+                (f.RequestorId == user2Id && f.ReceiverId == user1Id), ct);
+    }
+
+    public async Task<List<Friendship>> GetPendingRequestsAsync(Guid userId, CancellationToken ct)
+    {
+        return await _context.Friendships
+            .Include(f => f.Requestor)
             .Where(f => f.ReceiverId == userId && f.Status == FriendshipStatus.Pending)
-            .Select(f => f.Requestor);
-    }
-
-    public IQueryable<AppUser> GetSentRequests(Guid userId)
-    {
-        return _context.Friendships
-            .AsNoTracking()
-            .Where(f => f.RequestorId == userId && f.Status == FriendshipStatus.Pending)
-            .Select(f => f.Receiver);
+            .ToListAsync(ct);
     }
 }

@@ -13,7 +13,7 @@ namespace StudyVera.Domain.Entities;
 [Index(nameof(RequestorId), nameof(ReceiverId))]
 public class Friendship
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public Guid RequestorId { get; set; }
     public AppUser Requestor { get; set; }

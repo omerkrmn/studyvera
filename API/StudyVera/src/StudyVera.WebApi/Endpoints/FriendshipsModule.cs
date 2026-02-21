@@ -1,5 +1,9 @@
 ﻿using Carter;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
+using StudyVera.Application.Features.Friendships.Commands;
+using StudyVera.Application.Features.Friendships.Queries;
+using StudyVera.WebApi.Extensions;
 using System.Security.Claims;
 
 namespace StudyVera.WebApi.Endpoints;
@@ -11,37 +15,56 @@ public class FriendshipsModule : ICarterModule
         var group = app.MapGroup("api/friendship")
                                .WithTags("Friendships")
                                .RequireAuthorization();
-
-        // 1. Onaylanmış Arkadaşları Getir
-        group.MapGet("friends", async (ISender mediator, ClaimsPrincipal user) =>
+        //arkadaşları getir.
+        group.MapGet("/", async (HttpContext context, ISender mediator, CancellationToken ct) =>
         {
-            var userId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var result = await mediator.Send(new GetFriendsQuery(userId));
-            return Results.Ok(result);
-        });
+            var userId = context.GetUserId();
+            var query = new GetFriendScoresQuery { UserId = userId };
+            var response = await mediator.Send(query, ct);
+            return Results.Ok(response);
+        })
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status404NotFound)
+        .WithName("GetAllFriendships");
 
-        // 2. Bekleyen Arkadaşlık İsteklerini Getir (Gelenler)
-        group.MapGet("requests/pending", async (ISender mediator, ClaimsPrincipal user) =>
+        group.MapPost("/request/{friendUserName}", async (HttpContext context, ISender mediator, string friendUserName, CancellationToken ct) =>
         {
-            var userId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var result = await mediator.Send(new GetPendingRequestsQuery(userId));
-            return Results.Ok(result);
-        });
+            var userId = context.GetUserId();
+            var command = new SendFriendRequestCommand { UserId = userId, To = friendUserName };
+            var response = await mediator.Send(command, ct);
 
-        // 3. Arkadaşlık İsteği At (Username ile)
-        group.MapPost("request/{username}", async (string username, ISender mediator, ClaimsPrincipal user) =>
-        {
-            var userId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var result = await mediator.Send(new CreateFriendRequestCommand(userId, username));
-            return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result);
-        });
+            return Results.Ok(response);
+        })
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .WithName("SendFriendRequest");
 
-        // 4. İsteği Cevapla (Kabul/Red)
-        group.MapPut("request/{requestId}/respond", async (Guid requestId, [FromBody] bool accept, ISender mediator, ClaimsPrincipal user) =>
+
+
+        group.MapPost("/accept/{userName}", async (HttpContext context, ISender mediator, string userName, CancellationToken ct) =>
         {
-            var userId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var result = await mediator.Send(new RespondFriendRequestCommand(requestId, userId, accept));
-            return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result);
-        });
+            var userId = context.GetUserId();
+            var command = new AcceptFriendRequestCommand { UserId = userId, From = userName };
+            var response = await mediator.Send(command, ct);
+
+            return Results.Ok(response);
+        })
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .WithName("AcceptFriendRequest");
+
+        group.MapGet("/requests", async (HttpContext context, ISender mediator) =>
+        {
+            var userId = context.GetUserId();
+            var response = await mediator.Send(new GetReceivedRequestsQuery { UserId = userId });
+            return Results.Ok(response);
+        })
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .WithName("GetReceivedRequests");
     }
 }

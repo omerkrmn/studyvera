@@ -37,6 +37,23 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
             entity.ToView(null);
         });
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        builder.Entity<Friendship>(entity =>
+        {
+            entity.HasKey(f => f.Id);
+
+            entity.HasOne(f => f.Requestor)
+                .WithMany(u => u.SentFriendRequests)
+                .HasForeignKey(f => f.RequestorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(f => f.Receiver)
+                .WithMany(u => u.ReceivedFriendRequests)
+                .HasForeignKey(f => f.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(f => new { f.RequestorId, f.ReceiverId }).IsUnique();
+        });
     }
     
 }
