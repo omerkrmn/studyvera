@@ -3,6 +3,7 @@ using StudyVera.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,4 +31,13 @@ public class AppUser : IdentityUser<Guid>
     public ICollection<UserActivityHistory> UserActivityHistories { get; set; } = new List<UserActivityHistory>();
     public ICollection<UserLessonProgress> LessonProgresses { get; set; } = new List<UserLessonProgress>();
     public ICollection<UserQuestionStat> QuestionStats { get; set; } = new List<UserQuestionStat>();
+
+    public virtual ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
+    public virtual ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
+
+
+    [NotMapped]
+    public IEnumerable<AppUser> Friends =>
+        SentFriendRequests.Where(f => f.Status == FriendshipStatus.Accepted).Select(f => f.Receiver)
+        .Concat(ReceivedFriendRequests.Where(f => f.Status == FriendshipStatus.Accepted).Select(f => f.Requestor));
 }
