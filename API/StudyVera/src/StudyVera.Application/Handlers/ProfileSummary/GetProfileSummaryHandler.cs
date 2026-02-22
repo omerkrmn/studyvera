@@ -34,9 +34,19 @@ public class GetProfileSummaryHandler : IRequestHandler<GetProfileSummaryQuery, 
         var profileStat = await _manager.ProfileStatRepository
                         .GetByUserAsync(request.UserId, cancellationToken);
 
-        _model.UserScore = profileStat?.Score ?? 0;
-        _model.CurrentStreak = profileStat?.CurrentStreak ?? 0;
+        if (profileStat != null && profileStat.LastActivityDate.HasValue)
+        {
+            var daysPassed = (DateTime.UtcNow.Date - profileStat.LastActivityDate.Value.Date).Days;
+            _model.CurrentStreak = daysPassed <= 1 ? profileStat.CurrentStreak : 0;
+        }
+        else
+            _model.CurrentStreak = 0;
+        
 
+        _model.UserScore = profileStat?.Score ?? 0;
+
+        _model.CurrentStreak = profileStat?.CurrentStreak ?? 0;
+        
         var statsFromDb = await _manager.UserQuestionStatRepository
             .FindByCondition(uqs => uqs.UserId == request.UserId, false)
             .Where(s => s.TotalSolvedCount > 50)
