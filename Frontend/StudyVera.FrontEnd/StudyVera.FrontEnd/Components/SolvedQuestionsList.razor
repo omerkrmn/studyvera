@@ -8,14 +8,14 @@
 @inject ILessonService LessonService
 
 <div class="table-responsive">
-    <table class="table table-hover caption-top align-middle">
-        <thead class="border-bottom">
-            <tr>
-                <th scope="col" style="width: 30%;">Ders / Konu Adı</th>
+    <table class="table table-hover align-middle shadow-sm rounded-3 overflow-hidden">
+        <thead class="bg-body-tertiary text-muted small text-uppercase">
+            <tr class="border-bottom">
+                <th scope="col" class="ps-4 py-3" style="width: 35%;">Ders / Konu Adı</th>
+                <th scope="col" class="text-center">Durum</th>
                 <th scope="col" class="text-center">Çözülen</th>
-                <th scope="col" class="text-center">Doğru</th>
-                <th scope="col" class="text-center">Yanlış</th>
-                <th scope="col" class="text-center">
+                <th scope="col" class="text-center d-none d-md-table-cell">D / Y</th>
+                <th scope="col" class="text-center" style="width: 20%;">
                     Başarı
                     <span class="ms-1 text-muted opacity-75"
                           style="cursor: help; font-size: 0.85rem;"
@@ -23,11 +23,11 @@
                         <i class="bi bi-info-circle-fill" style="color: forestgreen"></i>
                     </span>
                 </th>
-                <th scope="col" class="text-center" style="width: 15%;">Tarih</th>
+                <th scope="col" class="text-center d-none d-sm-table-cell" style="width: 12%;">Tarih</th>
             </tr>
         </thead>
 
-        @if (_groupedQuestions == null || !_groupedQuestions.Any())
+        @if (_filteredGroupedQuestions == null || !_filteredGroupedQuestions.Any())
         {
             <tbody>
                 <tr>
@@ -37,7 +37,7 @@
         }
         else
         {
-            @foreach (var group in _groupedQuestions)
+            @foreach (var group in _filteredGroupedQuestions)
             {
                 var isLessonExpanded = _expandedLessonIds.Contains(group.Key);
                 var lessonTotalSolved = group.Sum(x => x.TotalSolvedCount);
@@ -77,14 +77,21 @@
                         {
                             float eksik = CalculateDeficiencyScore(question.TotalSolvedCount, question.TotalCorrectCount, question.LastAttemptAt, question.TopicId);
                             var isTopicExpanded = _expandedTopicId == question.Id;
+                            var isUrgent = eksik > 100;
 
-                            <tr class=""
-                                title="Konu eksik skoru : @eksik"
+                            <tr class="@(isUrgent ? "table-danger bg-opacity-10" : "")"
+                                title="Konu eksik skoru: @eksik.ToString("F0")"
                                 style="cursor: pointer;"
                                 @ondblclick="@(() => ToggleTopicExpand(question))">
 
                                 <td class="ps-5">
-                                    <span class="fw-medium fw-bold">@question.Topic.Name</span>
+                                    @if (isUrgent)
+                                    {
+                                        <i class="bi bi-fire text-danger me-1" title="Bu konuya acil odaklanmalısın!"></i>
+                                    }
+                                    <span class="fw-medium fw-bold @(isUrgent ? "text-danger" : "")">
+                                        @question.Topic.Name
+                                    </span>
                                     @if (isTopicExpanded)
                                     {
                                         <i class="bi bi-info-circle-fill ms-2 text-info small"></i>
@@ -147,9 +154,11 @@
     [Parameter] public List<UserQuestionStatDto> Questions { get; set; } = new();
     [Parameter] public List<TopicDto> Topics { get; set; } = new();
     [Parameter] public List<LessonDto> Lessons { get; set; } = new();
+    [Parameter] public string SearchText { get; set; } = "";
+    [Parameter] public bool ShowWeakOnly { get; set; } = false;
     #endregion
 
-    private IEnumerable<IGrouping<int, UserQuestionStatDto>>? _groupedQuestions;
+    private IEnumerable<IGrouping<int, UserQuestionStatDto>>? _filteredGroupedQuestions;
 
     private Dictionary<int, string> _lessonNameLookup = new();
     private Dictionary<int, byte> _topicPriorityLookup = new();
@@ -159,17 +168,6 @@
 
     protected override void OnParametersSet()
     {
-        if (Questions != null && Questions.Any())
-        {
-            _groupedQuestions = Questions
-                .GroupBy(q => q.Topic.LessonId)
-                .OrderBy(g => g.Key);
-        }
-        else
-        {
-            _groupedQuestions = null;
-        }
-
         if (Lessons != null)
         {
             _lessonNameLookup = Lessons.ToDictionary(k => k.Id, v => v.Name);
@@ -179,6 +177,36 @@
         {
             _topicPriorityLookup = Topics.ToDictionary(k => k.Id, v => v.Priority);
         }
+        
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        if (Questions == null || !Questions.Any())
+        {
+            _filteredGroupedQuestions = null;
+            return;
+        }
+
+        var query = Questions.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            query = query.Where(q => 
+                (q.Topic?.Name?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false) || 
+                (GetLessonName(q.Topic?.LessonId ?? 0).Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        if (ShowWeakOnly)
+        {
+            query = query.Where(q => CalculateDeficiencyScore(q.TotalSolvedCount, q.TotalCorrectCount, q.LastAttemptAt, q.TopicId) > 100);
+        }
+
+        _filteredGroupedQuestions = query
+            .GroupBy(q => q.Topic.LessonId)
+            .OrderBy(g => g.Key);
     }
     
     private void ToggleLesson(int lessonId)

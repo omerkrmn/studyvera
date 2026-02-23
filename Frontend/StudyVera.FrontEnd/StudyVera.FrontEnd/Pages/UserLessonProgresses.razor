@@ -8,6 +8,7 @@
 @inject IUserLessonProgressService UserLessonProgressService
 @inject TopicService TopicService
 @inject ILessonService LessonService
+@inject IJSRuntime JS
 
 <PageTitle>Konu İlerleme Takibi</PageTitle>
 
@@ -15,6 +16,64 @@
     <div class="mb-4 d-flex justify-content-between align-items-center">
         <h2 class="text-primary fw-bold m-0"><i class="bi bi-journal-check me-2"></i>Konu İlerleme Takibi</h2>
         <div class="badge bg-primary rounded-pill px-3 py-2">Konu Takip Çizelgesi</div>
+    </div>
+
+    <!-- İstatistik Paneli -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-primary bg-opacity-10">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Toplam Konu</h6>
+                    <h3 class="fw-bold text-primary mb-0">@Topics?.Count()</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-success bg-opacity-10">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Tamamlanan</h6>
+                    <h3 class="fw-bold text-success mb-0">@progresses?.Count(p => p.ProgressStatus == ProgressStatus.Completed)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-warning bg-opacity-10">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Devam Eden</h6>
+                    <h3 class="fw-bold text-warning mb-0">@progresses?.Count(p => p.ProgressStatus == ProgressStatus.InProgress)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-info bg-opacity-10">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-muted small text-uppercase fw-bold mb-1">İlerleme</h6>
+                    <h3 class="fw-bold text-info mb-0">%@CalculateOverallProgress()</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme ve Aksiyonlar -->
+    <div class="d-flex flex-wrap gap-3 mb-4 align-items-center bg-body-tertiary p-3 rounded-4 shadow-sm">
+        <div class="flex-grow-1 position-relative">
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input type="text" class="form-control ps-5 rounded-pill border-0 shadow-sm" placeholder="Ders veya konu ara..." @bind="searchText" @bind:event="oninput" />
+        </div>
+        <div class="d-flex gap-2">
+            <select class="form-select rounded-pill border-0 shadow-sm" style="width: auto;" @bind="filterStatus">
+                <option value="All">Tümü</option>
+                <option value="Completed">Tamamlanan</option>
+                <option value="InProgress">Devam Eden</option>
+                <option value="NotStarted">Başlanmayan</option>
+            </select>
+            <button class="btn btn-outline-primary rounded-pill shadow-sm" @onclick="SuggestRandomTopic" title="Ne çalışsam?">
+                <i class="bi bi-shuffle me-1"></i> <span class="d-none d-md-inline">Öneri Al</span>
+            </button>
+            <button class="btn btn-outline-secondary rounded-pill shadow-sm" @onclick="ToggleAllLessons" title="@(areAllExpanded ? "Hepsini Kapat" : "Hepsini Aç")">
+                <i class="bi @(areAllExpanded ? "bi-arrows-collapse" : "bi-arrows-expand")"></i>
+            </button>
+        </div>
     </div>
 
     @if (isLoading)
@@ -25,14 +84,22 @@
     }
     else
     {
-        @foreach (var lessonGroup in AllTopicsGroupedByLesson)
+        @if (!FilteredGroups.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-search fs-1 opacity-50"></i>
+                <p class="mt-2">Aradığınız kriterlere uygun konu bulunamadı.</p>
+            </div>
+        }
+
+        @foreach (var lessonGroup in FilteredGroups)
         {
             var lessonId = lessonGroup.Key;
             var lessonName = Lessons.FirstOrDefault(l => l.Id == lessonId)?.Name ?? "Ders";
             var totalInLesson = lessonGroup.Count();
             var completedInLesson = lessonGroup.Count(t => IsCompleted(t.Id));
             var percent = totalInLesson == 0 ? 0 : (int)((float)completedInLesson / totalInLesson * 100);
-            var isExpanded = activeLessonId == lessonId;
+            var isExpanded = activeLessonIds.Contains(lessonId);
 
             <div class="card progress-card mb-3 rounded-4 overflow-hidden shadow-sm">
                 <div class="lesson-header py-3 px-4 d-flex justify-content-between align-items-center"
@@ -161,10 +228,47 @@
     private List<LessonDto> Lessons = new();
     private bool isLoading = true;
 
-    private int activeLessonId = -1;
+    // --- Filtreleme ve UI State ---
+    private string searchText = "";
+    private string filterStatus = "All"; // All, Completed, InProgress, NotStarted
+    private HashSet<int> activeLessonIds = new();
+    private bool areAllExpanded = false;
 
-    private IEnumerable<IGrouping<int, TopicDto>> AllTopicsGroupedByLesson =>
-        Topics?.GroupBy(t => t.LessonId).OrderBy(g => g.Key) ?? Enumerable.Empty<IGrouping<int, TopicDto>>();
+    private IEnumerable<IGrouping<int, TopicDto>> FilteredGroups
+    {
+        get
+        {
+            if (Topics == null) return Enumerable.Empty<IGrouping<int, TopicDto>>();
+
+            var query = Topics.AsEnumerable();
+
+            // 1. Metin Arama
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                query = query.Where(t =>
+                    t.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                    (Lessons.FirstOrDefault(l => l.Id == t.LessonId)?.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                );
+            }
+
+            // 2. Durum Filtresi
+            if (filterStatus != "All")
+            {
+                query = query.Where(t =>
+                {
+                    var p = GetProgress(t.Id);
+                    if (filterStatus == "Completed") return p?.ProgressStatus == ProgressStatus.Completed;
+                    if (filterStatus == "InProgress") return p?.ProgressStatus == ProgressStatus.InProgress;
+                    if (filterStatus == "NotStarted") return p == null;
+                    return true;
+                });
+            }
+
+            return query
+                .GroupBy(t => t.LessonId)
+                .OrderBy(g => g.Key);
+        }
+    }
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
@@ -179,10 +283,23 @@
 
     private void ToggleLesson(int lessonId)
     {
-        if (activeLessonId == lessonId)
-            activeLessonId = -1;
+        if (activeLessonIds.Contains(lessonId))
+            activeLessonIds.Remove(lessonId);
         else
-            activeLessonId = lessonId;
+            activeLessonIds.Add(lessonId);
+    }
+
+    private void ToggleAllLessons()
+    {
+        if (areAllExpanded)
+        {
+            activeLessonIds.Clear();
+        }
+        else
+        {
+            activeLessonIds = new HashSet<int>(FilteredGroups.Select(g => g.Key));
+        }
+        areAllExpanded = !areAllExpanded;
     }
 
     private UserLessonProgressDto? GetProgress(int topicId) => progresses?.FirstOrDefault(p => p.TopicId == topicId);
@@ -193,6 +310,7 @@
     {
         await UserLessonProgressService.Add(new AddUserLessonProgressDto { TopicId = topicId, ProgressStatus = ProgressStatus.InProgress });
         progresses = await UserLessonProgressService.GetAll();
+        await JS.InvokeVoidAsync("showToast", "success", "İyi çalışmalar! Konu durumu 'Devam Ediyor' olarak güncellendi.");
     }
 
     private async Task MarkAsCompleted(int progressId)
@@ -200,6 +318,35 @@
         await UserLessonProgressService.Update(progressId);
         var item = progresses?.FirstOrDefault(p => p.Id == progressId);
         if (item != null) item.ProgressStatus = ProgressStatus.Completed;
+        await JS.InvokeVoidAsync("showToast", "success", "Tebrikler! Konu tamamlandı.");
         StateHasChanged();
+    }
+
+    private int CalculateOverallProgress()
+    {
+        if (Topics == null || !Topics.Any()) return 0;
+        var completed = progresses?.Count(p => p.ProgressStatus == ProgressStatus.Completed) ?? 0;
+        return (int)((float)completed / Topics.Count * 100);
+    }
+
+    private async Task SuggestRandomTopic()
+    {
+        if (Topics == null) return;
+        
+        // Henüz başlanmamış konuları bul
+        var notStartedTopics = Topics.Where(t => GetProgress(t.Id) == null).ToList();
+        
+        if (notStartedTopics.Any())
+        {
+            var random = new Random();
+            var topic = notStartedTopics[random.Next(notStartedTopics.Count)];
+            var lessonName = Lessons.FirstOrDefault(l => l.Id == topic.LessonId)?.Name;
+            
+            await JS.InvokeVoidAsync("alert", $"🎯 Önerilen Çalışma:\n\nDers: {lessonName}\nKonu: {topic.Name}\n\nHemen başlamaya ne dersin?");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Harika! Tüm konulara en azından başlamışsın. Tekrar yapmak istediğin bir konuyu seçebilirsin.");
+        }
     }
 }

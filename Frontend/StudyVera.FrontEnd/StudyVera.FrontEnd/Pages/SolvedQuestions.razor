@@ -67,13 +67,26 @@
     </div>
 </div>
 
+<!-- YENİ ÖZELLİK: Filtreleme ve Arama Alanı -->
+<div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-3 px-1">
+    <div class="input-group shadow-sm" style="max-width: 350px;">
+        <span class="input-group-text bg-body border-end-0 text-muted"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control border-start-0" placeholder="Ders veya konu ara..." @bind="searchText" @bind:event="oninput" />
+    </div>
+    
+    <div class="form-check form-switch bg-body p-2 rounded shadow-sm border ps-5 pe-3">
+        <input class="form-check-input" type="checkbox" id="weakTopicsSwitch" @bind="showWeakOnly">
+        <label class="form-check-label small fw-bold text-muted" for="weakTopicsSwitch">⚠️ Sadece Eksikleri Göster</label>
+    </div>
+</div>
+
 @if (isModalOpen)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(2px);">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
 
-                <div class="modal-header bg-light border-bottom-0">
+                <div class="modal-header bg-body-tertiary border-bottom-0">
                     <h5 class="modal-title fw-bold text-primary">
                         <i class="bi bi-plus-circle-fill me-2"></i>Yeni İlerleme Ekle
                     </h5>
@@ -152,7 +165,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                            <button type="button" class="btn btn-light rounded-pill" @onclick="CloseModal">İptal</button>
+                            <button type="button" class="btn btn-outline-secondary rounded-pill" @onclick="CloseModal">İptal</button>
 
                             <button type="button" class="btn btn-outline-primary rounded-pill" @onclick="SaveAndNew">
                                 <i class="bi bi-arrow-repeat me-1"></i> Kaydet & Yeni
@@ -169,7 +182,7 @@
         </div>
     </div>
 }
-<SolvedQuestionsList Lessons="Lessons" Questions="questions" Topics="Topics"></SolvedQuestionsList>
+<SolvedQuestionsList Lessons="Lessons" Questions="questions" Topics="Topics" SearchText="@searchText" ShowWeakOnly="@showWeakOnly"></SolvedQuestionsList>
 @code {
 
     private string FavoriteLessonName
@@ -196,6 +209,10 @@
     private List<UserQuestionStatDto> questions = new();
     private List<TopicDto>? Topics;
     private List<LessonDto> Lessons = new();
+
+    // --- Liste Filtreleme State ---
+    private string searchText = "";
+    private bool showWeakOnly = false;
 
     // --- Modal State ---
     private AddUserQuestionStatDto newQuestion = new();
