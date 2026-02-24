@@ -27,12 +27,12 @@ public class GetWeeklyGoalHandler : IRequestHandler<GetWeeklyGoalQuery, UserWeek
         var weekStart = UserWeeklyGoal.GetCurrentWeekStartDate();
         var goal = await _manager.UserWeeklyGoalRepository.GetCurrentGoalAsync(request.UserId, weekStart, cancellationToken);
 
+        var profile = await _manager.UserProfileRepository
+            .FindByCondition(x => x.UserId == request.UserId, false)
+            .FirstOrDefaultAsync(cancellationToken);
+
         if (goal == null)
         {
-            var profile = await _manager.UserProfileRepository
-                .FindByCondition(x => x.UserId == request.UserId, false)
-                .FirstOrDefaultAsync(cancellationToken);
-
             goal = new UserWeeklyGoal
             {
                 UserId = request.UserId,
@@ -44,7 +44,21 @@ public class GetWeeklyGoalHandler : IRequestHandler<GetWeeklyGoalQuery, UserWeek
             };
 
             _manager.UserWeeklyGoalRepository.Create(goal);
-            await _manager.SaveChangesAsync();
+            await _manager.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            if (goal.CurrentQuestionCount == 0 && profile != null)
+            {
+                var targetMinutes = profile.DailyStudyMinuteGoal * 7;
+                if (goal.TargetQuestionCount != profile.WeeklyQuestionGoal || goal.TargetStudyMinutes != targetMinutes)
+                {
+                    goal.TargetQuestionCount = profile.WeeklyQuestionGoal;
+                    goal.TargetStudyMinutes = targetMinutes;
+                    _manager.UserWeeklyGoalRepository.Update(goal);
+                    await _manager.SaveChangesAsync(cancellationToken);
+                }
+            }
         }
 
         return goal.Adapt<UserWeeklyGoalDto>();

@@ -24,15 +24,16 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
         var today = now.Date;
         var weekStart = UserWeeklyGoal.GetCurrentWeekStartDate();
 
-        var uqs = await _manager.UserQuestionStatRepository.FindByCondition(
-            uqs => uqs.UserId == request.UserId && uqs.TopicId == request.TopicId, true)
-            .FirstOrDefaultAsync(ct);
-
         var topic = await _manager.TopicRepository
             .FindByCondition(t => t.Id == request.TopicId, false)
             .SingleOrDefaultAsync(ct);
 
-        
+        if (topic == null)
+            throw new NotFoundException("Konu bulunamadı.");
+
+        var uqs = await _manager.UserQuestionStatRepository.FindByCondition(
+            uqs => uqs.UserId == request.UserId && uqs.TopicId == request.TopicId, true)
+            .FirstOrDefaultAsync(ct);
 
         int topicPriority = topic?.Priority ?? 3;
 
@@ -49,13 +50,12 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
                 WeekStartDate = weekStart,
                 TargetQuestionCount = profile?.WeeklyQuestionGoal ?? 500,
                 TargetStudyMinutes = (profile?.DailyStudyMinuteGoal ?? 60) * 7,
-                CurrentQuestionCount = request.SolvedCount // İlk değerle başlat
+                CurrentQuestionCount = request.SolvedCount 
             });
         }
         else
         {
             weeklyGoal.CurrentQuestionCount += request.SolvedCount;
-            _manager.UserWeeklyGoalRepository.Update(weeklyGoal);
         }
 
         var newDetail = new QuestionStatDetail
@@ -102,14 +102,13 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
             }
 
             profileStat.LastActivityDate = now;
-            _manager.ProfileStatRepository.Update(profileStat);
         }
 
         _manager.UserActivityHistoryRepository.Create(new UserActivityHistory
         {
             UserId = request.UserId,
             ActivityType = ActivityType.SolvedAQuestion,
-            Description = $"{request.SolvedCount} adet {topic?.Name ?? "Bilinmeyen Konu"} sorusu çözüldü.",
+            Description = $"{request.SolvedCount} adet {topic.Name} sorusu çözüldü.",
             ActivityDate = now
         });
 

@@ -23,14 +23,14 @@ public class GetAllByUserQuestionStatHandler : IRequestHandler<GetAllByUserQuest
     public async Task<List<QuestionStatDetailDto>> Handle(GetAllByUserQuestionStatQuery request, CancellationToken cancellationToken)
     {
 
-        
-        var allQuestionStatDetails =  await _manager
+
+        var allQuestionStatDetails = await _manager
                                             .QuestionStatDetailRepository
                                             .FindByCondition(qsd => qsd.UserQuestionStatId == request.QuestionStatId, false)
                                             .Select(qsd => new QuestionStatDetailDto
                                             {
-                                                AttemptedAt=qsd.AttemptedAt,
-                                                CorrectCount=qsd.CorrectCount,
+                                                AttemptedAt = qsd.AttemptedAt,
+                                                CorrectCount = qsd.CorrectCount,
                                                 SolvedCount = qsd.SolvedCount
                                             })
                                             .ToListAsync(cancellationToken);

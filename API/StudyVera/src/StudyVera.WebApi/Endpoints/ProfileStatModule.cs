@@ -35,6 +35,7 @@ public class ProfileStatModule : ICarterModule
 
             return response is not null ? Results.Ok(response) : Results.NotFound();
         })
+
         .Produces<ProfileStatDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 

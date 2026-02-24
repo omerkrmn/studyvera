@@ -28,5 +28,5 @@ public class GetLessonsHandler : IRequestHandler<GetLessonsQuery, List<LessonDto
                     .ProjectToType<LessonDto>()
                     .ToListAsync(cancellationToken);
         return lessons;
-    }
+    }   
 }

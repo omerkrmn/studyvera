@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StudyVera.Application.Features.Auth.Commands;
 
-public class RegisterCommand : IRequest<AppUser>
+public class RegisterCommand : IRequest<bool>
 {
     // auth 
     [Required(ErrorMessage = "Firstname cannot be null!")]

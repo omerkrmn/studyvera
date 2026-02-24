@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using StudyVera.Domain.Entities.Mock;
 using StudyVera.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,8 @@ public class AppUser : IdentityUser<Guid>
 
     public virtual ICollection<Friendship> SentFriendRequests { get; set; } = new List<Friendship>();
     public virtual ICollection<Friendship> ReceivedFriendRequests { get; set; } = new List<Friendship>();
+
+    public ICollection<UserMockExam> MockExams { get; set; } = [];
 
 
     [NotMapped]

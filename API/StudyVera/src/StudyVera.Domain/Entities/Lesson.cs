@@ -18,4 +18,6 @@ public class Lesson
 
     public ICollection<Topic> Topics { get; set; } = [];
 
+    public int ExamQuestionCount { get; set; }
+
 }

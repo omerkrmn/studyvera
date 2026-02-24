@@ -14,11 +14,6 @@ public class ProfileViewModel
 
     public int BadgesEarned { get; set; }
     public int CurrentStreak { get; set; }
-    public int GoalRemainingQuestions { get; set; }
-    public int GoalCompletionPercentage { get; set; }
-
-    public Dictionary<DateTime, int> ActivityData { get; set; } = new();
-
     public Dictionary<string, int> DeficiencyTopics { get; set; } = new();
 
 }

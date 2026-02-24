@@ -34,7 +34,7 @@ public class GetFriendsHandler : IRequestHandler<GetFriendScoresQuery, List<Frie
 
         var response = friendUsers.Select(user => new FriendDto
         {
-            UserName = user.UserName,
+            UserName = user?.UserName,
             Score = user.ProfileStat?.Score ?? 0,
         })
         .OrderByDescending(x => x.Score)

@@ -5,10 +5,11 @@ using StudyVera.Application.Common.Exceptions;
 using StudyVera.Application.Features.Auth.Commands;
 using StudyVera.Domain.Entities; 
 using StudyVera.Domain.Entities.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudyVera.Application.Handlers.Auth;
 
-public class RegisterHandler : IRequestHandler<RegisterCommand, AppUser>
+public class RegisterHandler : IRequestHandler<RegisterCommand, bool>
 {
     private readonly UserManager<AppUser> _userManager;
 
@@ -17,17 +18,18 @@ public class RegisterHandler : IRequestHandler<RegisterCommand, AppUser>
         _userManager = userManager;
     }
 
-    public async Task<AppUser> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        if (request == null)
-            throw new ParameterNullException("parameters cannot be null!");
+        if (request == null) throw new ArgumentNullException(nameof(request));
 
         var user = request.Adapt<AppUser>();
 
+        if (string.IsNullOrEmpty(user.UserName)) user.UserName = user.Email;
+
         user.UserSettings = new UserProfile
         {
-            WeeklyQuestionGoal = 100, 
-            CurrentTitle="Acemi",
+            WeeklyQuestionGoal = 100,
+            CurrentTitle = "Acemi",
             AllowFriendRequests = true,
             DailyReminderHour = 1,
             ShowRankInLeaderboard = true,
@@ -38,9 +40,9 @@ public class RegisterHandler : IRequestHandler<RegisterCommand, AppUser>
             Language = "tr-TR",
             Theme = "Dark"
         };
+
         user.ProfileStat = new ProfileStat
         {
-            UserId = user.Id,
             CurrentStreak = 0,
             BestStreak = 0,
             LastActivityDate = null
@@ -48,11 +50,12 @@ public class RegisterHandler : IRequestHandler<RegisterCommand, AppUser>
 
         var result = await _userManager.CreateAsync(user, request.Password);
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            return user;
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new ValidationException(errors);
         }
-        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-        throw new Exception(errors);
+
+        return true;
     }
 }
