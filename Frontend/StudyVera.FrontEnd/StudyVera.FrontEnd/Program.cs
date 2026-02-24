@@ -43,5 +43,6 @@ builder.Services.AddScoped<ILessonService, LessonService>();
 builder.Services.AddScoped<IUserWeeklyGoalService, UserWeeklyGoalService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+builder.Services.AddScoped<IUserMockExamService, UserMockExamService>();
 
 await builder.Build().RunAsync();
