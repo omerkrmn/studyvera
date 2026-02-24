@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudyVera.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using StudyVera.Infrastructure.Persistence;
 namespace StudyVera.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260222103707__Mock_feature_1")]
+    partial class _Mock_feature_1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -573,47 +576,6 @@ namespace StudyVera.Infrastructure.Migrations
                     b.HasIndex("UserQuestionStatId");
 
                     b.ToTable("QuestionStatDetails");
-                });
-
-            modelBuilder.Entity("StudyVera.Domain.Entities.StudySession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DurationMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("LessonId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("TopicId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LessonId");
-
-                    b.HasIndex("TopicId");
-
-                    b.ToTable("StudySessions");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Topic", b =>
@@ -1566,21 +1528,6 @@ namespace StudyVera.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("userQuestionStat");
-                });
-
-            modelBuilder.Entity("StudyVera.Domain.Entities.StudySession", b =>
-                {
-                    b.HasOne("StudyVera.Domain.Entities.Lesson", "Lesson")
-                        .WithMany()
-                        .HasForeignKey("LessonId");
-
-                    b.HasOne("StudyVera.Domain.Entities.Topic", "Topic")
-                        .WithMany()
-                        .HasForeignKey("TopicId");
-
-                    b.Navigation("Lesson");
-
-                    b.Navigation("Topic");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Topic", b =>

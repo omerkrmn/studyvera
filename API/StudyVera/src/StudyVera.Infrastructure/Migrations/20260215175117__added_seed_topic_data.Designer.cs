@@ -12,8 +12,8 @@ using StudyVera.Infrastructure.Persistence;
 namespace StudyVera.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251221125639__init")]
-    partial class _init
+    [Migration("20260215175117__added_seed_topic_data")]
+    partial class _added_seed_topic_data
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,7 +133,9 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<int>("UserRank")
                         .HasColumnType("int");
 
-                    b.ToTable("RankResults");
+                    b.ToTable((string)null);
+
+                    b.ToView(null, (string)null);
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Exam", b =>
@@ -312,9 +314,6 @@ namespace StudyVera.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<int?>("UserSettingsId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -324,8 +323,6 @@ namespace StudyVera.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("UserSettingsId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -561,6 +558,15 @@ namespace StudyVera.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("BestStreak")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentStreak")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastActivityDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
@@ -617,6 +623,9 @@ namespace StudyVera.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
                     b.Property<byte>("Priority")
                         .HasColumnType("tinyint");
 
@@ -625,6 +634,584 @@ namespace StudyVera.Infrastructure.Migrations
                     b.HasIndex("LessonId");
 
                     b.ToTable("Topics");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            LessonId = 2,
+                            Name = "Sözcükte Anlam",
+                            OrderIndex = 1,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 2,
+                            LessonId = 2,
+                            Name = "Cümlede Anlam",
+                            OrderIndex = 2,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 3,
+                            LessonId = 2,
+                            Name = "Sözcük Türleri",
+                            OrderIndex = 3,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            LessonId = 2,
+                            Name = "Sözcükte Yapı",
+                            OrderIndex = 4,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 5,
+                            LessonId = 2,
+                            Name = "Cümlenin Ögeleri",
+                            OrderIndex = 5,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 6,
+                            LessonId = 2,
+                            Name = "Cümle Türleri",
+                            OrderIndex = 6,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 7,
+                            LessonId = 2,
+                            Name = "Dil Bilgisi Ses Olayları",
+                            OrderIndex = 7,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 8,
+                            LessonId = 2,
+                            Name = "Yazım Kuralları",
+                            OrderIndex = 8,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 9,
+                            LessonId = 2,
+                            Name = "Noktalama İşaretleri",
+                            OrderIndex = 9,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 10,
+                            LessonId = 2,
+                            Name = "Anlatım Bozuklukları",
+                            OrderIndex = 10,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 11,
+                            LessonId = 2,
+                            Name = "Paragrafta Anlam",
+                            OrderIndex = 11,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 12,
+                            LessonId = 2,
+                            Name = "Paragrafta Anlatım Biçimi",
+                            OrderIndex = 12,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 13,
+                            LessonId = 2,
+                            Name = "Sözel Mantık",
+                            OrderIndex = 13,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 14,
+                            LessonId = 5,
+                            Name = "Temel Kavramlar",
+                            OrderIndex = 1,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 15,
+                            LessonId = 5,
+                            Name = "Rasyonel Sayılar - Ondalıklı Sayılar",
+                            OrderIndex = 2,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 16,
+                            LessonId = 5,
+                            Name = "Basit Eşitsizlikler",
+                            OrderIndex = 3,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 17,
+                            LessonId = 5,
+                            Name = "Mutlak Değer",
+                            OrderIndex = 4,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 18,
+                            LessonId = 5,
+                            Name = "Üslü Sayılar",
+                            OrderIndex = 5,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 19,
+                            LessonId = 5,
+                            Name = "Köklü Sayılar",
+                            OrderIndex = 6,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 20,
+                            LessonId = 5,
+                            Name = "Çarpanlara Ayırma",
+                            OrderIndex = 7,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 21,
+                            LessonId = 5,
+                            Name = "Oran-Orantı",
+                            OrderIndex = 8,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 22,
+                            LessonId = 5,
+                            Name = "Denklem Çözme",
+                            OrderIndex = 9,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 23,
+                            LessonId = 5,
+                            Name = "Problemler",
+                            OrderIndex = 10,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 24,
+                            LessonId = 5,
+                            Name = "Kümeler",
+                            OrderIndex = 11,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 25,
+                            LessonId = 5,
+                            Name = "Fonksiyonlar",
+                            OrderIndex = 12,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 26,
+                            LessonId = 5,
+                            Name = "İşlem",
+                            OrderIndex = 13,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 27,
+                            LessonId = 5,
+                            Name = "Permütasyon",
+                            OrderIndex = 14,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 28,
+                            LessonId = 5,
+                            Name = "Kombinasyon",
+                            OrderIndex = 15,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 29,
+                            LessonId = 5,
+                            Name = "Olasılık",
+                            OrderIndex = 16,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 30,
+                            LessonId = 5,
+                            Name = "Sayısal Mantık",
+                            OrderIndex = 17,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 31,
+                            LessonId = 8,
+                            Name = "Geometrik Kavramlar ve Açılar",
+                            OrderIndex = 1,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 32,
+                            LessonId = 8,
+                            Name = "Çokgenler ve Dörtgenler",
+                            OrderIndex = 2,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 33,
+                            LessonId = 8,
+                            Name = "Çember ve Daire",
+                            OrderIndex = 3,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 34,
+                            LessonId = 8,
+                            Name = "Analitik Geometri",
+                            OrderIndex = 4,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 35,
+                            LessonId = 8,
+                            Name = "Katı Cisimler",
+                            OrderIndex = 5,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 36,
+                            LessonId = 17,
+                            Name = "İslamiyet Öncesi Türk Tarihi",
+                            OrderIndex = 1,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 37,
+                            LessonId = 17,
+                            Name = "İlk Türk-İslam Devletleri ve Beylikleri",
+                            OrderIndex = 2,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 38,
+                            LessonId = 17,
+                            Name = "Osmanlı Devleti Kuruluş ve Yükselme Dönemleri",
+                            OrderIndex = 3,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 39,
+                            LessonId = 17,
+                            Name = "Osmanlı Devleti'nde Kültür ve Uygarlık",
+                            OrderIndex = 4,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 40,
+                            LessonId = 17,
+                            Name = "XVII. Yüzyılda Osmanlı Devleti (Duraklama)",
+                            OrderIndex = 5,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 41,
+                            LessonId = 17,
+                            Name = "XVIII. Yüzyılda Osmanlı Devleti (Gerileme)",
+                            OrderIndex = 6,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 42,
+                            LessonId = 17,
+                            Name = "XIX. Yüzyılda Osmanlı Devleti (Dağılma)",
+                            OrderIndex = 7,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 43,
+                            LessonId = 17,
+                            Name = "XX. Yüzyılda Osmanlı Devleti",
+                            OrderIndex = 8,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 44,
+                            LessonId = 17,
+                            Name = "Kurtuluş Savaşı Hazırlık Dönemi",
+                            OrderIndex = 9,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 45,
+                            LessonId = 17,
+                            Name = "I. TBMM Dönemi",
+                            OrderIndex = 10,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 46,
+                            LessonId = 17,
+                            Name = "Kurtuluş Savaşı Muharebeler Dönemi",
+                            OrderIndex = 11,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 47,
+                            LessonId = 17,
+                            Name = "Atatürk İnkılapları",
+                            OrderIndex = 12,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 48,
+                            LessonId = 17,
+                            Name = "Atatürk İlkeleri",
+                            OrderIndex = 13,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 49,
+                            LessonId = 17,
+                            Name = "Partiler ve Partileşme Dönemi",
+                            OrderIndex = 14,
+                            Priority = (byte)0
+                        },
+                        new
+                        {
+                            Id = 50,
+                            LessonId = 17,
+                            Name = "Atatürk Dönemi Türk Dış Politikası",
+                            OrderIndex = 15,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 51,
+                            LessonId = 17,
+                            Name = "Atatürk Sonrası Dönem",
+                            OrderIndex = 16,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 52,
+                            LessonId = 17,
+                            Name = "Atatürk'ün Hayatı ve Kişiliği",
+                            OrderIndex = 17,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 53,
+                            LessonId = 20,
+                            Name = "Türkiye'nin Coğrafi Konumu",
+                            OrderIndex = 1,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 54,
+                            LessonId = 20,
+                            Name = "Türkiye'nin İklimi ve Bitki Örtüsü",
+                            OrderIndex = 2,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 55,
+                            LessonId = 20,
+                            Name = "Türkiye'nin Fiziki Özellikleri",
+                            OrderIndex = 3,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 56,
+                            LessonId = 20,
+                            Name = "Türkiye'de Nüfus ve Yerleşme",
+                            OrderIndex = 4,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 57,
+                            LessonId = 20,
+                            Name = "Tarım",
+                            OrderIndex = 5,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 58,
+                            LessonId = 20,
+                            Name = "Hayvancılık",
+                            OrderIndex = 6,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 59,
+                            LessonId = 20,
+                            Name = "Madenler ve Enerji Kaynakları",
+                            OrderIndex = 7,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 60,
+                            LessonId = 20,
+                            Name = "Sanayi ve Endüstri",
+                            OrderIndex = 8,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 61,
+                            LessonId = 20,
+                            Name = "Ulaşım",
+                            OrderIndex = 9,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 62,
+                            LessonId = 20,
+                            Name = "Ticaret",
+                            OrderIndex = 10,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 63,
+                            LessonId = 20,
+                            Name = "Turizm",
+                            OrderIndex = 11,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 64,
+                            LessonId = 20,
+                            Name = "Bölgeler Coğrafyası",
+                            OrderIndex = 12,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 65,
+                            LessonId = 26,
+                            Name = "Temel Hukuk Kavramları",
+                            OrderIndex = 1,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 66,
+                            LessonId = 26,
+                            Name = "Anayasal Kavramlar",
+                            OrderIndex = 2,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 67,
+                            LessonId = 26,
+                            Name = "Türk Anayasa Tarihi",
+                            OrderIndex = 3,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 68,
+                            LessonId = 26,
+                            Name = "Temel Hak ve Ödevler",
+                            OrderIndex = 4,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 69,
+                            LessonId = 26,
+                            Name = "Yasama",
+                            OrderIndex = 5,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 70,
+                            LessonId = 26,
+                            Name = "Yürütme",
+                            OrderIndex = 6,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 71,
+                            LessonId = 26,
+                            Name = "Yargı",
+                            OrderIndex = 7,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 72,
+                            LessonId = 26,
+                            Name = "İdare Hukuku",
+                            OrderIndex = 8,
+                            Priority = (byte)3
+                        });
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.UserActivityHistory", b =>
@@ -684,6 +1271,61 @@ namespace StudyVera.Infrastructure.Migrations
                     b.ToTable("UserLessonProgresses");
                 });
 
+            modelBuilder.Entity("StudyVera.Domain.Entities.UserProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowFriendRequests")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrentTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DailyReminderHour")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DailyStudyMinuteGoal")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsProfilePublic")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ShowRankInLeaderboard")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Theme")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("WeeklyQuestionGoal")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserSettings");
+                });
+
             modelBuilder.Entity("StudyVera.Domain.Entities.UserQuestionStat", b =>
                 {
                     b.Property<int>("Id")
@@ -716,7 +1358,7 @@ namespace StudyVera.Infrastructure.Migrations
                     b.ToTable("UserQuestionStats");
                 });
 
-            modelBuilder.Entity("StudyVera.Domain.Entities.UserSettings", b =>
+            modelBuilder.Entity("StudyVera.Domain.Entities.UserWeeklyGoal", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -724,9 +1366,32 @@ namespace StudyVera.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid?>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CurrentQuestionCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentStudyMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TargetQuestionCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TargetStudyMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("WeekStartDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.ToTable("UserSettings");
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("UserWeeklyGoals");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -778,15 +1443,6 @@ namespace StudyVera.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("StudyVera.Domain.Entities.Identity.AppUser", b =>
-                {
-                    b.HasOne("StudyVera.Domain.Entities.UserSettings", "UserSettings")
-                        .WithMany()
-                        .HasForeignKey("UserSettingsId");
-
-                    b.Navigation("UserSettings");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Lesson", b =>
@@ -888,6 +1544,17 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("StudyVera.Domain.Entities.UserProfile", b =>
+                {
+                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", "User")
+                        .WithOne("UserSettings")
+                        .HasForeignKey("StudyVera.Domain.Entities.UserProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("StudyVera.Domain.Entities.UserQuestionStat", b =>
                 {
                     b.HasOne("StudyVera.Domain.Entities.Topic", "Topic")
@@ -907,6 +1574,13 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("StudyVera.Domain.Entities.UserWeeklyGoal", b =>
+                {
+                    b.HasOne("StudyVera.Domain.Entities.Identity.AppUser", null)
+                        .WithMany("UserWeeklyGoals")
+                        .HasForeignKey("AppUserId");
+                });
+
             modelBuilder.Entity("StudyVera.Domain.Entities.Exam", b =>
                 {
                     b.Navigation("Lessons");
@@ -923,6 +1597,10 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Navigation("QuestionStats");
 
                     b.Navigation("UserActivityHistories");
+
+                    b.Navigation("UserSettings");
+
+                    b.Navigation("UserWeeklyGoals");
                 });
 
             modelBuilder.Entity("StudyVera.Domain.Entities.Lesson", b =>

@@ -17,8 +17,11 @@ public interface IRepositoryManager
     IUserWeeklyGoalRepository UserWeeklyGoalRepository { get; }
 
     IFriendshipRepository FriendshipRepository { get; }
-    
 
+    IUserMockExamRepository UserMockExamRepository { get; }
+    IUserMockExamDetailRepository UserMockExamDetailRepository { get; }
+    
+    IStudySessionRepository StudySessionRepository { get; }
 
     Task SaveChangesAsync(CancellationToken ct = default);
 }
