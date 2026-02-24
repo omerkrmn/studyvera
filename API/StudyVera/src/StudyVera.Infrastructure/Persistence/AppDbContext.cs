@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Dtos.ProfileSummary;
 using StudyVera.Domain.Entities;
 using StudyVera.Domain.Entities.Identity;
+using StudyVera.Domain.Entities.Mock;
 using System.Reflection.Emit;
 
 namespace StudyVera.Infrastructure.Persistence;
@@ -23,6 +24,12 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public DbSet<UserRankResult> RankResults { get; set; }
     public DbSet<UserWeeklyGoal> UserWeeklyGoals { get; set; }
     public DbSet<Friendship> Friendships { get; set; }
+
+    public DbSet<UserMockExam> UserMockExams { get; set; }
+    public DbSet<UserMockExamDetail> UserMockExamDetails { get; set; }
+
+    public DbSet<StudySession> StudySessions { get; set; }
+
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -53,6 +60,26 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(f => new { f.RequestorId, f.ReceiverId }).IsUnique();
+        });
+        builder.Entity<UserMockExamDetail>(builder =>
+        {
+            builder.HasOne(d => d.UserMockExam)
+                   .WithMany(m => m.Details)
+                   .HasForeignKey(d => d.UserMockExamId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(d => d.Lesson)
+                   .WithMany()
+                   .HasForeignKey(d => d.LessonId)
+                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<UserMockExam>(builder =>
+        {
+            builder.HasOne(x => x.User)
+                   .WithMany(x => x.MockExams)
+                   .HasForeignKey(x => x.UserId)
+                   .OnDelete(DeleteBehavior.Cascade); 
         });
     }
     

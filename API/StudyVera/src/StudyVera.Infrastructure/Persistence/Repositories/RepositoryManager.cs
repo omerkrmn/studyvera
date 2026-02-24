@@ -1,4 +1,4 @@
-﻿using StudyVera.Domain.Interfaces;
+﻿﻿using StudyVera.Domain.Interfaces;
 using StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
 
 namespace StudyVera.Infrastructure.Persistence.Repositories
@@ -19,6 +19,9 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
         private readonly Lazy<IQuestionStatDetailRepository> _questionStatDetailRepository;
         private readonly Lazy<IUserWeeklyGoalRepository> _userWeeklyGoalRepository;
         private readonly Lazy<IFriendshipRepository> _friendshipRepository;
+        private readonly Lazy<IUserMockExamRepository> _userMockExamRepository;
+        private readonly Lazy<IUserMockExamDetailRepository> _userMockExamDetailRepository;
+        private readonly Lazy<IStudySessionRepository> _studySessionRepository;
         #endregion
         public RepositoryManager(AppDbContext context)
         {
@@ -35,7 +38,12 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
             _questionStatDetailRepository = new Lazy<IQuestionStatDetailRepository>(() => new QuestionStatDetailRepository(_context));
             _userWeeklyGoalRepository = new Lazy<IUserWeeklyGoalRepository>(() => new UserWeeklyGoalRepository(_context));
 
+
             _friendshipRepository = new Lazy<IFriendshipRepository>(() => new FriendshipRepository(_context));
+
+            _userMockExamRepository = new Lazy<IUserMockExamRepository>(() => new UserMockExamRepository(_context));
+            _userMockExamDetailRepository = new Lazy<IUserMockExamDetailRepository>(() => new UserMockExamDetailRepository(_context));
+            _studySessionRepository = new Lazy<IStudySessionRepository>(() => new StudySessionRepository(_context));
         }
 
         #region Repositories
@@ -51,6 +59,9 @@ namespace StudyVera.Infrastructure.Persistence.Repositories
         public IQuestionStatDetailRepository QuestionStatDetailRepository => _questionStatDetailRepository.Value;
         public IUserWeeklyGoalRepository UserWeeklyGoalRepository => _userWeeklyGoalRepository.Value;
         public IFriendshipRepository FriendshipRepository => _friendshipRepository.Value;
+        public IUserMockExamRepository UserMockExamRepository => _userMockExamRepository.Value;
+        public IUserMockExamDetailRepository UserMockExamDetailRepository => _userMockExamDetailRepository.Value;
+        public IStudySessionRepository StudySessionRepository => _studySessionRepository.Value;
         #endregion
         #region SaveChanges
         public Task SaveChangesAsync(CancellationToken ct = default) => _context.SaveChangesAsync(ct);
