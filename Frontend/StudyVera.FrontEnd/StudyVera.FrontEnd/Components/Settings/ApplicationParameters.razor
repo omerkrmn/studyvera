@@ -114,7 +114,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Profil güncelleme sırasında hata: {ex.Message}");
+            await JS.InvokeVoidAsync("showToast", "error", "Profiliniz güncellenirken bir hata oluştu!");
         }
         finally
         {
