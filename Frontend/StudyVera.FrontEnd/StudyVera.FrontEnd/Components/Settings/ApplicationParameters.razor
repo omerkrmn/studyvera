@@ -3,6 +3,7 @@
 @using StudyVera.FrontEnd.Services.Concrats
 @inject IUserProfileService ProfileService
 @inject ILocalStorageService LocalStorage
+@inject IJSRuntime JS
 
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-header bg-transparent border-0 pt-4 px-4">
@@ -93,7 +94,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Servisimiz zaten önce LocalStorage'a bakıp yoksa API'ye gidiyor.
         var result = await ProfileService.GetProfileAsync();
 
         if (result != null)
@@ -108,13 +108,9 @@
 
         try
         {
-            // Backend'e PATCH isteği atar
             await ProfileService.UpdateProfileAsync(parameters);
-
-            // Başarılı olursa LocalStorage'ı günceller (Cache synchronization)
             await LocalStorage.SetItemAsync(CacheKey, parameters);
-
-            // Burada kullanıcıya başarılı olduğuna dair bir bildirim tetiklenebilir.
+            await JS.InvokeVoidAsync("showToast", "success", "Profiliniz başarıyla güncellendi!");
         }
         catch (Exception ex)
         {
