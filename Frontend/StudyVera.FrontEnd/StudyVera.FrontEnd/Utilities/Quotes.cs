@@ -26,6 +26,8 @@ public static class Quotes
             @"Sana gitme demeyeceğim,
               Üşüyorsun ceketimi al.
               Günün en güzel saatleri bunlar,
-              Yanımda kal."
+              Yanımda kal.",
+              
+            @"Güç Seninle olsun"
 };
 }
