@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.UserActivityHistories;
 using StudyVera.FrontEnd.Services.Concrats;
 using StudyVera.FrontEnd.Services.Helpers;
@@ -29,10 +29,11 @@ public class UserHistoryService : ServiceHelper , IUserHistoryService
         await AddAuthorizationHeader();
 
         var response = await _client.GetAsync(_baseUrl);
-        var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Sunucu hatası ({response.StatusCode}): {content}");
+            await response.HandleError();
+        
+        var content = await response.Content.ReadAsStringAsync();
 
         var progresses = JsonSerializer.Deserialize<List<UserActivityHistoryDto>>(
             content,
@@ -48,10 +49,11 @@ public class UserHistoryService : ServiceHelper , IUserHistoryService
         await AddAuthorizationHeader();
 
         var response = await _client.GetAsync($"{_baseUrl}/get-all-by-date");
-        var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Sunucu hatası ({response.StatusCode}): {content}");
+            await response.HandleError();
+        
+        var content = await response.Content.ReadAsStringAsync();
 
         var allDate = JsonSerializer.Deserialize<List<DateTime>>(
             content,
@@ -66,4 +68,3 @@ public class UserHistoryService : ServiceHelper , IUserHistoryService
         return distinctDays;
     }
 }
-

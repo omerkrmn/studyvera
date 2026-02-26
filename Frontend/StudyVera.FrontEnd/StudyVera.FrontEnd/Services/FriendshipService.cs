@@ -26,8 +26,7 @@ public class FriendshipService : ServiceHelper, IFriendshipService
 
         if (!response.IsSuccessStatusCode)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new Exception(content); 
+            await response.HandleError();
         }
     }
 
@@ -38,8 +37,7 @@ public class FriendshipService : ServiceHelper, IFriendshipService
 
         if (!response.IsSuccessStatusCode)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new Exception(content);
+            await response.HandleError();
         }
     }
 
@@ -50,8 +48,7 @@ public class FriendshipService : ServiceHelper, IFriendshipService
 
         if (!response.IsSuccessStatusCode)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new Exception(content);
+            await response.HandleError();
         }
 
         var contentStream = await response.Content.ReadAsStreamAsync();
@@ -71,8 +68,7 @@ public class FriendshipService : ServiceHelper, IFriendshipService
 
         if (!response.IsSuccessStatusCode)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new Exception($"İstekler getirilemedi: {content}");
+            await response.HandleError();
         }
 
         var contentStream = await response.Content.ReadAsStreamAsync();

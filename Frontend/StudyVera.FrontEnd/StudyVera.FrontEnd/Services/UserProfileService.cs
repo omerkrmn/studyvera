@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.UserProfile;
 using StudyVera.FrontEnd.Services.Concrats;
 using StudyVera.FrontEnd.Services.Helpers;
@@ -62,8 +62,7 @@ public class UserProfileService : ServiceHelper, IUserProfileService
         }
         else
         {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Profil güncelleme hatası: {error}");
+            await response.HandleError();
         }
     }
 

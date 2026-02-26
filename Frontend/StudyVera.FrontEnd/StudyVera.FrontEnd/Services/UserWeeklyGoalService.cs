@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.Common;
 using StudyVera.FrontEnd.Models.UserActivityHistories;
 using StudyVera.FrontEnd.Models.UserWeeklyGoals;
@@ -27,25 +27,16 @@ public class UserWeeklyGoalService : ServiceHelper, IUserWeeklyGoalService
             await AddAuthorizationHeader();
 
             var response = await _client.GetAsync($"{_baseUrl}/summary");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                await response.HandleError();
+            }
+
             var content = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                return JsonSerializer.Deserialize<UserWeeklyGoalDto>(content,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                    ?? new UserWeeklyGoalDto();
-            }
-            try
-            {
-                var errorData = JsonSerializer.Deserialize<ErrorResponse>(content,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                throw new Exception(errorData?.Message ?? "Beklenmedik bir hata oluştu.");
-            }
-            catch (JsonException)
-            {
-                throw new Exception($"Sunucu Hatası: {response.StatusCode}");
-            }
+            return JsonSerializer.Deserialize<UserWeeklyGoalDto>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                ?? new UserWeeklyGoalDto();
         }
         catch (HttpRequestException)
         {

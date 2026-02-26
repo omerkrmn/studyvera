@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.LessonSchedules;
 using StudyVera.FrontEnd.Services.Concrats;
 using StudyVera.FrontEnd.Services.Helpers;
@@ -34,8 +34,7 @@ public class LessonScheduleService :ServiceHelper, ILessonScheduleService
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Ders programı eklenirken bir hata oluştu. Durum Kodu: {response.StatusCode}. Hata: {errorContent}");
+                await response.HandleError();
             }
 
             await _localStorage.RemoveItemAsync("lessonSchedules");

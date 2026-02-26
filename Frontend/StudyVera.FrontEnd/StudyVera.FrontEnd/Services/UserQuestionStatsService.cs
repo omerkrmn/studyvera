@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.UserLessonProgress;
 using StudyVera.FrontEnd.Models.UserQuestionStat;
 using StudyVera.FrontEnd.Services.Concrats;
@@ -30,8 +30,7 @@ public class UserQuestionStatsService : ServiceHelper, IUserQuestionStatsService
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Sunucu hatası: {response.StatusCode} → {error}");
+            await response.HandleError();
         }
     }
 
@@ -40,9 +39,10 @@ public class UserQuestionStatsService : ServiceHelper, IUserQuestionStatsService
         await AddAuthorizationHeader();
 
         var response = await _client.GetAsync(_baseUrl);
-        var content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Sunucu hatası ({response.StatusCode}): {content}");
+            await response.HandleError();
+
+        var content = await response.Content.ReadAsStringAsync();
 
         var solvedQuestions = JsonSerializer.Deserialize<List<UserQuestionStatDto>>(
             content,

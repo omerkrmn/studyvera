@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.QuestionStatDetails;
 using StudyVera.FrontEnd.Models.UserQuestionStat;
 using StudyVera.FrontEnd.Services.Concrats;
@@ -30,10 +30,10 @@ public class QuestionStatDetailService :ServiceHelper, IQuestionStatDetailServic
 
         var response = await _client.GetAsync($"{_baseUrl}{questionStatId}");
         
-        var content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Sunucu hatası ({response.StatusCode}): {content}");
+            await response.HandleError();
 
+        var content = await response.Content.ReadAsStringAsync();
         var details = JsonSerializer.Deserialize<List<QuestionStatDetailDto>>(
             content,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }

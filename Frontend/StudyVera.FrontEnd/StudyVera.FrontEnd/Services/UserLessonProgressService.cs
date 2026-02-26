@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using StudyVera.FrontEnd.Models.UserLessonProgress;
 using StudyVera.FrontEnd.Services.Concrats;
 using StudyVera.FrontEnd.Services.Helpers;
@@ -31,8 +31,7 @@ public class UserLessonProgressService :ServiceHelper, IUserLessonProgressServic
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Sunucu hatası: {response.StatusCode} → {error}");
+            await response.HandleError();
         }
     }
 
@@ -42,10 +41,11 @@ public class UserLessonProgressService :ServiceHelper, IUserLessonProgressServic
         await AddAuthorizationHeader();
 
         var response = await _client.GetAsync(_baseUrl);
-        var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Sunucu hatası ({response.StatusCode}): {content}");
+            await response.HandleError();
+        
+        var content = await response.Content.ReadAsStringAsync();
 
         var progresses = JsonSerializer.Deserialize<List<UserLessonProgressDto>>(
             content,
@@ -78,8 +78,7 @@ public class UserLessonProgressService :ServiceHelper, IUserLessonProgressServic
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Güncelleme başarısız: {response.StatusCode} - {error}");
+            await response.HandleError();
         }
     }
 

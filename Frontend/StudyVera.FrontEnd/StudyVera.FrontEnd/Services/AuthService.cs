@@ -1,4 +1,4 @@
-﻿using Blazored.LocalStorage;
+﻿﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using StudyVera.FrontEnd.Models.Auth;
 using StudyVera.FrontEnd.Models.Common;
@@ -41,8 +41,8 @@ public class AuthService : ServiceHelper, IAuthService
     {
         var response = await _httpClient.PostAsJsonAsync($"{_apiUrl}/register", registerRequest);
         if(response.IsSuccessStatusCode) return true;
-        var errorData = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-        throw new Exception(errorData?.Message ?? "Kayıt sırasında bilinmeyen bir hata oluştu.");
+        await response.HandleError();
+        return false;
     }
 
     public async Task<string?> RefreshToken()
