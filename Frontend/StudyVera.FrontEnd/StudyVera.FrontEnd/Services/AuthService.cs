@@ -40,7 +40,7 @@ public class AuthService : ServiceHelper, IAuthService
     public async Task<bool> Register(RegisterRequest registerRequest)
     {
         var response = await _httpClient.PostAsJsonAsync($"{_apiUrl}/register", registerRequest);
-        if(response.IsSuccessStatusCode) return true;
+        if (response.IsSuccessStatusCode) return true;
         await response.HandleError();
         return false;
     }
@@ -90,5 +90,21 @@ public class AuthService : ServiceHelper, IAuthService
         await _localStorage.SetItemAsync("accessToken", response.AccessToken);
         await _localStorage.SetItemAsync("refreshToken", response.RefreshToken);
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", response.AccessToken);
+    }
+
+    public async Task<bool> GoogleLogin(string idToken)
+    {
+        var request = new GoogleAuthRequest { IdToken = idToken };
+        var response = await _httpClient.PostAsJsonAsync($"{_apiUrl}/google", request);
+
+        if (!response.IsSuccessStatusCode)
+            return false;
+
+        var result = await response.Content.ReadFromJsonAsync<TokenResponse>();
+        if (result == null) return false;
+
+        await StoreTokens(result);
+        ((CustomAuthStateProvider)_authStateProvider).NotifyUserAuthentication(result.AccessToken);
+        return true;
     }
 }

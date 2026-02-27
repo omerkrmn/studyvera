@@ -1,6 +1,7 @@
 ﻿using Carter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using StudyVera.Infrastructure.Identity;
 using StudyVera.Infrastructure.Persistence;
 using StudyVera.WebApi.Extensions;
 using StudyVera.WebApi.Middleware;
@@ -50,6 +51,8 @@ builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureJwtSettings(builder.Configuration);
 builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.ConfigureServices();
+builder.Services.Configure<GoogleAuthSettings>(builder.Configuration.GetSection("GoogleAuthSettings"));
+
 
 
 builder.Services.AddCors(options =>

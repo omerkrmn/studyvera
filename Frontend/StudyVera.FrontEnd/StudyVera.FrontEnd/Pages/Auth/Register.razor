@@ -2,8 +2,11 @@
 @using StudyVera.FrontEnd.Enums
 @using StudyVera.FrontEnd.Models.Auth
 @using StudyVera.FrontEnd.Services.Concrats
+@using StudyVera.FrontEnd.Utilities
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <PageTitle>StudyVera - Kayıt Ol</PageTitle>
 
@@ -96,6 +99,21 @@
         <div class="text-center mt-4">
             <p class="small text-secondary">Zaten hesabınız var mı? <a href="/auth/login" class="text-info text-decoration-none fw-bold">Giriş Yap</a></p>
         </div>
+
+        <div class="position-relative my-3">
+            <hr class="text-secondary" />
+            <span class="position-absolute top-50 start-50 translate-middle bg-body px-3 text-secondary small">veya</span>
+        </div>
+
+        <div class="d-grid">
+            <div id="googleSignInDiv" class="d-flex justify-content-center"></div>
+        </div>
+        @if (!string.IsNullOrEmpty(googleErrorMessage))
+        {
+            <div class="alert alert-danger mt-3 small py-2 rounded-3 border-0 shadow-sm text-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @googleErrorMessage
+            </div>
+        }
     </div>
 </div>
 
@@ -103,6 +121,8 @@
     private RegisterRequest registerModel = new();
     private bool isLoading = false;
     private string? errorMessage;
+    private string? googleErrorMessage;
+    private DotNetObjectReference<Register>? dotNetHelper;
 
     private async Task HandleRegister()
     {
@@ -137,5 +157,39 @@
         {
             isLoading = false;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetHelper = DotNetObjectReference.Create(this);
+            string clientId = AppConsts.GoogleClientId;
+            if (string.IsNullOrEmpty(clientId))
+            {
+                googleErrorMessage = "Google Client ID yapılandırılmamış.";
+                return;
+            }
+            await JSRuntime.InvokeVoidAsync("googleAuth.initializeGoogleSignIn", dotNetHelper, clientId);
+            await JSRuntime.InvokeVoidAsync("googleAuth.renderButton", "googleSignInDiv");
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleCredentialResponse(string credential)
+    {
+        googleErrorMessage = null;
+        StateHasChanged();
+
+        var success = await AuthService.GoogleLogin(credential);
+        if (success)
+            Navigation.NavigateTo("/profile", true);
+        else
+            googleErrorMessage = "Google ile kayıt başarısız oldu. Lütfen tekrar deneyin.";
+    }
+
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
     }
 }

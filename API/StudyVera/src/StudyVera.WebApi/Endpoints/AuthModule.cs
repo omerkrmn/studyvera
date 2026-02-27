@@ -28,5 +28,10 @@ public class AuthModule : ICarterModule
             var response = await mediator.Send(command);
             return Results.Ok(response);
         });
+        group.MapPost("google", async (GoogleAuthCommand command, ISender mediator) =>
+        {
+            var response = await mediator.Send(command);
+            return Results.Ok(response);
+        });
     }
 }

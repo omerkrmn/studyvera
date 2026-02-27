@@ -9,4 +9,6 @@ public interface IAuthService
     Task<string?> RefreshToken();
     Task Logout();
     Task<bool> IsUserAuthenticated();
+    Task<bool> GoogleLogin(string idToken);
+
 }

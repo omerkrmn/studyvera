@@ -10,4 +10,7 @@ public interface IAuthenticationManager
     Task<TokenDto> CreateToken(bool populateExp);
     Task<TokenDto> RefreshToken(TokenDto tokenDto);
     Guid GetUserId();
+
+    Task<TokenDto> GoogleSignIn(GoogleAuthDto googleAuth);
+
 }

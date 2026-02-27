@@ -1,10 +1,12 @@
-﻿using Mapster;
+﻿using Google.Apis.Auth;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StudyVera.Application.Dtos;
 using StudyVera.Application.Services;
 using StudyVera.Domain.Entities.Identity;
+using StudyVera.Domain.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -13,10 +15,12 @@ using System.Text;
 
 namespace StudyVera.Infrastructure.Identity;
 
-public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<JwtSettings> jwtOptions) : IAuthenticationManager
+public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<JwtSettings> jwtOptions,IOptions<GoogleAuthSettings> googleAuthOptions) : IAuthenticationManager
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly IOptions<JwtSettings> _jwtOptions = jwtOptions;
+    private readonly GoogleAuthSettings _googleAuthSettings = googleAuthOptions.Value;
+
 
     private AppUser? _user;
 
@@ -133,7 +137,7 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
         {
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidateLifetime = false, // <--- burada false olacak
+            ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings.ValidIssuer,
             ValidAudience = jwtSettings.ValidAudience,
@@ -158,4 +162,39 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
 
     public Guid GetUserId()
         => _user!.Id;
+
+    public async Task<TokenDto> GoogleSignIn(GoogleAuthDto googleAuth)
+    {
+        var payload = await GoogleJsonWebSignature.ValidateAsync(googleAuth.IdToken, new GoogleJsonWebSignature.ValidationSettings
+        {
+            Audience = new[] { _googleAuthSettings.ClientId }
+        });
+
+        var email = payload.Email;
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            user = new AppUser
+            {
+                UserName = email.Split('@')[0],
+                Email = email,
+                FirstName = payload.GivenName ?? string.Empty,
+                LastName = payload.FamilyName ?? string.Empty,
+                EmailConfirmed = true,
+                TargetExam = TargetExam.KPSS
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                throw new Exception($"Kullanıcı oluşturulamadı: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+            }
+
+            await _userManager.AddToRoleAsync(user, "User");
+        }
+
+        _user = user;
+
+        return await CreateToken(populateExp: true);
+    }
 }
