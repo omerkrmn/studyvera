@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using StudyVera.Application.Features.Mock.UserMockExams.Commands;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Entities.Mock;
+using StudyVera.Domain.Enums;
 using StudyVera.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -56,6 +58,15 @@ public class CreateUserMockExamCommandHandler : IRequestHandler<CreateUserMockEx
         mockExam.TotalNet = mockExam.Details.Sum(x => x.Net);
 
         _manager.UserMockExamRepository.Create(mockExam);
+
+        _manager.UserActivityHistoryRepository.Create(new UserActivityHistory
+        {
+            UserId = request.UserId,
+            ActivityType = ActivityType.CreateMockExam,
+            ActivityDate = DateTime.UtcNow,
+            Description = $"Kullanıcı {mockExam.ExamName} adlı deneme sınavını oluşturdu."
+        });
+
 
         await _manager.SaveChangesAsync();
 

@@ -18,7 +18,6 @@ public class CreateStudySessionHandler : IRequestHandler<CreateStudySessionComma
 
     public async Task<bool> Handle(CreateStudySessionCommand request, CancellationToken cancellationToken)
     {
-        // 1. Çalışma Oturumunu Oluştur
         var session = new StudySession
         {
             UserId = request.UserId,
@@ -33,7 +32,6 @@ public class CreateStudySessionHandler : IRequestHandler<CreateStudySessionComma
         
         _manager.StudySessionRepository.Create(session);
 
-        // 2. Haftalık Hedefi Güncelle (Süre Bazlı)
         var weekStart = UserWeeklyGoal.GetCurrentWeekStartDate();
         var weeklyGoal = await _manager.UserWeeklyGoalRepository.GetCurrentGoalAsync(request.UserId, weekStart, cancellationToken);
 
@@ -60,7 +58,6 @@ public class CreateStudySessionHandler : IRequestHandler<CreateStudySessionComma
             _manager.UserWeeklyGoalRepository.Update(weeklyGoal);
         }
 
-        // 3. Aktivite Geçmişine Ekle
         var activity = new UserActivityHistory
         {
             UserId = request.UserId,

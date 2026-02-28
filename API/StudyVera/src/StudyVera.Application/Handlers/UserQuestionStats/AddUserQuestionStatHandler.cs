@@ -108,7 +108,9 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
         {
             UserId = request.UserId,
             ActivityType = ActivityType.SolvedAQuestion,
-            Description = $"{request.SolvedCount} adet {topic.Name} sorusu çözüldü.",
+            TopicId = request.TopicId,
+            LessonId = topic?.LessonId,
+            Description = $"{request.SolvedCount} adet {topic?.Name} sorusu çözüldü.",
             ActivityDate = now
         });
 

@@ -56,6 +56,7 @@ namespace StudyVera.Application.Handlers.UserLessonProgresses
             {
                 UserId = request.UserId,
                 ActivityType = ActivityType.LessonProgressed,
+                LessonId = request.TopicId,
                 Description = $"Kullanıcı {request.TopicId} numaralı konuda güncelleme yaptı {request.ProgressStatus}",
                 ActivityDate = DateTime.UtcNow,
             });
