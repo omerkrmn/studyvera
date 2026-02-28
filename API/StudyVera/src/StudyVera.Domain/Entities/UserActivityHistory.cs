@@ -14,6 +14,9 @@ public class UserActivityHistory
     public DateTime ActivityDate { get; set; } = DateTime.UtcNow;
     public ActivityType? ActivityType { get; set; }
     public string Description { get; set; } = string.Empty;
+
+    public int? TopicId { get; set; }
+    public int? LessonId { get; set; }
     
     public Guid UserId { get; set; }
 
