@@ -17,5 +17,6 @@ public interface ITopicDeficiencyService
     /// <param name="lastAttemptAt">date the problem was solved</param>
     /// <param name="topicPriority"></param>
     /// <returns></returns>
-    public float CalculateDeficiencyScore(int totalSolvedCount, int correctCount, DateTime lastAttemptAt, float topicPriority);
+    public float CalculateDeficiencyScore(int totalSolvedCount, int correctCount, DateTime lastAttemptAt, DateTime lastLessonDate, float topicPriority);
+    public float CalculateDeficiencyScoreVersion1(int totalSolvedCount, int correctCount, DateTime lastAttemptAt, float topicPriority);
 }

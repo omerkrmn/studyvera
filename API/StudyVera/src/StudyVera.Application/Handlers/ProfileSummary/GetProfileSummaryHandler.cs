@@ -41,24 +41,29 @@ public class GetProfileSummaryHandler : IRequestHandler<GetProfileSummaryQuery, 
         }
         else
             _model.CurrentStreak = 0;
-        
+
 
         _model.UserScore = profileStat?.Score ?? 0;
 
         _model.CurrentStreak = profileStat?.CurrentStreak ?? 0;
-        
+
         var statsFromDb = await _manager.UserQuestionStatRepository
             .FindByCondition(uqs => uqs.UserId == request.UserId, false)
-            .Where(s => s.TotalSolvedCount > 50)
+             .Where(s => s.TotalSolvedCount > 50)
             .Select(uqs => new
             {
                 TopicName = uqs.Topic.Name,
+                LastReviewedAt = uqs.User.LessonProgresses
+                                         .Where(lp => lp.TopicId == uqs.TopicId)
+                                         .Select(lp => lp.LastUpdated)
+                                         .FirstOrDefault(),
                 uqs.TotalSolvedCount,
                 uqs.TotalCorrectCount,
                 uqs.LastAttemptAt,
                 TopicPriority = uqs.Topic.Priority
             })
             .ToListAsync(cancellationToken);
+
 
         _model.DeficiencyTopics = statsFromDb
             .Select(s => new
@@ -68,12 +73,12 @@ public class GetProfileSummaryHandler : IRequestHandler<GetProfileSummaryQuery, 
                     s.TotalSolvedCount,
                     s.TotalCorrectCount,
                     s.LastAttemptAt,
+                    s.LastReviewedAt,
                     s.TopicPriority)
             })
-            .OrderByDescending(x => x.DeficiencyScore) 
-            .Take(3) 
+            .OrderByDescending(x => x.DeficiencyScore)
+             .Take(3)
             .ToDictionary(x => x.TopicName, x => (int)x.DeficiencyScore);
-
         return _model;
     }
 }
