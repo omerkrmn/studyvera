@@ -14,5 +14,7 @@ public enum ActivityType
     LessonProgressed=2,
     SolvedAQuestion=3,
     ProfileUpdated=4,
-    StudySessionCompleted=5
+    StudySessionCompleted=5,
+    TopicReviewed=6,
+    CreateMockExam=7,
 }
