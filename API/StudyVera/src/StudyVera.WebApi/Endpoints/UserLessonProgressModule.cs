@@ -46,5 +46,16 @@ public class UserLessonProgressModule : ICarterModule
             await mediator.Send(command, ct);
             return Results.NoContent();
         });
+
+        group.MapPut("review-topic/{ulpId:int}", async (int ulpId, HttpContext context, ISender mediator, CancellationToken ct) =>
+        {
+            await mediator.Send(new ReviewTopicCommand
+            {
+                UserId = context.GetUserId(),
+                ulpId = ulpId
+            }, ct);
+            return Results.NoContent();
+        });
+
     }
 }
