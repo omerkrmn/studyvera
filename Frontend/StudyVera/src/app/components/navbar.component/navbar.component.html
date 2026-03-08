@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold text-info" routerLink="/">StudyVera</a>
+
+    <button class="navbar-toggler" (click)="toggleNavMenu()">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed">
+      <ul class="navbar-nav">
+        @if (!auth.isLoggedIn()) {
+        <li class="nav-item"><a class="nav-link" routerLink="/">Ana Sayfa</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/info">Bilgi</a></li>
+        }
+
+        <li class="nav-item"><a class="nav-link" routerLink="/pomodoro">Pomodoro</a></li>
+
+        @if (auth.isLoggedIn()) {
+        <li class="nav-item"><a class="nav-link" routerLink="/profile">Profil</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/profile/user-lesson-progresses">İlerleme Takibi</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/profile/solved-questions">Sorular</a></li>
+        }
+
+      </ul>
+
+      <ul class="navbar-nav ms-auto align-items-center">
+        @if (!auth.isLoggedIn()) {
+        <li class="nav-item"><a class="nav-link" routerLink="/auth/login">Giriş Yap</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/auth/register">Kayıt Ol</a></li>
+        } @else {
+        <li class="nav-item"><button class="btn btn-outline-danger btn-sm" (click)="logout()">Çıkış</button></li>
+        }
+
+        <li class="nav-item ms-2">
+          <button class="btn btn-outline-secondary" (click)="theme.toggle()">
+            {{ theme.theme() === 'dark' ? '🌙 Gece' : '☀️ Gündüz' }}
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
