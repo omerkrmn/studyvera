@@ -1,0 +1,66 @@
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+  <div class="card shadow-lg border-0 rounded-4 p-4" style="width: 100%; max-width: 400px; background-color: var(--bs-body-bg);">
+    
+    <div class="text-center mb-4">
+      <h2 class="fw-bold text-primary">Hoş Geldiniz</h2>
+      <p class="text-secondary small">Lütfen hesabınıza giriş yapın</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-floating mb-3">
+        <input type="email" class="form-control" id="emailInput" formControlName="email" placeholder="name@example.com"
+               [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+        <label for="emailInput">Email Adresi</label>
+        @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
+          <div class="text-danger small mt-1">Email adresi zorunludur.</div>
+        }
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="passInput" formControlName="password" placeholder="Şifre"
+               [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+        <label for="passInput">Şifre</label>
+        @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
+          <div class="text-danger small mt-1">Şifre zorunludur.</div>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger mt-3 small py-2 rounded-3 border-0 shadow-sm text-center">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage() }}
+        </div>
+      }
+
+      <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm mt-2" 
+              [disabled]="loginForm.invalid || isLoading()">
+        @if (isLoading()) {
+          <span class="spinner-border spinner-border-sm me-2"></span> <span>Giriş Yapılıyor...</span>
+        } @else {
+          <span>Giriş Yap</span>
+        }
+      </button>
+
+    </form>
+    
+    <div class="text-center mt-4">
+      <p class="small text-secondary">Hesabınız yok mu? <a routerLink="/auth/register" class="text-primary text-decoration-none fw-bold">Kayıt Ol</a></p>
+    </div>
+
+    <div class="position-relative my-3">
+      <hr class="text-secondary" />
+      <span class="position-absolute top-50 start-50 translate-middle bg-body px-3 text-secondary small">veya</span>
+    </div>
+
+    <div class="d-grid">
+      <div id="googleSignInDiv" class="d-flex justify-content-center"></div>
+    </div>
+    
+    @if (googleErrorMessage()) {
+      <div class="alert alert-danger mt-3 small py-2 rounded-3 border-0 shadow-sm text-center">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ googleErrorMessage() }}
+      </div>
+    }
+
+  </div>
+</div>
