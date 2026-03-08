@@ -1,0 +1,121 @@
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 90vh;">
+  <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 mt-4 mb-4" style="width: 100%; max-width: 600px; background-color: var(--bs-body-bg);">
+    
+    <div class="text-center mb-4">
+      <h2 class="fw-bold text-info">StudyVera'ya Katılın</h2>
+      <p class="text-secondary small">Dijital Koçunuzla tanışmak için bilgilerinizi girin.</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="fName" formControlName="firstName" placeholder="Ad"
+                   [class.is-invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
+            <label for="fName">Adınız</label>
+            @if (registerForm.get('firstName')?.hasError('required') && registerForm.get('firstName')?.touched) {
+              <div class="invalid-feedback ps-2">Ad zorunludur.</div>
+            }
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="lName" formControlName="lastName" placeholder="Soyad"
+                   [class.is-invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
+            <label for="lName">Soyadınız</label>
+            @if (registerForm.get('lastName')?.hasError('required') && registerForm.get('lastName')?.touched) {
+              <div class="invalid-feedback ps-2">Soyad zorunludur.</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="uName" formControlName="userName" placeholder="Kullanıcı Adı"
+               [class.is-invalid]="registerForm.get('userName')?.invalid && registerForm.get('userName')?.touched">
+        <label for="uName">Kullanıcı Adı</label>
+        @if (registerForm.get('userName')?.hasError('required') && registerForm.get('userName')?.touched) {
+          <div class="invalid-feedback ps-2">Kullanıcı adı zorunludur.</div>
+        }
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="email" class="form-control" id="email" formControlName="email" placeholder="E-posta"
+               [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+        <label for="email">E-posta</label>
+        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+          <div class="invalid-feedback ps-2">Geçerli bir e-posta giriniz.</div>
+        }
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="pwd" formControlName="password" placeholder="Şifre"
+               [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+        <label for="pwd">Şifre</label>
+        @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+          <div class="invalid-feedback ps-2">Şifre zorunludur.</div>
+        } @else if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
+          <div class="invalid-feedback ps-2">Şifre en az 6 karakter olmalıdır.</div>
+        }
+      </div>
+
+      <div class="form-floating mb-4">
+        <select class="form-select" id="exam" formControlName="targetExam"
+                [class.is-invalid]="registerForm.get('targetExam')?.invalid && registerForm.get('targetExam')?.touched">
+          <option value="">--- Sınav Seçiniz ---</option>
+          @for (exam of targetExams; track exam.id) {
+            <option [value]="exam.id">{{ exam.name }}</option>
+          }
+        </select>
+        <label for="exam">Hedef Sınavınız</label>
+        @if (registerForm.get('targetExam')?.hasError('required') && registerForm.get('targetExam')?.touched) {
+          <div class="invalid-feedback ps-2">Lütfen hedef sınavınızı seçin.</div>
+        }
+      </div>
+
+      @if (errorMessages().length > 0) {
+        <div class="alert alert-danger mt-3 shadow-sm border-0 rounded-3">
+          <div class="d-flex align-items-center mb-1">
+            <i class="bi bi-exclamation-octagon-fill me-2"></i>
+            <strong class="small">Kayıt Hataları:</strong>
+          </div>
+          <ul class="mb-0 small ps-4">
+            @for (error of errorMessages(); track error) {
+              <li>{{ error }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <button type="submit" class="btn btn-info btn-lg w-100 fw-bold rounded-pill text-white shadow-sm" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <span class="spinner-border spinner-border-sm me-2"></span> <span>Hesap Oluşturuluyor...</span>
+        } @else {
+          <span>Hesap Oluştur</span>
+        }
+      </button>
+
+    </form>
+
+    <div class="text-center mt-4">
+      <p class="small text-secondary">Zaten hesabınız var mı? <a routerLink="/auth/login" class="text-info text-decoration-none fw-bold">Giriş Yap</a></p>
+    </div>
+
+    <div class="position-relative my-3">
+      <hr class="text-secondary" />
+      <span class="position-absolute top-50 start-50 translate-middle bg-body px-3 text-secondary small">veya</span>
+    </div>
+
+    <div class="d-grid">
+      <div id="googleSignInDiv" class="d-flex justify-content-center"></div>
+    </div>
+    
+    @if (googleErrorMessage()) {
+      <div class="alert alert-danger mt-3 small py-2 rounded-3 border-0 shadow-sm text-center">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ googleErrorMessage() }}
+      </div>
+    }
+
+  </div>
+</div>
