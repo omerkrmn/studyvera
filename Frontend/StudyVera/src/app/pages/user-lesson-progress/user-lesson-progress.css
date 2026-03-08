@@ -1,0 +1,38 @@
+ .progress-card {
+     background-color: var(--bs-body-bg);
+     border: 1px solid var(--bs-border-color);
+     transition: transform 0.2s ease;
+ }
+
+ /* Header: Koyu modda daha koyu, açık modda daha açık gri */
+ .lesson-header {
+     background-color: rgba(var(--bs-tertiary-bg-rgb), 1);
+     border-bottom: 1px solid var(--bs-border-color);
+     cursor: pointer;
+ }
+
+     .lesson-header:hover {
+         background-color: rgba(var(--bs-secondary-bg-rgb), 1);
+     }
+
+ /* Liste öğeleri */
+ .topic-item {
+     background-color: transparent;
+     border-bottom: 1px solid var(--bs-border-color-translucent);
+     transition: background-color 0.2s;
+ }
+
+ /* Tamamlanan konular için yumuşak yeşil vurgu (Gece moduna uygun) */
+ .topic-completed {
+     background-color: rgba(var(--bs-success-rgb), 0.1) !important;
+ }
+
+ /* Yazı renkleri */
+ .text-emphasis {
+     color: var(--bs-emphasis-color) !important;
+ }
+
+ /* Progress bar arka planı */
+ .progress-custom {
+     background-color: rgba(var(--bs-secondary-rgb), 0.2);
+ }
