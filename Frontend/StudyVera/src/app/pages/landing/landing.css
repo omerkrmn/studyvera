@@ -1,0 +1,57 @@
+ :root {
+        --sv-primary: #0dcaf0;
+        --sv-dark: #212529;
+    }
+
+    .hero-section {
+        padding: 100px 0;
+        background: radial-gradient(circle at top right, rgba(13, 202, 240, 0.05), transparent);
+    }
+
+    .tool-card {
+        border: 1px solid var(--bs-border-color);
+        background-color: var(--bs-body-bg);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: default;
+    }
+
+        .tool-card:hover {
+            border-color: var(--sv-primary);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+        }
+
+    .feature-icon-box {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+    }
+
+    .analysis-card {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-left: 5px solid var(--sv-primary);
+    }
+
+    .stat-box h2 {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--sv-primary), #008cba);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .vs-card {
+        border-radius: 20px;
+        border: 1px solid var(--bs-border-color);
+        height: 100%;
+    }
+
+    .branding-text {
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
