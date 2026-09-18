@@ -1,0 +1,56 @@
+<div class="heatmap-container">
+  <div class="heatmap-header">
+    <span class="heatmap-title">Çalışma Sürekliliği (Son 1 Yıl)</span>
+    <div class="heatmap-legend">
+      <span>Daha az</span>
+      <div class="legend-cells">
+        <div class="heatmap-cell level-0"></div>
+        <div class="heatmap-cell level-1"></div>
+        <div class="heatmap-cell level-2"></div>
+        <div class="heatmap-cell level-3"></div>
+        <div class="heatmap-cell level-4"></div>
+      </div>
+      <span>Daha fazla</span>
+    </div>
+  </div>
+
+  <div class="heatmap-grid-wrapper">
+    <!-- Month Labels -->
+    <div class="month-labels">
+      @for (month of monthLabels(); track month.offset) {
+        <span class="month-label" [style.left.px]="month.offset">{{ month.name }}</span>
+      }
+    </div>
+
+    <div class="grid-layout">
+      <!-- Day Labels (Mon, Wed, Fri) -->
+      <div class="day-labels">
+        <span>Pzt</span>
+        <span>Çar</span>
+        <span>Cum</span>
+      </div>
+
+      <!-- The SVG Grid -->
+      <svg [attr.width]="gridWidth()" height="110" class="heatmap-svg">
+        @for (week of weeks(); track $index) {
+          <g [attr.transform]="'translate(' + ($index * 14) + ', 0)'">
+            @for (day of week; track day.date.getTime()) {
+              <rect
+                [attr.x]="0"
+                [attr.y]="day.dayOfWeek * 14"
+                width="11"
+                height="11"
+                rx="2"
+                ry="2"
+                [class]="'heatmap-cell level-' + getLevel(day.count)"
+                [attr.data-date]="day.date.toISOString()"
+              >
+                <title>{{ formatDate(day.date) }}: {{ day.count }} aktivite</title>
+              </rect>
+            }
+          </g>
+        }
+      </svg>
+    </div>
+  </div>
+</div>

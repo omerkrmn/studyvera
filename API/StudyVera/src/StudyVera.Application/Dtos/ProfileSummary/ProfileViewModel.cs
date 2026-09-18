@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,5 +15,6 @@ public class ProfileViewModel
     public int BadgesEarned { get; set; }
     public int CurrentStreak { get; set; }
     public Dictionary<string, int> DeficiencyTopics { get; set; } = new();
+    public string? CurrentTitle { get; set; }
 
 }

@@ -1,4 +1,4 @@
-﻿using StudyVera.Application.Dtos.QuestionStatDetails;
+using StudyVera.Application.Dtos.QuestionStatDetails;
 using StudyVera.Application.Dtos.Topic;
 using StudyVera.Domain.Entities.Identity;
 using System;
@@ -20,6 +20,7 @@ public class UserQuestionStatDto
     public int TotalSolvedCount { get; set; }
     public int TotalCorrectCount { get; set; }
     public int TotalWrongCount => TotalSolvedCount - TotalCorrectCount;
+    public int TotalTimeSpentInMinutes { get; set; }
 
     public float AccuracyRate => TotalSolvedCount == 0 ? 0 : (float)TotalCorrectCount / (float)TotalSolvedCount;
     public DateTime LastAttemptAt { get; set; }

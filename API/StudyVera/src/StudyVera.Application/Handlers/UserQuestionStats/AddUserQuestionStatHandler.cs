@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Exceptions;
@@ -50,25 +50,29 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
                 WeekStartDate = weekStart,
                 TargetQuestionCount = profile?.WeeklyQuestionGoal ?? 500,
                 TargetStudyMinutes = (profile?.DailyStudyMinuteGoal ?? 60) * 7,
-                CurrentQuestionCount = request.SolvedCount 
+                CurrentQuestionCount = request.SolvedCount,
+                CurrentStudyMinutes = request.DurationMinutes ?? 0
             });
         }
         else
         {
             weeklyGoal.CurrentQuestionCount += request.SolvedCount;
+            weeklyGoal.CurrentStudyMinutes += request.DurationMinutes ?? 0;
         }
 
         var newDetail = new QuestionStatDetail
         {
             CorrectCount = request.CorrectCount,
             SolvedCount = request.SolvedCount,
-            AttemptedAt = now
+            AttemptedAt = now,
+            DurationMinutes = request.DurationMinutes
         };
 
         if (uqs != null)
         {
             uqs.TotalSolvedCount += request.SolvedCount;
             uqs.TotalCorrectCount += request.CorrectCount;
+            uqs.TotalTimeSpentInMinutes += request.DurationMinutes ?? 0;
             uqs.LastAttemptAt = now;
             newDetail.UserQuestionStatId = uqs.Id;
             _manager.QuestionStatDetailRepository.Create(newDetail);
@@ -81,6 +85,7 @@ public class AddUserQuestionStatHandler : IRequestHandler<AddUserQuestionStatCom
                 TopicId = request.TopicId,
                 TotalCorrectCount = request.CorrectCount,
                 TotalSolvedCount = request.SolvedCount,
+                TotalTimeSpentInMinutes = request.DurationMinutes ?? 0,
                 LastAttemptAt = now,
                 QuestionStatDetails = new List<QuestionStatDetail> { newDetail }
             });

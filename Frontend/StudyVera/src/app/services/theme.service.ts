@@ -15,10 +15,15 @@ export class ThemeService {
 
   toggle() {
     const newTheme = this.theme() === 'dark' ? 'light' : 'dark';
-    this.theme.set(newTheme);
+    this.setTheme(newTheme);
+  }
 
-    document.documentElement.setAttribute('data-bs-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
+  setTheme(newTheme: 'light' | 'dark') {
+    this.theme.set(newTheme);
+    if (isPlatformBrowser(this.platformId)) {
+      document.documentElement.setAttribute('data-bs-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
   }
 
   private applyTheme() {

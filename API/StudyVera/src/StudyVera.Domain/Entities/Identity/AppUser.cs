@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using StudyVera.Domain.Entities.Mock;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -43,4 +44,31 @@ public class AppUser : IdentityUser<Guid>
     public IEnumerable<AppUser> Friends =>
         SentFriendRequests.Where(f => f.Status == FriendshipStatus.Accepted).Select(f => f.Receiver)
         .Concat(ReceivedFriendRequests.Where(f => f.Status == FriendshipStatus.Accepted).Select(f => f.Requestor));
+
+    public void InitializeDefaultSettingsAndStats()
+    {
+        Id = Guid.NewGuid();
+        UserSettings = new UserProfile
+        {
+            UserId = Id,
+            WeeklyQuestionGoal = 100,
+            CurrentTitle = "Acemi",
+            AllowFriendRequests = true,
+            DailyReminderHour = 1,
+            ShowRankInLeaderboard = true,
+            DailyStudyMinuteGoal = 60,
+            IsProfilePublic = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Language = "tr-TR",
+            Theme = "Dark"
+        };
+        ProfileStat = new ProfileStat
+        {
+            UserId = Id,
+            CurrentStreak = 0,
+            BestStreak = 0,
+            LastActivityDate = null
+        };
+    }
 }

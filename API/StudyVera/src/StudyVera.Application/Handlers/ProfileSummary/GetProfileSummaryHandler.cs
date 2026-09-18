@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Dtos.ProfileSummary;
 using StudyVera.Application.Features.ProfileSummary.Queries;
@@ -46,6 +46,9 @@ public class GetProfileSummaryHandler : IRequestHandler<GetProfileSummaryQuery, 
         _model.UserScore = profileStat?.Score ?? 0;
 
         _model.CurrentStreak = profileStat?.CurrentStreak ?? 0;
+
+        var userProfile = await _manager.UserProfileRepository.GetByUserIdAsync(request.UserId, cancellationToken);
+        _model.CurrentTitle = userProfile?.CurrentTitle;
 
         var statsFromDb = await _manager.UserQuestionStatRepository
             .FindByCondition(uqs => uqs.UserId == request.UserId, false)

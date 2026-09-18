@@ -1,4 +1,4 @@
-﻿using Carter;
+using Carter;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +26,24 @@ public class UserQuestionModule : ICarterModule
         })
         .WithName("SolveQuestion");
 
+        group.MapPost("/range", async (AddRangeUserQuestionStatCommand command, HttpContext context, ISender mediator, CancellationToken ct) =>
+        {
+            command.UserId = context.GetUserId();
+            await mediator.Send(command, ct);
+
+            return Results.Created();
+        })
+        .WithName("SolveQuestionRange");
+
+        group.MapPost("/transfer", async (TransferUserQuestionStatCommand command, HttpContext context, ISender mediator, CancellationToken ct) =>
+        {
+            command.UserId = context.GetUserId();
+            await mediator.Send(command, ct);
+
+            return Results.Ok();
+        })
+        .WithName("TransferQuestionStat");
+
         group.MapGet("/", async (HttpContext context, ISender mediator, CancellationToken ct) =>
         {
             GetAllUserQuestionStatsByUserQuery query = new();
@@ -35,5 +53,28 @@ public class UserQuestionModule : ICarterModule
             return Results.Ok(result);
         })
         .WithName("GetUserQuestionStats");
+
+        group.MapDelete("/detail/{id:int}", async (int id, HttpContext context, ISender mediator, CancellationToken ct) =>
+        {
+            var command = new DeleteQuestionStatDetailCommand
+            {
+                UserId = context.GetUserId(),
+                QuestionStatDetailId = id
+            };
+            await mediator.Send(command, ct);
+
+            return Results.NoContent();
+        })
+        .WithName("DeleteQuestionStatDetail");
+
+        group.MapPut("/detail/{id:int}", async (int id, UpdateQuestionStatDetailCommand command, HttpContext context, ISender mediator, CancellationToken ct) =>
+        {
+            command.UserId = context.GetUserId();
+            command.QuestionStatDetailId = id;
+            await mediator.Send(command, ct);
+
+            return Results.NoContent();
+        })
+        .WithName("UpdateQuestionStatDetail");
     }
 }

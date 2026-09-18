@@ -17,7 +17,7 @@ export class Register implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  private googleClientId = 'S826303476918-e7ugnlbf84ujrqbiqcet99e0ivgr4ufv.apps.googleusercontent.com';
+  private googleClientId = '826303476918-e7ugnlbf84ujrqbiqcet99e0ivgr4ufv.apps.googleusercontent.com';
 
   targetExams = [
     { name: 'KPSS', id: 1 },
@@ -81,10 +81,18 @@ export class Register implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isLoading.set(false);
-        if (err.error?.message) {
-          this.errorMessages.set(err.error.message.split(',').map((e: string) => e.trim()));
+        const errorMsg = err.error?.Message || err.error?.message;
+        
+        if (errorMsg) {
+          this.errorMessages.set(errorMsg.split(',').map((e: string) => e.trim()));
+          if (typeof window !== 'undefined' && (window as any).showToast) {
+            (window as any).showToast('error', errorMsg);
+          }
         } else {
           this.errorMessages.set(['Kayıt sırasında bir hata oluştu.']);
+          if (typeof window !== 'undefined' && (window as any).showToast) {
+            (window as any).showToast('error', 'Kayıt sırasında bir hata oluştu.');
+          }
         }
       }
     });

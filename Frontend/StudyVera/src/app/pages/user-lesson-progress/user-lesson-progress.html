@@ -1,130 +1,131 @@
-<div class="container mt-4">
-    <div class="mb-4 d-flex justify-content-between align-items-center">
-        <h2 class="text-primary fw-bold m-0"><i class="bi bi-journal-check me-2"></i>Konu İlerleme Takibi</h2>
-        <div class="badge bg-primary rounded-pill px-3 py-2">Konu Takip Çizelgesi</div>
-    </div>
-
-    <!-- İstatistik Paneli -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-primary bg-opacity-10">
-                <div class="card-body p-3 text-center">
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Toplam Konu</h6>
-                    <h3 class="fw-bold text-primary mb-0">{{ totalTopicsCount() }}</h3>
-                </div>
-            </div>
+<div class="dashboard-wrapper mt-4">
+    <!-- ================= HEADER ================= -->
+    <div class="dashboard-header mb-4">
+        <div class="header-info">
+            <h2 class="header-title mb-0"><i class="bi bi-journal-check me-2"></i>Konu İlerleme Takibi</h2>
+            <p class="header-subtitle mt-2">Derslerinizi ve konu hedeflerinizi detaylı bir şekilde takip edin.</p>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-success bg-opacity-10">
-                <div class="card-body p-3 text-center">
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Tamamlanan</h6>
-                    <h3 class="fw-bold text-success mb-0">{{ completedCount() }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-warning bg-opacity-10">
-                <div class="card-body p-3 text-center">
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">Devam Eden</h6>
-                    <h3 class="fw-bold text-warning mb-0">{{ inProgressCount() }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-info bg-opacity-10">
-                <div class="card-body p-3 text-center">
-                    <h6 class="text-muted small text-uppercase fw-bold mb-1">İlerleme</h6>
-                    <h3 class="fw-bold text-info mb-0">%{{ overallProgress() }}</h3>
-                </div>
-            </div>
+        <div class="header-actions">
+            <span class="badge-title"><i class="bi bi-list-check me-1"></i>Konu Takip Çizelgesi</span>
         </div>
     </div>
 
-    <!-- Filtreleme ve Aksiyonlar -->
-    <div class="d-flex flex-wrap gap-3 mb-4 align-items-center bg-body-tertiary p-3 rounded-4 shadow-sm">
-        <div class="flex-grow-1 position-relative">
-            <input type="text" class="form-control rounded-pill border-0 shadow-sm ps-4" placeholder="Ders veya konu ara..."
-                (input)="onSearch($event)">
+    <!-- ================= BENTO STATS ================= -->
+    <div class="bento-grid-4 mb-4">
+        <div class="bento-stat-card border-top-primary">
+            <span class="stat-label">Toplam Konu</span>
+            <span class="stat-value">{{ totalTopicsCount() }}</span>
         </div>
-        <div class="d-flex gap-2">
-            <select class="form-select rounded-pill border-0 shadow-sm" style="width: auto;" (change)="onFilterChange($event)">
-                <option value="All">Tümü</option>
-                <option value="Completed">Tamamlanan</option>
-                <option value="InProgress">Devam Eden</option>
-                <option value="NotStarted">Başlanmayan</option>
+        <div class="bento-stat-card border-top-success">
+            <span class="stat-label">Tamamlanan</span>
+            <span class="stat-value text-success">{{ completedCount() }}</span>
+        </div>
+        <div class="bento-stat-card border-top-warning">
+            <span class="stat-label">Devam Eden</span>
+            <span class="stat-value text-warning">{{ inProgressCount() }}</span>
+        </div>
+        <div class="bento-stat-card border-top-info">
+            <span class="stat-label">İlerleme</span>
+            <span class="stat-value text-info">%{{ overallProgress() }}</span>
+        </div>
+    </div>
+
+    <!-- ================= CONTROLS ================= -->
+    <div class="controls-bar mb-4">
+        <div class="search-box flex-grow-1">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Ders veya konu ara..." (input)="onSearch($event)">
+        </div>
+        <div class="filter-actions">
+            <select class="custom-select" (change)="onFilterChange($event)">
+                <option value="All">Tüm Durumlar</option>
+                <option value="Completed">Tamamlananlar</option>
+                <option value="InProgress">Devam Edenler</option>
+                <option value="NotStarted">Başlanmayanlar</option>
             </select>
-            <button type="button" class="btn btn-outline-primary rounded-pill shadow-sm" (click)="suggestRandomTopic()">
+            <button type="button" class="btn-dashboard-outline primary-outline" (click)="suggestRandomTopic()">
                 <i class="bi bi-shuffle me-1"></i> Öneri Al
             </button>
-            <button type="button" class="btn btn-outline-secondary rounded-pill shadow-sm" (click)="toggleAllLessons()">
+            <button type="button" class="btn-dashboard-outline secondary-outline" (click)="toggleAllLessons()" title="Tümünü Aç/Kapat">
                 <i class="bi" [class.bi-arrows-collapse]="activeLessonIds().size > 0" [class.bi-arrows-expand]="activeLessonIds().size === 0"></i>
             </button>
         </div>
     </div>
 
+    <!-- ================= CONTENT ================= -->
     @if (isLoading()) {
-    <div class="d-flex justify-content-center py-5">
+    <div class="loading-state d-flex align-items-center justify-content-center py-5 gap-3 dash-text-muted">
         <div class="spinner-border text-primary" role="status"></div>
+        <span>Veriler yükleniyor...</span>
     </div>
     } @else {
-    @for (lessonId of getKeys(filteredGroups()); track lessonId) {
-    @let stats = getLessonStats(+lessonId);
-    <div class="card mb-3 shadow-sm rounded-4 border-0 overflow-hidden">
-        <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center "
-            style="cursor: pointer;" (click)="toggleLesson(+lessonId)">
-            <div class="d-flex align-items-center">
-                <i class="bi me-3 text-primary fw-bold" [class.bi-chevron-down]="activeLessonIds().has(+lessonId)"
-                    [class.bi-chevron-right]="!activeLessonIds().has(+lessonId)"></i>
-                <div>
-                    <h5 class="m-0 fw-bold text-primary">{{ getLessonName(+lessonId) }}</h5>
-                    <small class="text-secondary">{{ stats.total }} Konu | {{ stats.completed }} Tamamlandı</small>
-                </div>
-            </div>
-            <div class="d-flex align-items-center gap-3" style="min-width: 150px; width: 30%;">
-                <div class="progress flex-grow-1" style="height: 6px;">
-                    <div class="progress-bar bg-success" [style.width.%]="stats.percent"></div>
-                </div>
-                <span class="fw-bold small">%{{ stats.percent }}</span>
-            </div>
-        </div>
-
-        @if (activeLessonIds().has(+lessonId)) {
-        <div class="list-group list-group-flush border-top">
-            @for (topic of filteredGroups()[+lessonId]; track topic.id) {
-            <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        @switch (getTopicStatus(topic.id)) {
-                            @case ('Completed') { <i class="bi bi-check-circle-fill text-success fs-5"></i> }
-                            @case ('InProgress') { <i class="bi bi-play-circle-fill text-warning fs-5"></i> }
-                            @default { <i class="bi bi-circle text-secondary opacity-50 fs-5"></i> }
-                        }
+    <div class="lesson-list">
+        @for (lessonId of getKeys(filteredGroups()); track lessonId) {
+        @let stats = getLessonStats(+lessonId);
+        
+        <div class="dash-card mb-3 overflow-hidden">
+            <!-- Lesson Header Toggle -->
+            <div class="lesson-header px-4 py-3" (click)="toggleLesson(+lessonId)">
+                <div class="d-flex align-items-center flex-grow-1">
+                    <div class="toggle-icon me-3">
+                        <i class="bi text-primary fs-5" [class.bi-chevron-down]="activeLessonIds().has(+lessonId)" [class.bi-chevron-right]="!activeLessonIds().has(+lessonId)"></i>
                     </div>
-                    <span class="fw-medium">{{ topic.name }}</span>
+                    <div>
+                        <h5 class="m-0 fw-bold lesson-title">{{ getLessonName(+lessonId) }}</h5>
+                        <small class="lesson-subtitle">{{ stats.total }} Konu | {{ stats.completed }} Tamamlandı</small>
+                    </div>
                 </div>
                 
-                @switch (getTopicStatus(topic.id)) {
-                    @case ('Completed') {
-                        <span class="badge text-success-emphasis bg-success-subtle rounded-pill border border-success-subtle px-3 py-2">
-                            <i class="bi bi-calendar-check me-1"></i> Tamamlandı
-                        </span>
-                    }
-                    @case ('InProgress') {
-                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" (click)="markAsCompleted(topic.id)">
-                            <i class="bi bi-check-lg me-1"></i> Bitirdim
-                        </button>
-                    }
-                    @default {
-                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" (click)="startTopic(topic.id)">
-                            <i class="bi bi-play-fill"></i> Başla
-                        </button>
-                    }
+                <div class="lesson-progress-area">
+                    <div class="progress-bar-bg flex-grow-1">
+                        <div class="progress-bar-fill bg-success" [style.width.%]="stats.percent"></div>
+                    </div>
+                    <span class="fw-bold percent-text">%{{ stats.percent }}</span>
+                </div>
+            </div>
+
+            <!-- Topic List Dropdown -->
+            @if (activeLessonIds().has(+lessonId)) {
+            <div class="topic-list border-top dash-border">
+                @for (topic of filteredGroups()[+lessonId]; track topic.id) {
+                <div class="topic-item px-4 py-3 d-flex justify-content-between align-items-center" [class.completed-bg]="getTopicStatus(topic.id) === 'Completed'">
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="topic-status-icon me-3">
+                            @switch (getTopicStatus(topic.id)) {
+                                @case ('Completed') { <i class="bi bi-check-circle-fill text-success fs-5"></i> }
+                                @case ('InProgress') { <i class="bi bi-play-circle-fill text-warning fs-5"></i> }
+                                @default { <i class="bi bi-circle dash-text-muted opacity-50 fs-5"></i> }
+                            }
+                        </div>
+                        <span class="topic-name fw-bold">{{ topic.name }}</span>
+                    </div>
+                    
+                    <div class="topic-action">
+                        @switch (getTopicStatus(topic.id)) {
+                            @case ('Completed') {
+                                <span class="badge-status badge-success">
+                                    <i class="bi bi-calendar-check me-1"></i> Tamamlandı
+                                </span>
+                            }
+                            @case ('InProgress') {
+                                <button type="button" class="btn-action btn-success-fill" (click)="markAsCompleted(topic.id)">
+                                    <i class="bi bi-check-lg me-1"></i> Bitirdim
+                                </button>
+                            }
+                            @default {
+                                <button type="button" class="btn-action btn-success-outline" (click)="startTopic(topic.id)">
+                                    <i class="bi bi-play-fill"></i> Başla
+                                </button>
+                            }
+                        }
+                    </div>
+                </div>
                 }
             </div>
             }
         </div>
         }
     </div>
-    }
     }
 </div>

@@ -13,4 +13,6 @@ public class ReviewTopicCommand : IRequest<Unit>
     [JsonIgnore]
     [Required(ErrorMessage = "ulpId is required.")]
     public int ulpId { get; set; }
+
+    public int? DurationMinutes { get; set; }
 }

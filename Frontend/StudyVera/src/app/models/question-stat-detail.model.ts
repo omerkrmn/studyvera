@@ -4,6 +4,7 @@ export interface QuestionStatDetailDto {
   correctCount: number;
   
   wrongCount: number; 
+  durationMinutes?: number;
   
   attemptedAt: string; 
 }

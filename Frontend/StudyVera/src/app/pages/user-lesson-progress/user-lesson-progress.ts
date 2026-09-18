@@ -153,9 +153,12 @@ export class UserLessonProgress implements OnInit {
       await firstValueFrom(this.progressService.add({ topicId, progressStatus: ProgressStatus.InProgress }));
       await this.loadData(false);
       (window as any).showToast('success', 'İyi çalışmalar! Konu durumu "Devam Ediyor" olarak güncellendi.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Konu başlatma hatası:', error);
-      (window as any).showToast('error', 'Konu başlatılırken bir hata oluştu.');
+      const errorMsg = error.error?.Message || error.error?.message || 'Konu başlatılırken bir hata oluştu.';
+      if (typeof window !== 'undefined' && (window as any).showToast) {
+        (window as any).showToast('error', errorMsg);
+      }
     }
   }
 
@@ -163,12 +166,15 @@ export class UserLessonProgress implements OnInit {
     const progress = this.progresses().find(p => Number(p.topicId) === topicId);
     if (progress) {
       try {
-        await firstValueFrom(this.progressService.update(progress.id));
+        await firstValueFrom(this.progressService.update(progress.id, { progressStatus: ProgressStatus.Completed }));
         await this.loadData(false); // Sessiz güncelleme
         (window as any).showToast('success', 'Tebrikler! Konu başarıyla tamamlandı.');
-      } catch (error) {
+      } catch (error: any) {
         console.error('Konu tamamlama hatası:', error);
-        (window as any).showToast('error', 'Konu güncellenirken bir hata oluştu.');
+        const errorMsg = error.error?.Message || error.error?.message || 'Konu güncellenirken bir hata oluştu.';
+        if (typeof window !== 'undefined' && (window as any).showToast) {
+          (window as any).showToast('error', errorMsg);
+        }
       }
     }
   }

@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth;
+using Google.Apis.Auth;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -63,6 +63,7 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
     public async Task<IdentityResult> RegisterUser(UserForRegistrationDto userForRegistrationDto)
     {
         var user = userForRegistrationDto.Adapt<AppUser>();
+        user.InitializeDefaultSettingsAndStats();
 
         var result = await _userManager
             .CreateAsync(user, userForRegistrationDto.Password);
@@ -183,6 +184,7 @@ public class AuthenticationManager(UserManager<AppUser> userManager, IOptions<Jw
                 EmailConfirmed = true,
                 TargetExam = TargetExam.KPSS
             };
+            user.InitializeDefaultSettingsAndStats();
 
             var createResult = await _userManager.CreateAsync(user);
             if (!createResult.Succeeded)

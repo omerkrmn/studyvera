@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -19,6 +19,8 @@ namespace StudyVera.Application.Features.UserQuestionStats.Commands
         public int SolvedCount { get; set; }
         [Required(ErrorMessage = "Correct is required")]
         public int CorrectCount { get; set; }
+        
+        public int? DurationMinutes { get; set; }
 
     }   
 

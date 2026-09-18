@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using StudyVera.Application.Common.Exceptions;
@@ -26,27 +26,7 @@ public class RegisterHandler : IRequestHandler<RegisterCommand, bool>
 
         if (string.IsNullOrEmpty(user.UserName)) user.UserName = user.Email;
 
-        user.UserSettings = new UserProfile
-        {
-            WeeklyQuestionGoal = 100,
-            CurrentTitle = "Acemi",
-            AllowFriendRequests = true,
-            DailyReminderHour = 1,
-            ShowRankInLeaderboard = true,
-            DailyStudyMinuteGoal = 60,
-            IsProfilePublic = true,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Language = "tr-TR",
-            Theme = "Dark"
-        };
-
-        user.ProfileStat = new ProfileStat
-        {
-            CurrentStreak = 0,
-            BestStreak = 0,
-            LastActivityDate = null
-        };
+        user.InitializeDefaultSettingsAndStats();
 
         var result = await _userManager.CreateAsync(user, request.Password);
 

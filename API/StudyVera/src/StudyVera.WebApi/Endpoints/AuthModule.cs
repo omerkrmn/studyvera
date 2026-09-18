@@ -1,4 +1,4 @@
-﻿using Carter;
+using Carter;
 using MediatR;
 using StudyVera.Application.Features.Auth.Commands;
 

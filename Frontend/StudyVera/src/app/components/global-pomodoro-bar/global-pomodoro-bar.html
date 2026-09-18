@@ -1,0 +1,59 @@
+@if (isVisible()) {
+<div class="global-pomodoro-bar px-4 py-2 border-bottom d-flex align-items-center justify-content-between"
+     [class.study-active]="!pomodoroService.isBreakMode()"
+     [class.break-active]="pomodoroService.isBreakMode() && !pomodoroService.isOverdue()"
+     [class.overdue-active]="pomodoroService.isOverdue()">
+  
+  <div class="d-flex align-items-center gap-3">
+    <!-- Pulse status dot and icon -->
+    <span class="status-indicator d-flex align-items-center gap-2">
+      <span class="pulse-dot"></span>
+      <i class="bi text-muted small" 
+         [class.bi-cup-hot]="pomodoroService.isBreakMode()" 
+         [class.bi-clock-history]="!pomodoroService.isBreakMode()"></i>
+    </span>
+    <span class="status-text fw-semibold small d-none d-sm-inline">
+      @if (pomodoroService.isOverdue()) {
+        Mola Süresi Aşıldı!
+      } @else if (pomodoroService.isBreakMode()) {
+        Mola Zamanı
+      } @else {
+        Odaklanma Modu
+      }
+    </span>
+    <span class="timer-value fw-bold font-monospace"
+          [class.text-danger]="pomodoroService.isOverdue()"
+          [class.text-success]="pomodoroService.isBreakMode() && !pomodoroService.isOverdue()"
+          [class.text-primary]="!pomodoroService.isBreakMode() && !pomodoroService.isOverdue()">
+      {{ timeDisplay() }}
+    </span>
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
+    <!-- Play/Pause -->
+    <button class="btn btn-sm btn-control shadow-sm" (click)="toggleTimer()" 
+            [title]="pomodoroService.isRunning() ? 'Durdur' : 'Başlat'">
+      <i class="bi" 
+         [class.bi-pause-fill]="pomodoroService.isRunning()" 
+         [class.bi-play-fill]="!pomodoroService.isRunning()"></i>
+    </button>
+    
+    <!-- Reset -->
+    <button class="btn btn-sm btn-control text-danger shadow-sm" (click)="resetTimer()" title="Sıfırla">
+      <i class="bi bi-arrow-counterclockwise"></i>
+    </button>
+
+    <div class="vr mx-2 text-secondary opacity-25"></div>
+
+    <!-- Detaylar link -->
+    <a routerLink="/pomodoro" class="btn btn-sm btn-link-detail fw-semibold px-2 text-decoration-none text-info">
+      <i class="bi bi-box-arrow-up-right me-1"></i>Detaylar
+    </a>
+  </div>
+
+  <!-- Thin Progress Bar at the bottom -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" [style.width.%]="progress()"></div>
+  </div>
+</div>
+}

@@ -1,0 +1,199 @@
+.scoreboard-card {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    max-width: 500px;
+    margin: 2rem auto;
+    border: 1px solid var(--bs-border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.underline {
+    height: 4px;
+    width: 40px;
+    background-color: #0d6efd;
+    border-radius: 2px;
+    margin: 0.5rem auto 0;
+}
+
+.input-group {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
+.input-group .form-control {
+    background: transparent;
+    border: none;
+    color: var(--bs-body-color);
+    padding: 0.75rem 1rem;
+}
+
+.input-group .form-control::placeholder {
+    color: var(--bs-secondary-color);
+}
+
+.input-group .btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    padding: 0 1.5rem;
+    font-weight: bold;
+}
+
+.leaderboard-switch {
+    position: relative;
+    background: var(--bs-secondary-bg);
+    border-radius: 50px;
+    padding: 4px;
+    width: 280px;
+    display: flex;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+}
+
+.leaderboard-switch input {
+    display: none;
+}
+
+.switch-label {
+    display: flex;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    margin: 0;
+}
+
+.switch-option {
+    flex: 1;
+    text-align: center;
+    padding: 8px 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--bs-secondary-color);
+    z-index: 2;
+    transition: color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.switch-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: #0d6efd;
+    border-radius: 40px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+}
+
+#friendSwitch:checked + .switch-label .switch-slider {
+    left: 50%;
+}
+
+#friendSwitch:not(:checked) + .switch-label .switch-option:first-child {
+    color: #ffffff;
+}
+
+#friendSwitch:checked + .switch-label .switch-option:last-child {
+    color: #ffffff;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-radius: 1.25rem;
+    background-color: var(--bs-secondary-bg);
+    margin-bottom: 0.75rem;
+    border: 1px solid transparent;
+    transition: transform 0.2s ease;
+}
+
+.player-row:hover {
+    transform: scale(1.02);
+    background-color: var(--bs-tertiary-bg);
+}
+
+.rank-badge {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: bold;
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+    flex-shrink: 0;
+}
+
+.rank-gold {
+    border-left: 4px solid #f1c40f !important;
+}
+.rank-gold .rank-badge {
+    background-color: #f1c40f;
+    color: #000;
+}
+
+.rank-silver {
+    border-left: 4px solid #adb5bd !important;
+}
+.rank-silver .rank-badge {
+    background-color: #adb5bd;
+    color: #000;
+}
+
+.rank-bronze {
+    border-left: 4px solid #e67e22 !important;
+}
+.rank-bronze .rank-badge {
+    background-color: #e67e22;
+    color: #fff;
+}
+
+.nickname {
+    font-size: 1.1rem;
+    color: var(--bs-body-color);
+}
+
+.score-value {
+    font-size: 1.25rem;
+    color: #0d6efd;
+}
+
+.score-label {
+    font-size: 0.6rem;
+    color: #6c757d;
+    letter-spacing: 1px;
+}
+
+.pending-section h6 {
+    letter-spacing: 1.5px;
+    font-size: 0.7rem !important;
+}
+
+.pending-row {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.pending-row:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.avatar-sm {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+}
+
+.action-buttons .btn-sm {
+    font-size: 0.75rem;
+    padding: 2px 10px;
+}

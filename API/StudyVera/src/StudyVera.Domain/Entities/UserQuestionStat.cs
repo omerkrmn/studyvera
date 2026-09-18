@@ -1,4 +1,4 @@
-﻿using StudyVera.Domain.Entities.Identity;
+using StudyVera.Domain.Entities.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,6 +22,7 @@ public class UserQuestionStat
     public int TotalCorrectCount { get; set; }
 
     public int TotalWrongCount => TotalSolvedCount - TotalCorrectCount;
+    public int TotalTimeSpentInMinutes { get; set; }
 
     public float AccuracyRate => TotalSolvedCount == 0 ? 0 : (float)TotalCorrectCount / (float)TotalSolvedCount;
 

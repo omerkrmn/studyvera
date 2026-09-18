@@ -1,5 +1,7 @@
-﻿using StudyVera.Domain.Entities;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Interfaces;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace StudyVera.Infrastructure.Persistence.Repositories.EntityRepositories;
 
@@ -8,8 +10,9 @@ public class UserProfileRepository : RepositoryBase<UserProfile>, IUserProfileRe
     public UserProfileRepository(AppDbContext context) : base(context)
     {
     }
-    public Task<UserProfile> GetByUserIdAsync(Guid userId, CancellationToken ct)
+    public async Task<UserProfile> GetByUserIdAsync(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return await FindByCondition(up => up.UserId == userId, false)
+            .FirstOrDefaultAsync(ct);
     }
 }

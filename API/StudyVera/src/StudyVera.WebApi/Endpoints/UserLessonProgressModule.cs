@@ -1,4 +1,4 @@
-﻿using Carter;
+using Carter;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -47,13 +47,12 @@ public class UserLessonProgressModule : ICarterModule
             return Results.NoContent();
         });
 
-        group.MapPut("review-topic/{ulpId:int}", async (int ulpId, HttpContext context, ISender mediator, CancellationToken ct) =>
+        group.MapPut("review-topic/{ulpId:int}", async (int ulpId, ReviewTopicCommand command, HttpContext context, ISender mediator, CancellationToken ct) =>
         {
-            await mediator.Send(new ReviewTopicCommand
-            {
-                UserId = context.GetUserId(),
-                ulpId = ulpId
-            }, ct);
+            command.UserId = context.GetUserId();
+            command.ulpId = ulpId;
+
+            await mediator.Send(command, ct);
             return Results.NoContent();
         });
 

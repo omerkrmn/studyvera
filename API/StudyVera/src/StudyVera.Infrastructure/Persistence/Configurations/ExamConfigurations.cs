@@ -22,7 +22,6 @@ namespace StudyVera.Infrastructure.Persistence.Configurations
                     Description = "Kamu Personeli Seçme Sınavı",
                     ExamDate = new DateTime(2026,9,6)
                 }
-                
             };
             builder.HasData(exams);
         }

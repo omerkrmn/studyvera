@@ -1,4 +1,4 @@
-﻿
+
 
 using StudyVera.Domain.Entities.Identity;
 using StudyVera.Domain.Enums;
@@ -17,4 +17,5 @@ public class UserLessonProgress
     
     public ProgressStatus ProgressStatus { get; set; }
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+    public int? DurationMinutes { get; set; }
 }

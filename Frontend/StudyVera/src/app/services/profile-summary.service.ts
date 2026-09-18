@@ -15,6 +15,7 @@ export class ProfileSummaryService {
 
   getProfileSummary(): Observable<ProfileViewModel | null> {
     return this.http.get<ProfileViewModel>(this.baseUrl).pipe(
+      
       catchError((error) => {
         console.error('ProfileSummaryService.getProfileSummary error:', error);        
         return of(null); 

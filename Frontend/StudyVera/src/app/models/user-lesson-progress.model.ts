@@ -15,6 +15,7 @@ export interface UserLessonProgressDto {
 export interface AddUserLessonProgressDto {
   topicId: number;
   progressStatus: ProgressStatus;
+  durationMinutes?: number;
 }
 
 export interface UpdateUserLessonProgressDto {

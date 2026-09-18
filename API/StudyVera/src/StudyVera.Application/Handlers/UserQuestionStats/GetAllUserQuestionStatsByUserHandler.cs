@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Models;
@@ -22,23 +22,26 @@ namespace StudyVera.Application.Handlers.UserQuestionStats
 
         public async Task<List<UserQuestionStatDto>> Handle(GetAllUserQuestionStatsByUserQuery request, CancellationToken cancellationToken)
         {
+
             return await _manager.UserQuestionStatRepository
-                .FindByCondition(uqs => uqs.UserId == request.UserId, trackChanges: false)
-                .Select(uqs => new UserQuestionStatDto
-                {
-                    Id = uqs.Id,
-                    TopicId = uqs.TopicId,
-                    Topic = new TopicWithoutIdColumnDto
-                    {
-                        LessonId = uqs.Topic.LessonId,
-                        Name = uqs.Topic.Name,
-                        Priority = uqs.Topic.Priority
-                    },
-                    TotalSolvedCount = uqs.TotalSolvedCount,
-                    TotalCorrectCount = uqs.TotalCorrectCount,
-                    LastAttemptAt = uqs.LastAttemptAt
-                })
-                .ToListAsync(cancellationToken);
+                        .FindByCondition(uqs => uqs.UserId == request.UserId, trackChanges: false)
+                        .OrderBy(uqs => uqs.Topic.OrderIndex) 
+                        .Select(uqs => new UserQuestionStatDto
+                        {
+                            Id = uqs.Id,
+                            TopicId = uqs.TopicId,
+                            Topic = new TopicWithoutIdColumnDto
+                            {
+                                LessonId = uqs.Topic.LessonId,
+                                Name = uqs.Topic.Name,
+                                Priority = uqs.Topic.Priority
+                            },
+                            TotalSolvedCount = uqs.TotalSolvedCount,
+                            TotalCorrectCount = uqs.TotalCorrectCount,
+                            TotalTimeSpentInMinutes = uqs.TotalTimeSpentInMinutes,
+                            LastAttemptAt = uqs.LastAttemptAt
+                        })
+                        .ToListAsync(cancellationToken);
         }
     }
 

@@ -356,45 +356,52 @@ namespace StudyVera.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
+                            Id = 1,
+                            ExamId = 1,
+                            ExamQuestionCount = 30,
+                            Name = "Türkçe"
+                        },
+                        new
+                        {
                             Id = 2,
                             ExamId = 1,
-                            ExamQuestionCount = 0,
-                            Name = "Türkçe"
+                            ExamQuestionCount = 27,
+                            Name = "Matematik"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ExamId = 1,
+                            ExamQuestionCount = 3,
+                            Name = "Geometri"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ExamId = 1,
+                            ExamQuestionCount = 27,
+                            Name = "Tarih"
                         },
                         new
                         {
                             Id = 5,
                             ExamId = 1,
-                            ExamQuestionCount = 0,
-                            Name = "Matematik"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            ExamId = 1,
-                            ExamQuestionCount = 0,
-                            Name = "Geometri"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            ExamId = 1,
-                            ExamQuestionCount = 0,
-                            Name = "Tarih"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            ExamId = 1,
-                            ExamQuestionCount = 0,
+                            ExamQuestionCount = 18,
                             Name = "Çoğrafya"
                         },
                         new
                         {
-                            Id = 26,
+                            Id = 6,
                             ExamId = 1,
-                            ExamQuestionCount = 0,
+                            ExamQuestionCount = 9,
                             Name = "Vatandaşlık"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ExamId = 1,
+                            ExamQuestionCount = 6,
+                            Name = "Güncel Olaylar"
                         });
                 });
 
@@ -562,6 +569,9 @@ namespace StudyVera.Infrastructure.Migrations
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("int");
+
                     b.Property<int>("SolvedCount")
                         .HasColumnType("int");
 
@@ -597,6 +607,9 @@ namespace StudyVera.Infrastructure.Migrations
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SessionType")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -650,7 +663,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 1,
                             LessonId = 2,
-                            Name = "Sözcükte Anlam",
+                            Name = "İşlem Yeteneği",
                             OrderIndex = 1,
                             Priority = (byte)3
                         },
@@ -658,7 +671,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 2,
                             LessonId = 2,
-                            Name = "Cümlede Anlam",
+                            Name = "Temel Kavramlar",
                             OrderIndex = 2,
                             Priority = (byte)3
                         },
@@ -666,7 +679,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 3,
                             LessonId = 2,
-                            Name = "Sözcük Türleri",
+                            Name = "Tek - Çift - Pozitif - Negatif Sayılar",
                             OrderIndex = 3,
                             Priority = (byte)3
                         },
@@ -674,7 +687,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 4,
                             LessonId = 2,
-                            Name = "Sözcükte Yapı",
+                            Name = "Ardışık Sayılar",
                             OrderIndex = 4,
                             Priority = (byte)3
                         },
@@ -682,7 +695,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 5,
                             LessonId = 2,
-                            Name = "Cümlenin Ögeleri",
+                            Name = "Faktöriyel",
                             OrderIndex = 5,
                             Priority = (byte)3
                         },
@@ -690,7 +703,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 6,
                             LessonId = 2,
-                            Name = "Cümle Türleri",
+                            Name = "Sayı Basamakları ve Taban Aritmetiği",
                             OrderIndex = 6,
                             Priority = (byte)3
                         },
@@ -698,7 +711,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 7,
                             LessonId = 2,
-                            Name = "Dil Bilgisi Ses Olayları",
+                            Name = "Bölme - Bölünebilme",
                             OrderIndex = 7,
                             Priority = (byte)3
                         },
@@ -706,7 +719,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 8,
                             LessonId = 2,
-                            Name = "Yazım Kuralları",
+                            Name = "Asal Çarpanlara Ayırma",
                             OrderIndex = 8,
                             Priority = (byte)3
                         },
@@ -714,7 +727,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 9,
                             LessonId = 2,
-                            Name = "Noktalama İşaretleri",
+                            Name = "EBOB - EKOK",
                             OrderIndex = 9,
                             Priority = (byte)3
                         },
@@ -722,7 +735,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 10,
                             LessonId = 2,
-                            Name = "Anlatım Bozuklukları",
+                            Name = "Rasyonel Sayılar",
                             OrderIndex = 10,
                             Priority = (byte)3
                         },
@@ -730,7 +743,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 11,
                             LessonId = 2,
-                            Name = "Paragrafta Anlam",
+                            Name = "Basit Eşitsizlikler",
                             OrderIndex = 11,
                             Priority = (byte)3
                         },
@@ -738,7 +751,7 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 12,
                             LessonId = 2,
-                            Name = "Paragrafta Anlatım Biçimi",
+                            Name = "Mutlak Değer",
                             OrderIndex = 12,
                             Priority = (byte)3
                         },
@@ -746,190 +759,190 @@ namespace StudyVera.Infrastructure.Migrations
                         {
                             Id = 13,
                             LessonId = 2,
-                            Name = "Sözel Mantık",
+                            Name = "Üslü Sayılar",
                             OrderIndex = 13,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 14,
-                            LessonId = 5,
-                            Name = "Temel Kavramlar",
-                            OrderIndex = 1,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 15,
-                            LessonId = 5,
-                            Name = "Rasyonel Sayılar - Ondalıklı Sayılar",
-                            OrderIndex = 2,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 16,
-                            LessonId = 5,
-                            Name = "Basit Eşitsizlikler",
-                            OrderIndex = 3,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 17,
-                            LessonId = 5,
-                            Name = "Mutlak Değer",
-                            OrderIndex = 4,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 18,
-                            LessonId = 5,
-                            Name = "Üslü Sayılar",
-                            OrderIndex = 5,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 19,
-                            LessonId = 5,
+                            LessonId = 2,
                             Name = "Köklü Sayılar",
-                            OrderIndex = 6,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 20,
-                            LessonId = 5,
-                            Name = "Çarpanlara Ayırma",
-                            OrderIndex = 7,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 21,
-                            LessonId = 5,
-                            Name = "Oran-Orantı",
-                            OrderIndex = 8,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 22,
-                            LessonId = 5,
-                            Name = "Denklem Çözme",
-                            OrderIndex = 9,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 23,
-                            LessonId = 5,
-                            Name = "Problemler",
-                            OrderIndex = 10,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 24,
-                            LessonId = 5,
-                            Name = "Kümeler",
-                            OrderIndex = 11,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 25,
-                            LessonId = 5,
-                            Name = "Fonksiyonlar",
-                            OrderIndex = 12,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 26,
-                            LessonId = 5,
-                            Name = "İşlem",
-                            OrderIndex = 13,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 27,
-                            LessonId = 5,
-                            Name = "Permütasyon",
                             OrderIndex = 14,
                             Priority = (byte)3
                         },
                         new
                         {
-                            Id = 28,
-                            LessonId = 5,
-                            Name = "Kombinasyon",
+                            Id = 15,
+                            LessonId = 2,
+                            Name = "Çarpanlara Ayırma",
                             OrderIndex = 15,
                             Priority = (byte)3
                         },
                         new
                         {
-                            Id = 29,
-                            LessonId = 5,
-                            Name = "Olasılık",
+                            Id = 16,
+                            LessonId = 2,
+                            Name = "Oran - Orantı",
                             OrderIndex = 16,
                             Priority = (byte)3
                         },
                         new
                         {
-                            Id = 30,
-                            LessonId = 5,
-                            Name = "Sayısal Mantık",
+                            Id = 17,
+                            LessonId = 2,
+                            Name = "Birinci Dereceden Denklemler",
                             OrderIndex = 17,
                             Priority = (byte)3
                         },
                         new
                         {
+                            Id = 18,
+                            LessonId = 2,
+                            Name = "Sayı Problemleri",
+                            OrderIndex = 18,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 19,
+                            LessonId = 2,
+                            Name = "Kesir Problemleri",
+                            OrderIndex = 19,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 20,
+                            LessonId = 2,
+                            Name = "Yaş Problemleri",
+                            OrderIndex = 20,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 21,
+                            LessonId = 2,
+                            Name = "Hareket Problemleri",
+                            OrderIndex = 21,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 22,
+                            LessonId = 2,
+                            Name = "İşçi - Havuz Problemleri",
+                            OrderIndex = 22,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 23,
+                            LessonId = 2,
+                            Name = "Yüzde - Kâr - Zarar - Faiz Problemleri",
+                            OrderIndex = 23,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 24,
+                            LessonId = 2,
+                            Name = "Karışım Problemleri",
+                            OrderIndex = 24,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 25,
+                            LessonId = 2,
+                            Name = "Grafik Problemleri",
+                            OrderIndex = 25,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 26,
+                            LessonId = 2,
+                            Name = "Kümeler",
+                            OrderIndex = 26,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 27,
+                            LessonId = 2,
+                            Name = "İşlem - Modüler Aritmetik",
+                            OrderIndex = 27,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 28,
+                            LessonId = 2,
+                            Name = "Permütasyon - Kombinasyon - Olasılık",
+                            OrderIndex = 28,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 29,
+                            LessonId = 2,
+                            Name = "Fonksiyonlar",
+                            OrderIndex = 29,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
+                            Id = 30,
+                            LessonId = 2,
+                            Name = "Sayısal Mantık",
+                            OrderIndex = 30,
+                            Priority = (byte)3
+                        },
+                        new
+                        {
                             Id = 31,
-                            LessonId = 8,
-                            Name = "Geometrik Kavramlar ve Açılar",
+                            LessonId = 3,
+                            Name = "Üçgenler",
                             OrderIndex = 1,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 32,
-                            LessonId = 8,
-                            Name = "Çokgenler ve Dörtgenler",
+                            LessonId = 3,
+                            Name = "Çokgenler - Dörtgenler",
                             OrderIndex = 2,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 33,
-                            LessonId = 8,
-                            Name = "Çember ve Daire",
+                            LessonId = 3,
+                            Name = "Çember - Daire",
                             OrderIndex = 3,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 34,
-                            LessonId = 8,
-                            Name = "Analitik Geometri",
+                            LessonId = 3,
+                            Name = "Katı Cisimler",
                             OrderIndex = 4,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 35,
-                            LessonId = 8,
-                            Name = "Katı Cisimler",
+                            LessonId = 3,
+                            Name = "Analitik Geometri",
                             OrderIndex = 5,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 36,
-                            LessonId = 17,
+                            LessonId = 4,
                             Name = "İslamiyet Öncesi Türk Tarihi",
                             OrderIndex = 1,
                             Priority = (byte)3
@@ -937,289 +950,193 @@ namespace StudyVera.Infrastructure.Migrations
                         new
                         {
                             Id = 37,
-                            LessonId = 17,
-                            Name = "İlk Türk-İslam Devletleri ve Beylikleri",
+                            LessonId = 4,
+                            Name = "İlk Türk - İslam Devletleri",
                             OrderIndex = 2,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 38,
-                            LessonId = 17,
-                            Name = "Osmanlı Devleti Kuruluş ve Yükselme Dönemleri",
+                            LessonId = 4,
+                            Name = "Anadolu (Türkiye) Selçuklu Devleti",
                             OrderIndex = 3,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 39,
-                            LessonId = 17,
-                            Name = "Osmanlı Devleti'nde Kültür ve Uygarlık",
+                            LessonId = 4,
+                            Name = "Osmanlı Devleti Kültür ve Medeniyeti",
                             OrderIndex = 4,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 40,
-                            LessonId = 17,
-                            Name = "XVII. Yüzyılda Osmanlı Devleti (Duraklama)",
+                            LessonId = 4,
+                            Name = "Osmanlı Devleti Kuruluş Dönemi (1299 - 1453)",
                             OrderIndex = 5,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 41,
-                            LessonId = 17,
-                            Name = "XVIII. Yüzyılda Osmanlı Devleti (Gerileme)",
+                            LessonId = 4,
+                            Name = "Osmanlı Devleti Yükselme Dönemi (1453 - 1595)",
                             OrderIndex = 6,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 42,
-                            LessonId = 17,
-                            Name = "XIX. Yüzyılda Osmanlı Devleti (Dağılma)",
+                            LessonId = 4,
+                            Name = "XVII. Yüzyılda Osmanlı Devleti (Duraklama Dönemi) (1595 - 1699)",
                             OrderIndex = 7,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 43,
-                            LessonId = 17,
-                            Name = "XX. Yüzyılda Osmanlı Devleti",
+                            LessonId = 4,
+                            Name = "XVIII. Yüzyılda Osmanlı Devleti (Gerileme Dönemi) (1699 - 1792)",
                             OrderIndex = 8,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 44,
-                            LessonId = 17,
-                            Name = "Kurtuluş Savaşı Hazırlık Dönemi",
+                            LessonId = 4,
+                            Name = "XIX. Yüzyılda Osmanlı Devleti (Dağılma Dönemi) (1792 - 1922)",
                             OrderIndex = 9,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 45,
-                            LessonId = 17,
-                            Name = "I. TBMM Dönemi",
+                            LessonId = 4,
+                            Name = "XX. Yüzyıl Başlarında Osmanlı Devleti",
                             OrderIndex = 10,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 46,
-                            LessonId = 17,
-                            Name = "Kurtuluş Savaşı Muharebeler Dönemi",
+                            LessonId = 4,
+                            Name = "Mondros Ateşkes Antlaşması ve İlk İşgaller",
                             OrderIndex = 11,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 47,
-                            LessonId = 17,
-                            Name = "Atatürk İnkılapları",
+                            LessonId = 4,
+                            Name = "Milli Mücadele Hazırlık Dönemi",
                             OrderIndex = 12,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 48,
-                            LessonId = 17,
-                            Name = "Atatürk İlkeleri",
+                            LessonId = 4,
+                            Name = "I. TBMM Dönemi ve Gelişmeleri (1920 - 1923)",
                             OrderIndex = 13,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 49,
-                            LessonId = 17,
-                            Name = "Partiler ve Partileşme Dönemi",
+                            LessonId = 4,
+                            Name = "Milli Mücadele Muharebeler Dönemi",
                             OrderIndex = 14,
-                            Priority = (byte)0
+                            Priority = (byte)3
                         },
                         new
                         {
                             Id = 50,
-                            LessonId = 17,
-                            Name = "Atatürk Dönemi Türk Dış Politikası",
+                            LessonId = 4,
+                            Name = "Atatürk'ün Hayatı",
                             OrderIndex = 15,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 51,
-                            LessonId = 17,
-                            Name = "Atatürk Sonrası Dönem",
+                            LessonId = 4,
+                            Name = "Atatürk Dönemi İç Politika",
                             OrderIndex = 16,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 52,
-                            LessonId = 17,
-                            Name = "Atatürk'ün Hayatı ve Kişiliği",
+                            LessonId = 4,
+                            Name = "Atatürk İlkeleri",
                             OrderIndex = 17,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 53,
-                            LessonId = 20,
-                            Name = "Türkiye'nin Coğrafi Konumu",
-                            OrderIndex = 1,
+                            LessonId = 4,
+                            Name = "Atatürk İnkılapları",
+                            OrderIndex = 18,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 54,
-                            LessonId = 20,
-                            Name = "Türkiye'nin İklimi ve Bitki Örtüsü",
-                            OrderIndex = 2,
+                            LessonId = 4,
+                            Name = "Atatürk Dönemi Türk Dış Politikası",
+                            OrderIndex = 19,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 55,
-                            LessonId = 20,
-                            Name = "Türkiye'nin Fiziki Özellikleri",
-                            OrderIndex = 3,
+                            LessonId = 4,
+                            Name = "Cumhuriyet Dönemi Kültür ve Medeniyeti",
+                            OrderIndex = 20,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 56,
-                            LessonId = 20,
-                            Name = "Türkiye'de Nüfus ve Yerleşme",
-                            OrderIndex = 4,
+                            LessonId = 4,
+                            Name = "XX. Yüzyıl Başlarında Dünya (1918 - 1939)",
+                            OrderIndex = 21,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 57,
-                            LessonId = 20,
-                            Name = "Tarım",
-                            OrderIndex = 5,
+                            LessonId = 4,
+                            Name = "II. Dünya Savaşı (1939 - 1945)",
+                            OrderIndex = 22,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 58,
-                            LessonId = 20,
-                            Name = "Hayvancılık",
-                            OrderIndex = 6,
+                            LessonId = 4,
+                            Name = "Soğuk Savaş Dönemi (1947 - 1990)",
+                            OrderIndex = 23,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 59,
-                            LessonId = 20,
-                            Name = "Madenler ve Enerji Kaynakları",
-                            OrderIndex = 7,
+                            LessonId = 4,
+                            Name = "Yumuşama Dönemi (1961 - 1990)",
+                            OrderIndex = 24,
                             Priority = (byte)3
                         },
                         new
                         {
                             Id = 60,
-                            LessonId = 20,
-                            Name = "Sanayi ve Endüstri",
-                            OrderIndex = 8,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 61,
-                            LessonId = 20,
-                            Name = "Ulaşım",
-                            OrderIndex = 9,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 62,
-                            LessonId = 20,
-                            Name = "Ticaret",
-                            OrderIndex = 10,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 63,
-                            LessonId = 20,
-                            Name = "Turizm",
-                            OrderIndex = 11,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 64,
-                            LessonId = 20,
-                            Name = "Bölgeler Coğrafyası",
-                            OrderIndex = 12,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 65,
-                            LessonId = 26,
-                            Name = "Temel Hukuk Kavramları",
-                            OrderIndex = 1,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 66,
-                            LessonId = 26,
-                            Name = "Anayasal Kavramlar",
-                            OrderIndex = 2,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 67,
-                            LessonId = 26,
-                            Name = "Türk Anayasa Tarihi",
-                            OrderIndex = 3,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 68,
-                            LessonId = 26,
-                            Name = "Temel Hak ve Ödevler",
-                            OrderIndex = 4,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 69,
-                            LessonId = 26,
-                            Name = "Yasama",
-                            OrderIndex = 5,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 70,
-                            LessonId = 26,
-                            Name = "Yürütme",
-                            OrderIndex = 6,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 71,
-                            LessonId = 26,
-                            Name = "Yargı",
-                            OrderIndex = 7,
-                            Priority = (byte)3
-                        },
-                        new
-                        {
-                            Id = 72,
-                            LessonId = 26,
-                            Name = "İdare Hukuku",
-                            OrderIndex = 8,
+                            LessonId = 4,
+                            Name = "Küreselleşen Dünya (1990 - 2026)",
+                            OrderIndex = 25,
                             Priority = (byte)3
                         });
                 });
@@ -1265,6 +1182,9 @@ namespace StudyVera.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
@@ -1360,6 +1280,9 @@ namespace StudyVera.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("TotalSolvedCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalTimeSpentInMinutes")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")

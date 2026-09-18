@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +36,7 @@ public class GetFriendsHandler : IRequestHandler<GetFriendScoresQuery, List<Frie
         {
             UserName = user?.UserName,
             Score = user.ProfileStat?.Score ?? 0,
+            Title = user?.UserSettings?.CurrentTitle
         })
         .OrderByDescending(x => x.Score)
         .ToList();

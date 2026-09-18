@@ -27,7 +27,8 @@ public class CreateStudySessionHandler : IRequestHandler<CreateStudySessionComma
             StartTime = DateTime.UtcNow.AddMinutes(-request.DurationMinutes),
             EndTime = DateTime.UtcNow,
             IsCompleted = true,
-            Note = request.Note
+            Note = request.Note,
+            SessionType = request.SessionType
         };
         
         _manager.StudySessionRepository.Create(session);

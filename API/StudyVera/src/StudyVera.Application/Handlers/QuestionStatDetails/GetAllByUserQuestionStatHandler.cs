@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Dtos.QuestionStatDetails;
 using StudyVera.Application.Features.QuestionStatDetails.Queries;
@@ -29,9 +29,11 @@ public class GetAllByUserQuestionStatHandler : IRequestHandler<GetAllByUserQuest
                                             .FindByCondition(qsd => qsd.UserQuestionStatId == request.QuestionStatId, false)
                                             .Select(qsd => new QuestionStatDetailDto
                                             {
+                                                Id = qsd.Id,
                                                 AttemptedAt = qsd.AttemptedAt,
                                                 CorrectCount = qsd.CorrectCount,
-                                                SolvedCount = qsd.SolvedCount
+                                                SolvedCount = qsd.SolvedCount,
+                                                DurationMinutes = qsd.DurationMinutes
                                             })
                                             .ToListAsync(cancellationToken);
 

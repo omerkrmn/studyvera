@@ -1,11 +1,15 @@
 
 export interface UserWeeklyGoalDto {
-  id?: number;
+  weekStartDate: string;
   targetQuestionCount: number;
-  solvedQuestionCount: number;
-  targetStudyHours: number;
-  completedStudyHours: number;
-  startDate: string; 
-  endDate: string;
-  isCompleted: boolean;
+  targetStudyMinutes: number;
+  currentQuestionCount: number;
+  currentStudyMinutes: number;
+  remainingQuestions: number;
+  remainingStudyMinutes: number;
+  completionPercentage: number;
+  studyCompletionPercentage: number;
+  isGoalAchieved: boolean;
+  isStudyGoalAchieved: boolean;
+  statusMessage: string;
 }

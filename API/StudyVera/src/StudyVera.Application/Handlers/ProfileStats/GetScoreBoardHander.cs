@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Models;
@@ -36,7 +36,8 @@ public class GetScoreBoardHander : IRequestHandler<GetScoreBoardQuery, PagedList
                             .Select(a => new ScoreBoardDto
                             {
                                 NickName = a.User.UserName,
-                                Score = a.Score
+                                Score = a.Score,
+                                Title = a.User.UserSettings != null ? a.User.UserSettings.CurrentTitle : null
                             })
                             .ToListAsync(cancellationToken);
 

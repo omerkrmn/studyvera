@@ -1,5 +1,6 @@
 import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { catchError, switchMap, filter, take, throwError, BehaviorSubject } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
@@ -9,7 +10,12 @@ let refreshTokenSubject = new BehaviorSubject<any>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = localStorage.getItem('accessToken');
+  const platformId = inject(PLATFORM_ID);
+
+  let token = null;
+  if (isPlatformBrowser(platformId)) {
+    token = localStorage.getItem('accessToken');
+  }
 
   let authReq = req;
   if (token) {

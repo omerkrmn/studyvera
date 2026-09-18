@@ -1,0 +1,332 @@
+<div class="dashboard-wrapper">
+  
+  <!-- ================= BENTO STATS HEADER ================= -->
+  <div class="bento-grid mb-4">
+    <!-- Stat 1 -->
+    <div class="bento-card">
+      <div class="bento-icon primary-glow">
+        <i class="bi bi-ui-checks-grid"></i>
+      </div>
+      <div class="bento-content">
+        <span class="bento-label">Toplam Çözülen</span>
+        <span class="bento-value">{{ totalSolved() }}</span>
+      </div>
+    </div>
+    
+    <!-- Stat 2 -->
+    <div class="bento-card">
+      <div class="bento-icon success-glow">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <div class="bento-content">
+        <span class="bento-label">Toplam Başarı</span>
+        <span class="bento-value">{{ totalAccuracy() }}%</span>
+      </div>
+    </div>
+
+    <!-- Stat 3 -->
+    <div class="bento-card">
+      <div class="bento-icon info-glow">
+        <i class="bi bi-star-fill"></i>
+      </div>
+      <div class="bento-content">
+        <span class="bento-label">Favori Ders</span>
+        <span class="bento-value truncate-text" [title]="favoriteLessonName()">{{ favoriteLessonName() }}</span>
+      </div>
+    </div>
+
+    <!-- Action -->
+    <div class="bento-card bento-action" (click)="openModalForNew()">
+      <div class="bento-icon outline-glow">
+        <i class="bi bi-plus-lg"></i>
+      </div>
+      <span class="action-text">Çözülen Konu Ekle</span>
+    </div>
+  </div>
+
+  <!-- ================= CONTROL PANEL (FILTER) ================= -->
+  <div class="control-panel mb-4">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input type="text" placeholder="Ders veya konu ara..." [value]="searchText()" (input)="searchText.set($any($event.target).value)" />
+    </div>
+    
+    <label class="custom-toggle">
+      <input type="checkbox" [checked]="showWeakOnly()" (change)="showWeakOnly.set($any($event.target).checked)" />
+      <span class="toggle-slider"></span>
+      <span class="toggle-text"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Sadece Eksikleri Göster</span>
+    </label>
+  </div>
+
+  <!-- ================= LOADING ================= -->
+  @if (isLoading()) {
+  <div class="loading-state d-flex align-items-center justify-content-center py-5 gap-3 text-muted">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+    <span>Veriler yükleniyor...</span>
+  </div>
+  }
+
+  <!-- ================= LIST VIEW (TABLE) ================= -->
+  @if (!isLoading()) {
+  <div class="data-list-container">
+    
+    <!-- List Header -->
+    <div class="data-list-header">
+      <div class="col-name">Ders / Konu Adı</div>
+      <div class="col-num">Durum</div>
+      <div class="col-num col-hide-sm">D / Y</div>
+      <div class="col-num col-hide-md">Süre (dk)</div>
+      <div class="col-badge">Başarı <i class="bi bi-info-circle-fill text-muted ms-1" title="Doğru / Toplam"></i></div>
+      <div class="col-date col-hide-sm">Tarih</div>
+      <div class="col-action"></div>
+    </div>
+
+    <!-- Empty State -->
+    @if (!filteredGroupedQuestions().length) {
+    <div class="empty-list-state">
+      <i class="bi bi-clipboard2-x d-block"></i>
+      <p class="mt-3">Henüz çözülmüş soru kaydı bulunmamaktadır.</p>
+    </div>
+    }
+
+    <!-- Data Rows -->
+    <div class="data-list-body">
+      @for (group of filteredGroupedQuestions(); track group.lessonId) {
+        
+        <!-- LESSON ROW -->
+        <div class="list-row lesson-row" (click)="toggleLesson(group.lessonId)">
+          <div class="col-name">
+            <i class="bi toggle-icon" [class.bi-chevron-down]="isLessonExpanded(group.lessonId)" [class.bi-chevron-right]="!isLessonExpanded(group.lessonId)"></i>
+            <span class="fw-bold">{{ group.lessonName }}</span>
+            <span class="badge-count">{{ group.items.length }}</span>
+          </div>
+          <div class="col-num">
+            <span class="fw-bold">{{ group.totalSolved }}</span>
+          </div>
+          <div class="col-num col-hide-sm text-success fw-bold">{{ group.totalCorrect }} <span class="text-danger ms-2">{{ group.totalWrong }}</span></div>
+          <div class="col-num col-hide-md text-muted fw-bold">{{ group.totalTimeSpentInMinutes || '-' }}</div>
+          <div class="col-badge">
+            <span class="accuracy-pill" [ngClass]="getBadgeClass(group.accuracy)">
+              %{{ (group.accuracy * 100).toFixed(0) }}
+            </span>
+          </div>
+          <div class="col-date col-hide-sm text-muted small fw-medium">{{ formatDate(group.lastAttempt) }}</div>
+          <div class="col-action"></div>
+        </div>
+
+        <!-- TOPIC ROWS -->
+        @if (isLessonExpanded(group.lessonId)) {
+          @for (question of group.items; track question.id) {
+            @let defScore = calculateDeficiencyScore(question.totalSolvedCount, question.totalCorrectCount, question.lastAttemptAt, question.topicId);
+            @let isUrgent = defScore > 100;
+            @let isExpanded = expandedTopicId() === question.id;
+
+            <div class="list-row topic-row" [class.is-urgent]="isUrgent" [title]="'Konu eksik skoru: ' + defScore.toFixed(0)" (dblclick)="toggleTopicExpand(question)">
+              <div class="col-name ps-4">
+                @if (isUrgent) {
+                  <div class="pulse-ring me-2" title="Acil Odaklan"></div>
+                }
+                <span class="fw-semibold" [class.text-danger]="isUrgent">{{ question.topic.name }}</span>
+                @if (isExpanded) {
+                  <i class="bi bi-info-circle-fill ms-2 text-primary" style="font-size: 0.75rem;"></i>
+                }
+              </div>
+              <div class="col-num fw-bold">{{ question.totalSolvedCount }}</div>
+              <div class="col-num col-hide-sm text-success fw-bold">{{ question.totalCorrectCount }} <span class="text-danger ms-2">{{ question.totalWrongCount }}</span></div>
+              <div class="col-num col-hide-md text-muted fw-bold">{{ question.totalTimeSpentInMinutes || '-' }}</div>
+              <div class="col-badge">
+                <span class="accuracy-pill" [ngClass]="getColorByRate(question.accuracyRate)">
+                  %{{ (question.accuracyRate * 100).toFixed(1) }}
+                </span>
+              </div>
+              <div class="col-date col-hide-sm text-muted small fw-medium">{{ formatDate(question.lastAttemptAt) }}</div>
+              <div class="col-action"></div>
+            </div>
+
+            <!-- DETAIL ROWS -->
+            @if (isExpanded) {
+              @if (question.questionStatDetail.length) {
+                @for (detail of question.questionStatDetail; track detail.id) {
+                  @let detailRate = detail.solvedCount > 0 ? detail.correctCount / detail.solvedCount : 0;
+                  <div class="list-row detail-row">
+                    <div class="col-name ps-5 text-muted fst-italic small">└─ Oturum Detayı</div>
+                    <div class="col-num text-muted">{{ detail.solvedCount }}</div>
+                    <div class="col-num col-hide-sm text-success">{{ detail.correctCount }} <span class="text-danger ms-2">{{ detail.wrongCount }}</span></div>
+                    <div class="col-num col-hide-md text-muted">{{ detail.durationMinutes || '-' }}</div>
+                    <div class="col-badge">
+                      <span class="accuracy-pill pill-sm" [ngClass]="getColorByRate(detailRate)">
+                        %{{ (detailRate * 100).toFixed(0) }}
+                      </span>
+                    </div>
+                    <div class="col-date col-hide-sm text-muted small fw-medium">{{ formatDate(detail.attemptedAt) }}</div>
+                    <div class="col-action action-buttons">
+                      <button class="btn-icon" title="Düzenle" (click)="openEditModal(detail)">
+                        <i class="bi bi-pencil-square text-primary"></i>
+                      </button>
+                      <button class="btn-icon" title="Sil" (click)="deleteDetail(detail.id)">
+                        <i class="bi bi-trash text-danger"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              } @else {
+                <div class="list-row detail-row justify-content-center py-3">
+                  <div class="spinner-border spinner-border-sm text-muted me-2" role="status"></div>
+                  <span class="text-muted small">Detaylar yükleniyor...</span>
+                </div>
+              }
+            }
+
+          }
+        }
+      }
+    </div>
+  </div>
+  }
+
+</div>
+
+<!-- ================= ADD MODAL ================= -->
+@if (isModalOpen()) {
+<div class="dashboard-modal-overlay" (click)="closeModal()">
+  <div class="dashboard-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="m-0"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Yeni İlerleme Ekle</h5>
+      <button class="btn-icon" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    
+    <div class="modal-body">
+      @if (errorMessage()) {
+      <div class="alert-box error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+      }
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Ders</label>
+          <select class="dashboard-input" [value]="selectedLessonId()" (change)="onLessonChanged($event)">
+            <option value="0">Seçiniz...</option>
+            @for (lesson of lessons(); track lesson.id) {
+            <option [value]="lesson.id">{{ lesson.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group position-relative">
+          <label>Konu</label>
+          <input type="text" class="dashboard-input" placeholder="Konu ara..." [value]="searchTerm()"
+            [disabled]="selectedLessonId() === 0" (input)="onSearchTermInput($any($event.target).value)"
+            (focus)="showDropdown.set(true)" (blur)="hideDropdownDelayed()" />
+          
+          @if (showDropdown() && filteredTopics().length) {
+          <ul class="dropdown-menu-custom">
+            @for (topic of filteredTopics(); track topic.id) {
+            <li (mousedown)="selectTopic(topic)">{{ topic.name }}</li>
+            }
+          </ul>
+          }
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Soru</label>
+          <input type="number" class="dashboard-input fw-bold" [value]="newQuestion().solvedCount"
+            (input)="updateSolvedCount(+$any($event.target).value)" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Doğru</label>
+          <input type="number" class="dashboard-input fw-bold text-success" [value]="newQuestion().correctCount"
+            (input)="updateCorrectCount(+$any($event.target).value)" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Yanlış / Boş</label>
+          <input type="number" class="dashboard-input fw-bold text-danger" [value]="wrongCount" readonly />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Süre (Dakika) - Opsiyonel</label>
+        <input type="number" class="dashboard-input" [value]="newQuestion().durationMinutes || ''"
+          (input)="updateDurationMinutes($any($event.target).value)" min="0" placeholder="Örn: 45" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-dashboard btn-text" (click)="closeModal()" [disabled]="isSaving()">İptal</button>
+      <button class="btn-dashboard btn-outline" (click)="saveAndNew()" [disabled]="isSaving()">
+        <i class="bi bi-arrow-repeat me-2"></i>Kaydet & Yeni
+      </button>
+      <button class="btn-dashboard btn-primary" (click)="saveAndClose()" [disabled]="isSaving()">
+        @if (isSaving()) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        } @else {
+        <i class="bi bi-save me-2"></i>
+        }
+        Kaydet
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ================= EDIT MODAL ================= -->
+@if (isEditModalOpen()) {
+<div class="dashboard-modal-overlay" (click)="closeEditModal()">
+  <div class="dashboard-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="m-0"><i class="bi bi-pencil-square text-primary me-2"></i>Kayıt Düzenle</h5>
+      <button class="btn-icon" (click)="closeEditModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    
+    <div class="modal-body">
+      @if (errorMessage()) {
+      <div class="alert-box error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+      }
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Soru</label>
+          <input type="number" class="dashboard-input fw-bold" [value]="editQuestion().solvedCount"
+            (input)="updateEditSolvedCount(+$any($event.target).value)" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Doğru</label>
+          <input type="number" class="dashboard-input fw-bold text-success" [value]="editQuestion().correctCount"
+            (input)="updateEditCorrectCount(+$any($event.target).value)" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Yanlış / Boş</label>
+          <input type="number" class="dashboard-input fw-bold text-danger" 
+            [value]="(editQuestion().solvedCount || 0) - (editQuestion().correctCount || 0)" readonly />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Süre (Dakika)</label>
+        <input type="number" class="dashboard-input" [value]="editQuestion().durationMinutes || ''"
+          (input)="updateEditDurationMinutes($any($event.target).value)" min="0" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-dashboard btn-text" (click)="closeEditModal()" [disabled]="isSaving()">İptal</button>
+      <button class="btn-dashboard btn-primary" (click)="saveEdit()" [disabled]="isSaving()">
+        @if (isSaving()) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        } @else {
+        <i class="bi bi-check2 me-2"></i>
+        }
+        Güncelle
+      </button>
+    </div>
+  </div>
+</div>
+}

@@ -13,6 +13,7 @@ export interface UserQuestionStatDto {
   
   totalWrongCount: number;
   accuracyRate: number; 
+  totalTimeSpentInMinutes: number;
   
   questionStatDetail: QuestionStatDetailDto[];
   
@@ -23,4 +24,5 @@ export interface AddUserQuestionStatDto {
   topicId: number;
   solvedCount: number;
   correctCount: number;
+  durationMinutes?: number;
 }

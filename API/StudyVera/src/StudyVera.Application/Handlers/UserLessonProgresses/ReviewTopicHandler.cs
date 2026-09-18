@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Exceptions;
 using StudyVera.Application.Features.UserLessonProgresses.Commands;
+using StudyVera.Domain.Entities;
 using StudyVera.Domain.Enums;
 using StudyVera.Domain.Interfaces;
 
@@ -26,6 +27,31 @@ public class ReviewTopicHandler : IRequestHandler<ReviewTopicCommand, Unit>
             throw new NotFoundException($"UserLessonProgress not found.");
 
         ulp.LastUpdated= DateTime.UtcNow;
+        if (request.DurationMinutes.HasValue)
+        {
+            ulp.DurationMinutes = (ulp.DurationMinutes ?? 0) + request.DurationMinutes.Value;
+            var weekStart = UserWeeklyGoal.GetCurrentWeekStartDate();
+            var weeklyGoal = await _manager.UserWeeklyGoalRepository.GetCurrentGoalAsync(request.UserId, weekStart, cancellationToken);
+            if (weeklyGoal == null)
+            {
+                var profile = await _manager.UserProfileRepository
+                    .FindByCondition(us => us.UserId == request.UserId, false)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                _manager.UserWeeklyGoalRepository.Create(new UserWeeklyGoal
+                {
+                    UserId = request.UserId,
+                    WeekStartDate = weekStart,
+                    TargetQuestionCount = profile?.WeeklyQuestionGoal ?? 500,
+                    TargetStudyMinutes = (profile?.DailyStudyMinuteGoal ?? 60) * 7,
+                    CurrentStudyMinutes = request.DurationMinutes.Value
+                });
+            }
+            else
+            {
+                weeklyGoal.CurrentStudyMinutes += request.DurationMinutes.Value;
+            }
+        }
 
         _manager.UserActivityHistoryRepository.Create(new()
         {

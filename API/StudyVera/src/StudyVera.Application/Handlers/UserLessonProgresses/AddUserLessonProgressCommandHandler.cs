@@ -1,5 +1,6 @@
-﻿using Mapster;
+using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Exceptions;
 using StudyVera.Application.Features.UserLessonProgresses.Commands;
 using StudyVera.Domain.Entities;
@@ -60,6 +61,31 @@ namespace StudyVera.Application.Handlers.UserLessonProgresses
                 Description = $"Kullanıcı {request.TopicId} numaralı konuda güncelleme yaptı {request.ProgressStatus}",
                 ActivityDate = DateTime.UtcNow,
             });
+
+            if (request.DurationMinutes.HasValue && request.DurationMinutes.Value > 0)
+            {
+                var weekStart = UserWeeklyGoal.GetCurrentWeekStartDate();
+                var weeklyGoal = await _manager.UserWeeklyGoalRepository.GetCurrentGoalAsync(request.UserId, weekStart, cancellationToken);
+                if (weeklyGoal == null)
+                {
+                    var profile = await _manager.UserProfileRepository
+                        .FindByCondition(us => us.UserId == request.UserId, false)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    _manager.UserWeeklyGoalRepository.Create(new UserWeeklyGoal
+                    {
+                        UserId = request.UserId,
+                        WeekStartDate = weekStart,
+                        TargetQuestionCount = profile?.WeeklyQuestionGoal ?? 500,
+                        TargetStudyMinutes = (profile?.DailyStudyMinuteGoal ?? 60) * 7,
+                        CurrentStudyMinutes = request.DurationMinutes.Value
+                    });
+                }
+                else
+                {
+                    weeklyGoal.CurrentStudyMinutes += request.DurationMinutes.Value;
+                }
+            }
 
             await _manager.SaveChangesAsync(cancellationToken);
             return Unit.Value;

@@ -1,5 +1,6 @@
 using System;
 using StudyVera.Domain.Entities.Identity;
+using StudyVera.Domain.Enums;
 
 namespace StudyVera.Domain.Entities;
 
@@ -21,6 +22,7 @@ public class StudySession
     
     public string? Note { get; set; }
     public bool IsCompleted { get; set; }
+    public StudySessionType SessionType { get; set; }
 
     public void CompleteSession()
     {

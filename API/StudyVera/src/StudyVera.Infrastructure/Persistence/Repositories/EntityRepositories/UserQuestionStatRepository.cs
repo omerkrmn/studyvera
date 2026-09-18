@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using StudyVera.Application.Common.Models;
 using StudyVera.Application.Dtos;
 using StudyVera.Application.Dtos.UserQuestionStats;
@@ -23,24 +23,10 @@ public class UserQuestionStatRepository : RepositoryBase<UserQuestionStat>, IUse
         var query = FindByCondition(uqs => uqs.UserId == userId, false)
             .AsNoTracking();
 
-        var result = await query.Select(uqs => new
-        {
-            uqs.TotalSolvedCount,
-            uqs.TotalCorrectCount
-        })
-        .GroupBy(x => 1) 
-        .Select(g => new
-        {
-            TotalSolvedCount = g.Sum(x => x.TotalSolvedCount),
-            TotalCorrectCount = g.Sum(x => x.TotalCorrectCount)
-        })
-        .FirstOrDefaultAsync(c);
+        var totalSolved  = await query.SumAsync(uqs => uqs.TotalSolvedCount, c);
+        var totalCorrect = await query.SumAsync(uqs => uqs.TotalCorrectCount, c);
 
-        if (result == null)
-        {
-            return (0, 0);
-        }
-        return (result.TotalSolvedCount, result.TotalCorrectCount);
+        return (totalSolved, totalCorrect);
     }
 
 }

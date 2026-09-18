@@ -1,0 +1,95 @@
+.heatmap-container {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--bs-body-color, #212529);
+  padding: 0.5rem;
+  width: 100%;
+}
+
+.heatmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.heatmap-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.legend-cells {
+  display: flex;
+  gap: 3px;
+}
+
+.heatmap-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  shape-rendering: crispedges;
+}
+
+/* Color Levels (Github Inspired) */
+.level-0 { fill: var(--bs-tertiary-bg, #ebedf0); background-color: var(--bs-tertiary-bg, #ebedf0); }
+.level-1 { fill: #9be9a8; background-color: #9be9a8; }
+.level-2 { fill: #40c463; background-color: #40c463; }
+.level-3 { fill: #30a14e; background-color: #30a14e; }
+.level-4 { fill: #216e39; background-color: #216e39; }
+
+.heatmap-grid-wrapper {
+  position: relative;
+  padding-top: 1.5rem; /* Space for month labels */
+}
+
+.month-labels {
+  position: absolute;
+  top: 0;
+  left: 32px; /* Align with grid start after day labels */
+  height: 1.2rem;
+  right: 0;
+}
+
+.month-label {
+  position: absolute;
+  font-size: 0.7rem;
+  color: var(--bs-secondary-color, #6c757d);
+  white-space: nowrap;
+}
+
+.grid-layout {
+  display: flex;
+  gap: 8px;
+}
+
+.day-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 95px;
+  padding-top: 2px;
+  font-size: 0.7rem;
+  color: var(--bs-secondary-color, #6c757d);
+  width: 24px;
+}
+
+.heatmap-svg {
+  display: block;
+  overflow: visible;
+}
+
+/* Tooltip behavior */
+rect:hover {
+  stroke: rgba(0,0,0,0.3);
+  stroke-width: 1px;
+}

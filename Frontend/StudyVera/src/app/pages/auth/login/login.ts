@@ -16,8 +16,8 @@ export class Login implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
-  
-  private googleClientId = 'S826303476918-e7ugnlbf84ujrqbiqcet99e0ivgr4ufv.apps.googleusercontent.com';
+
+  private googleClientId = '826303476918-e7ugnlbf84ujrqbiqcet99e0ivgr4ufv.apps.googleusercontent.com';
 
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -28,7 +28,7 @@ export class Login implements OnInit, OnDestroy {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {

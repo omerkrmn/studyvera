@@ -1,4 +1,4 @@
-﻿using Carter;
+using Carter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using StudyVera.Infrastructure.Identity;
@@ -10,41 +10,43 @@ using StudyVera.WebApi.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCarter();
-builder.Services.AddOpenApi();
 builder.Services.AddAuthorization();
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudyVera API", Version = "v1" });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(
+//    c =>
+//    {
+//        c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudyVera API", Version = "v1" });
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "JWT token giriniz. Örn: Bearer {token}"
-    });
+//        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+//        {
+//            Name = "Authorization",
+//            Type = SecuritySchemeType.Http,
+//            Scheme = "Bearer",
+//            BearerFormat = "JWT",
+//            In = ParameterLocation.Header,
+//            Description = "JWT token giriniz. Örn: Bearer {token}"
+//        });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[]{}
-        }
-    });
-}); 
+//        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+//{
+//    {
+//        new OpenApiSecurityScheme
+//        {
+//            Reference = new OpenApiReference
+//            {
+//                Type = ReferenceType.SecurityScheme,
+//                Id = "Bearer"
+//            }
+//        },
+//        new string[]{}
+//    }
+//});
+//    }
+    );
 
 builder.Services.ConfigureSqlContext(builder.Configuration);
-builder.Services.ConfigureUnitOfWork(); 
+builder.Services.ConfigureUnitOfWork();
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureMediatR();
 builder.Services.ConfigureServiceManager();
@@ -73,9 +75,8 @@ app.ConfigureExceptionHandler();
 
 
 //if (app.Environment.IsDevelopment())
-app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

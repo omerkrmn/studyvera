@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +18,7 @@ public class UserWeeklyGoalDto
 
 
     public int RemainingQuestions => Math.Max(0, TargetQuestionCount - CurrentQuestionCount);
+    public int RemainingStudyMinutes => Math.Max(0, TargetStudyMinutes - CurrentStudyMinutes);
 
     public double CompletionPercentage
     {
@@ -29,7 +30,18 @@ public class UserWeeklyGoalDto
         }
     }
 
+    public double StudyCompletionPercentage
+    {
+        get
+        {
+            if (TargetStudyMinutes <= 0) return 0;
+            var percent = (double)CurrentStudyMinutes / TargetStudyMinutes * 100;
+            return Math.Min(100, Math.Round(percent, 1));
+        }
+    }
+
     public bool IsGoalAchieved => CurrentQuestionCount >= TargetQuestionCount;
+    public bool IsStudyGoalAchieved => CurrentStudyMinutes >= TargetStudyMinutes;
 
     public string StatusMessage => IsGoalAchieved
         ? "Tebrikler, haftalık hedefine ulaştın!"

@@ -1,0 +1,176 @@
+<div class="focus-wrapper" [class.is-running]="isRunning()" [class.is-paused]="!isRunning() && currentSeconds() > 0">
+    <!-- Ambient Glow behind timer -->
+    <div class="ambient-glow"></div>
+
+    <div class="focus-container">
+        <!-- Fullscreen Button -->
+        <button (click)="toggleFullScreen(fullscreenTarget)"
+                class="btn-icon btn-fullscreen" title="Tam Ekran">
+            <i class="bi bi-arrows-fullscreen"></i>
+        </button>
+
+        <div class="timer-area" #fullscreenTarget>
+            <!-- Status Badge -->
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">{{ isRunning() ? 'Aktif Çalışma' : (currentSeconds() > 0 ? 'Durduruldu' : 'Hazır') }}</span>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="timer-display">
+                {{ timeDisplay() }}
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">Toplam</span>
+                    <span class="stat-value">{{ totalTimeDisplay() }}</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-label">Seanslar</span>
+                    <span class="stat-value">{{ steps().length }}</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-row">
+                @if (!isRunning()) {
+                <button (click)="startTimer()" class="btn-focus btn-primary">
+                    <i class="bi bi-play-fill me-2"></i> Başlat
+                </button>
+                } @else {
+                <button (click)="stopTimer()" class="btn-focus btn-warning">
+                    <i class="bi bi-pause-fill me-2"></i> Durdur
+                </button>
+                }
+
+                <button (click)="saveStep()" 
+                        [disabled]="currentSeconds() === 0"
+                        class="btn-focus btn-secondary"
+                        title="Seansı Kaydet">
+                    <i class="bi bi-plus-circle me-2"></i> Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Sessions -->
+    @if (steps().length > 0) {
+    <div class="sessions-panel">
+        <div class="sessions-header">
+            <h5 class="mb-0 fw-medium">Kaydedilen Seanslar</h5>
+            <button (click)="resetTimer()" class="btn-text text-danger" title="Tümünü Sıfırla">
+                Sıfırla
+            </button>
+        </div>
+        <div class="sessions-list">
+            @for (step of steps(); track step.id; let idx = $index) {
+            <div class="session-item">
+                <div class="session-info">
+                    <span class="session-number">{{ steps().length - idx }}</span>
+                    <span class="session-time">{{ formatTimestamp(step.timestamp) }}</span>
+                </div>
+                <div class="session-duration">
+                    {{ formatDuration(step.duration) }}
+                </div>
+                <div class="session-actions">
+                    @if (authService.isLoggedIn()) {
+                        @if (!step.isSaved) {
+                        <button (click)="openSaveModal(step)" class="btn-icon text-primary" title="Sisteme Kaydet">
+                            <i class="bi bi-cloud-upload"></i>
+                        </button>
+                        } @else {
+                        <span class="text-success" title="Kaydedildi">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </span>
+                        }
+                    }
+                    <button (click)="deleteStep(step.id)" class="btn-icon text-danger" title="Sil">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    <!-- ================= SAVE MODAL ================= -->
+    @if (isModalOpen()) {
+    <div class="focus-modal-overlay" (click)="closeModal()">
+        <div class="focus-modal" (click)="$event.stopPropagation()">
+            <div class="focus-modal-header">
+                <h5>Çalışmayı Kaydet</h5>
+                <button class="btn-icon" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            
+            <div class="focus-modal-body">
+                @if (errorMessage()) {
+                <div class="focus-alert error">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage() }}
+                </div>
+                }
+
+                <div class="type-selector">
+                    <button class="type-btn" [class.active]="activityType() === 'lesson'" (click)="setActivityType('lesson')">
+                        Ders Çalışması
+                    </button>
+                    <button class="type-btn" [class.active]="activityType() === 'question'" (click)="setActivityType('question')">
+                        Soru Çözümü
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label>Ders Seçimi</label>
+                    <select class="focus-select" [value]="selectedLessonId()" (change)="onLessonChange($any($event.target).value)">
+                        <option value="0">Ders Seçiniz...</option>
+                        @for (lesson of lessons(); track lesson.id) {
+                            <option [value]="lesson.id">{{ lesson.name }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Konu Seçimi</label>
+                    <select class="focus-select" [value]="selectedTopicId()" (change)="selectedTopicId.set(+$any($event.target).value)" [disabled]="selectedLessonId() === 0">
+                        <option value="0">Konu Seçiniz...</option>
+                        @for (topic of filteredTopics(); track topic.id) {
+                            <option [value]="topic.id">{{ topic.name }}</option>
+                        }
+                    </select>
+                </div>
+
+                @if (activityType() === 'question') {
+                <div class="stats-grid">
+                    <div class="form-group">
+                        <label>Soru</label>
+                        <input type="number" class="focus-input fw-bold" [value]="solvedCount()" (input)="solvedCount.set(+$any($event.target).value)" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Doğru</label>
+                        <input type="number" class="focus-input text-success fw-bold" [value]="correctCount()" (input)="correctCount.set(+$any($event.target).value)" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Yanlış/Boş</label>
+                        <input type="number" class="focus-input text-danger fw-bold" [value]="(solvedCount() || 0) - (correctCount() || 0)" readonly />
+                    </div>
+                </div>
+                }
+            </div>
+
+            <div class="focus-modal-footer">
+                <button class="btn-focus btn-text" (click)="closeModal()" [disabled]="isSubmitting()">İptal</button>
+                <button class="btn-focus btn-primary" (click)="submitActivity()" [disabled]="isSubmitting()">
+                    @if (isSubmitting()) {
+                    <span class="spinner-border spinner-border-sm me-2"></span> Kaydediliyor...
+                    } @else {
+                    <i class="bi bi-save me-2"></i> Kaydet
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+</div>

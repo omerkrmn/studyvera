@@ -1,0 +1,297 @@
+<div class="dashboard-wrapper">
+
+    <!-- ================= LOADING / ERROR STATES ================= -->
+    @if (isLoading()) {
+    <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <span>Profil yükleniyor...</span>
+    </div>
+    }
+    @else if (errorMessage()) {
+    <div class="alert-box error">
+        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        <div class="d-flex flex-column ms-2">
+            <span class="fw-bold">Veri Yükleme Hatası</span>
+            <span class="small">{{ errorMessage() }}</span>
+        </div>
+        <button class="btn-retry ms-auto" (click)="loadProfileData()">Tekrar Dene</button>
+    </div>
+    }
+
+    <!-- ================= MAIN CONTENT ================= -->
+    @else if (isDataLoaded() && profileData()) {
+
+    <!-- ===== R2: HERO SECTION — Dominant First Impression ===== -->
+    <section class="hero-card">
+        <div class="hero-glow"></div>
+        <div class="hero-glow-2"></div>
+
+        <div class="hero-content">
+            <!-- Top Row: Level + Streak + Exam -->
+            <div class="hero-top">
+                <div class="hero-level-group">
+                    <div class="hero-level-badge">
+                        <span class="hero-level-number">{{ level() }}</span>
+                    </div>
+                    <div class="hero-level-info">
+                        <h2 class="hero-title">Seviye {{ level() }}</h2>
+                        @if (profileData()?.currentTitle) {
+                            <span class="hero-user-title">{{ profileData().currentTitle }}</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="hero-badges">
+                    <div class="hero-streak">
+                        <i class="bi bi-fire"></i>
+                        <span class="hero-streak-value">{{ profileData().currentStreak }}</span>
+                        <span class="hero-streak-label">gün seri</span>
+                    </div>
+                    <div class="hero-exam">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        {{ profileData().targetExam }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- XP Progress Bar -->
+            <div class="hero-xp-section">
+                <div class="hero-xp-header">
+                    <span class="hero-xp-current">{{ profileData().userScore | number:'1.0-0' }} XP</span>
+                    <span class="hero-xp-remaining">Sonraki seviyeye {{ nextLevelRemaining() }} puan</span>
+                </div>
+                <div class="hero-xp-bar-bg">
+                    <div class="hero-xp-bar" [style.width.%]="levelProgress()"></div>
+                </div>
+            </div>
+
+            <!-- R5: Weekly Goals Summary in Hero -->
+            @if (weeklyGoal()) {
+            <div class="hero-goals">
+                <div class="hero-goal-item">
+                    <div class="hero-goal-icon">
+                        <i class="bi bi-check2-square"></i>
+                    </div>
+                    <div class="hero-goal-info">
+                        <span class="hero-goal-label">Haftalık Soru</span>
+                        <div class="hero-goal-bar-bg">
+                            <div class="hero-goal-bar" [style.width.%]="questionGoalProgress()"></div>
+                        </div>
+                    </div>
+                    <span class="hero-goal-pct">%{{ questionGoalProgress() | number:'1.0-0' }}</span>
+                </div>
+                <div class="hero-goal-item">
+                    <div class="hero-goal-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <div class="hero-goal-info">
+                        <span class="hero-goal-label">Çalışma Süresi</span>
+                        <div class="hero-goal-bar-bg">
+                            <div class="hero-goal-bar bar-secondary" [style.width.%]="studyGoalProgress()"></div>
+                        </div>
+                    </div>
+                    <span class="hero-goal-pct">%{{ studyGoalProgress() | number:'1.0-0' }}</span>
+                </div>
+            </div>
+            }
+        </div>
+    </section>
+
+    <!-- Layout: Sidebar + Content -->
+    <div class="main-grid" [class.has-sidebar]="isLeaderboardVisible() || isBadgesVisible()">
+
+        <!-- SIDEBAR -->
+        @if (isLeaderboardVisible() || isBadgesVisible()) {
+        <aside class="sidebar">
+            <div class="sticky-sidebar">
+                @if (isLeaderboardVisible()) {
+                <div class="fade-in">
+                    <app-score></app-score>
+                </div>
+                }
+
+                @if (isBadgesVisible()) {
+                <div class="sidebar-badge-card fade-in">
+                    <div class="sidebar-badge-content">
+                        <h5 class="sidebar-badge-title"><i class="bi bi-gem me-2"></i>Rozetler</h5>
+                        <p class="sidebar-badge-count">
+                            <strong>{{ profileData().badgesEarned }}</strong> rozet kazandınız
+                        </p>
+                        <a routerLink="/badges" class="btn-badge-view">Tümünü Gör</a>
+                    </div>
+                    <i class="bi bi-award sidebar-badge-watermark"></i>
+                </div>
+                }
+            </div>
+        </aside>
+        }
+
+        <!-- CONTENT AREA -->
+        <div class="content-area">
+
+            <!-- R5: Smart Next Action (Context-Aware Primary CTA) -->
+            <section class="next-action-card">
+                @if (suggestedTopic().hasDeficiency) {
+                <div class="next-action-content">
+                    <div class="next-action-icon">
+                        <i class="bi bi-lightbulb"></i>
+                    </div>
+                    <div class="next-action-info">
+                        <span class="next-action-label">Önerilen Çalışma</span>
+                        <span class="next-action-topic">{{ suggestedTopic().name }}</span>
+                        <span class="next-action-hint">Bu konuyu güçlendirmek ilerlemenizi hızlandırır</span>
+                    </div>
+                    <a routerLink="/profile/user-lesson-progresses" class="btn-next-action">
+                        Çalışmaya Başla <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                } @else {
+                <div class="next-action-content">
+                    <div class="next-action-icon success">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="next-action-info">
+                        <span class="next-action-label">Harika Gidiyorsun!</span>
+                        <span class="next-action-topic">Tüm konularda güçlü bir ilerleme kaydettiniz</span>
+                    </div>
+                    <a routerLink="/profile/solved-questions" class="btn-next-action">
+                        Soru Çöz <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                }
+            </section>
+
+            <!-- R1: Compact Stats Strip — only unique data, no score duplication -->
+            <section class="stats-strip">
+                <div class="stat-chip">
+                    <i class="bi bi-journal-check stat-chip-icon"></i>
+                    <div class="stat-chip-data">
+                        <span class="stat-chip-value">{{ profileData().totalQuestions | number:'1.0-0' }}</span>
+                        <span class="stat-chip-label">Çözülen Soru</span>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <i class="bi bi-trophy stat-chip-icon"></i>
+                    <div class="stat-chip-data">
+                        <span class="stat-chip-value">#{{ profileData().globalRank | number:'1.0-0' }}</span>
+                        <span class="stat-chip-label">Genel Sıralama</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions (Compact) -->
+            <section class="quick-actions">
+                <a routerLink="/profile/solved-questions" class="action-card">
+                    <div class="action-card-icon"><i class="bi bi-plus-lg"></i></div>
+                    <span class="action-card-label">Soru Ekle</span>
+                </a>
+                <a routerLink="/mock-exam" class="action-card">
+                    <div class="action-card-icon accent"><i class="bi bi-stopwatch"></i></div>
+                    <span class="action-card-label">Deneme Ekle</span>
+                </a>
+                <a routerLink="/profile/user-lesson-progresses" class="action-card">
+                    <div class="action-card-icon"><i class="bi bi-journal-bookmark"></i></div>
+                    <span class="action-card-label">Konularım</span>
+                </a>
+            </section>
+
+            <!-- R1: Goal Details (Progressive Disclosure — already summarized in hero) -->
+            <section class="goals-section">
+                <div class="goals-grid">
+                    <!-- Question Goal -->
+                    <div class="goal-card">
+                        <div class="goal-card-header">
+                            <h6 class="goal-card-title"><i class="bi bi-bullseye"></i> Soru Hedefi</h6>
+                            @if (weeklyGoal()) {
+                                <span class="goal-pct-badge">%{{ weeklyGoal().completionPercentage | number:'1.1-1' }}</span>
+                            }
+                        </div>
+                        <div class="goal-bar-bg">
+                            <div class="goal-bar" [style.width.%]="weeklyGoal()?.completionPercentage || 0"></div>
+                        </div>
+                        <div class="goal-status">
+                            @if (weeklyGoal()?.isGoalAchieved) {
+                                <span class="goal-achieved"><i class="bi bi-check-circle-fill me-1"></i> Tebrikler! Hedefe ulaştın.</span>
+                            } @else {
+                                <span>Hedefe <strong>{{ weeklyGoal()?.remainingQuestions || 0 }}</strong> soru kaldı</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Time Goal -->
+                    <div class="goal-card">
+                        <div class="goal-card-header">
+                            <h6 class="goal-card-title"><i class="bi bi-clock-history"></i> Süre Hedefi</h6>
+                            @if (weeklyGoal()) {
+                                <span class="goal-pct-badge secondary">%{{ weeklyGoal().studyCompletionPercentage | number:'1.1-1' }}</span>
+                            }
+                        </div>
+                        <div class="goal-bar-bg">
+                            <div class="goal-bar bar-secondary" [style.width.%]="weeklyGoal()?.studyCompletionPercentage || 0"></div>
+                        </div>
+                        <div class="goal-status">
+                            @if (weeklyGoal()?.isStudyGoalAchieved) {
+                                <span class="goal-achieved"><i class="bi bi-check-circle-fill me-1"></i> Tebrikler! Hedefe ulaştın.</span>
+                            } @else {
+                                <span>Hedefe <strong>{{ weeklyGoal()?.remainingStudyMinutes || 0 }}</strong> dakika kaldı</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- R4: Positive-framed Deficiency Topics -->
+            @if (priorityDeficiencies().length > 0) {
+            <section class="growth-section">
+                <div class="section-header">
+                    <h5 class="section-title">
+                        <i class="bi bi-graph-up-arrow"></i> Güçlendirilecek Konular
+                    </h5>
+                    <span class="section-subtitle">Bu konulara odaklanarak ilerlemenizi hızlandırabilirsiniz</span>
+                </div>
+                <div class="growth-list">
+                    @for (topic of priorityDeficiencies(); track topic.key) {
+                    <div class="growth-item">
+                        <div class="growth-item-left">
+                            <div class="growth-item-icon">
+                                <i class="bi bi-arrow-up-right"></i>
+                            </div>
+                            <span class="growth-item-name">{{ topic.key }}</span>
+                        </div>
+                        <a routerLink="/profile/user-lesson-progresses" class="btn-growth">
+                            Çalış <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    }
+                </div>
+            </section>
+            }
+
+            <!-- Heatmap -->
+            <section class="heatmap-section">
+                <div class="section-header">
+                    <h5 class="section-title">
+                        <i class="bi bi-calendar-check"></i> Çalışma Sürekliliği
+                    </h5>
+                </div>
+                <div class="heatmap-wrapper">
+                    <app-heatmap></app-heatmap>
+                </div>
+            </section>
+
+            <!-- View Settings (bottom, non-intrusive) -->
+            <section class="view-settings">
+                <button class="toggle-btn" (click)="isLeaderboardVisible.set(!isLeaderboardVisible())">
+                    <i class="bi" [class.bi-toggle-on]="isLeaderboardVisible()" [class.bi-toggle-off]="!isLeaderboardVisible()"></i>
+                    Liderlik Tablosu
+                </button>
+                <button class="toggle-btn" (click)="isBadgesVisible.set(!isBadgesVisible())">
+                    <i class="bi" [class.bi-toggle-on]="isBadgesVisible()" [class.bi-toggle-off]="!isBadgesVisible()"></i>
+                    Rozetler
+                </button>
+            </section>
+
+        </div>
+    </div>
+    }
+</div>

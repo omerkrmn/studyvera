@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using StudyVera.Application.Common.Exceptions;
 using StudyVera.WebApi.Middleware.ErrorModel;
 

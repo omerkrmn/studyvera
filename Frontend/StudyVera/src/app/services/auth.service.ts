@@ -3,7 +3,8 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment.development';
+import { of, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -24,6 +25,9 @@ export class AuthService {
       }
     }
   } refreshTokenCall() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of(null);
+    }
     const accessToken = localStorage.getItem('accessToken');
     const refreshToken = localStorage.getItem('refreshToken');
 
@@ -76,7 +80,7 @@ export class AuthService {
   }
 
   googleLoginRequest(credential: string) {
-    return this.http.post<any>(`${this.apiUrl}/google`, { credential }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/google`, { idToken: credential }).pipe(
       tap(response => {
         console.log("Google Login API Cevabı:", response);
 

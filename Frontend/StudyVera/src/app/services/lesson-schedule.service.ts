@@ -10,7 +10,7 @@ import { LessonScheduleDto, AddLessonScheduleDto } from '../models/lesson-schedu
 export class LessonScheduleService {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
-  private apiUrl = `${environment.apiUrl}/profile/lesson-schedule`;
+  private apiUrl = `${environment.apiUrl}/lesson-schedule`;
   private cacheKey = 'lessonSchedules';
 
   getAll(): Observable<LessonScheduleDto[]> {
@@ -36,9 +36,15 @@ export class LessonScheduleService {
     return this.http.post(this.apiUrl, dto).pipe(
       tap(() => {
         if (isPlatformBrowser(this.platformId)) {
-          localStorage.removeItem(this.cacheKey); 
+          localStorage.removeItem(this.cacheKey);
         }
       })
     );
+  }
+
+  clearCache(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(this.cacheKey);
+    }
   }
 }

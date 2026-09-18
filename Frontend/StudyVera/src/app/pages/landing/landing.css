@@ -41,7 +41,6 @@
         font-size: 2.5rem;
         background: linear-gradient(45deg, var(--sv-primary), #008cba);
         -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
     }
 
     .vs-card {

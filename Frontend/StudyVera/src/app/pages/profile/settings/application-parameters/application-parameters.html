@@ -1,0 +1,85 @@
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h4 class="fw-bold"><i class="bi bi-sliders2-vertical me-2 text-primary"></i>Uygulama Parametreleri</h4>
+        <p class="text-muted small">Çalışma deneyiminizi kişiselleştirin.</p>
+    </div>
+
+    <div class="card-body p-4">
+        @if (isLoading) {
+            <div class="d-flex justify-content-center align-items-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+            </div>
+        } @else {
+            <form (ngSubmit)="saveChanges()">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3 text-uppercase small text-primary">Çalışma Hedefleri</h6>
+
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" [(ngModel)]="parameters.dailyStudyMinuteGoal" name="dailyStudyMinuteGoal" id="goalTime" />
+                            <label for="goalTime">Günlük Hedef Süre (Dakika)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" [(ngModel)]="parameters.weeklyQuestionGoal" name="weeklyQuestionGoal" id="goalCount" />
+                            <label for="goalCount">Haftalık Hedef Soru Sayısı</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" [(ngModel)]="parameters.dailyReminderHour" name="dailyReminderHour" id="reminderHour" min="0" max="23" />
+                            <label for="reminderHour">Günlük Hatırlatıcı Saati (0-23)</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3 text-uppercase small text-primary">Tercihler ve Gizlilik</h6>
+
+                        <div class="form-floating mb-3">
+                            <select [(ngModel)]="parameters.theme" name="theme" class="form-select" id="themeSelect">
+                                <option value="Light">Aydınlık Tema</option>
+                                <option value="Dark">Karanlık Tema</option>
+                            </select>
+                            <label for="themeSelect">Uygulama Teması</label>
+                        </div>
+
+                        <div class="form-check form-switch mb-2">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="parameters.isProfilePublic" name="isProfilePublic" id="isPublic" />
+                            <label class="form-check-label ms-2" for="isPublic">Profilim Herkese Açık</label>
+                        </div>
+
+                        <div class="form-check form-switch mb-2">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="parameters.showRankInLeaderboard" name="showRankInLeaderboard" id="showRank" />
+                            <label class="form-check-label ms-2" for="showRank">Sıralamamı Skor Tablosunda Göster</label>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="parameters.allowFriendRequests" name="allowFriendRequests" id="allowFriends" />
+                            <label class="form-check-label ms-2" for="allowFriends">Arkadaşlık İsteklerine İzin Ver</label>
+                        </div>
+
+                        <div class="mt-2">
+                            <span class="badge bg-info text-dark">Ünvan: {{ !parameters.currentTitle ? 'Yeni Üye' : parameters.currentTitle }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="text-muted small">
+                        Son güncelleme: {{ parameters.updatedAt | date:'medium' }}
+                    </div>
+                    <button class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm" type="submit" [disabled]="isSaving">
+                        @if (isSaving) {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Kaydediliyor...</span>
+                        } @else {
+                            <i class="bi bi-check2-circle me-2"></i>
+                            <span>Ayarları Güncelle</span>
+                        }
+                    </button>
+                </div>
+            </form>
+        }
+    </div>
+</div>

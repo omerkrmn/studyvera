@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using StudyVera.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
@@ -16,4 +16,6 @@ public class AddUserLessonProgressCommand : IRequest<Unit>
 
     [Required(ErrorMessage = "ProgressStatus is required.")]
     public ProgressStatus ProgressStatus { get; set; }
+
+    public int? DurationMinutes { get; set; }
 }
